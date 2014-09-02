@@ -179,6 +179,10 @@ public class Sim extends SimState implements Steppable{
     /**
      * Run the simulation from the command line (no arguments necessary). */
 	public static void main(String[] args) throws IOException {
+        if (args.length <= 1) {
+            System.err.println("Usage: Sim trialNumber raceWeight.");
+            System.exit(1);
+        }
         doLoop(new MakesSimState() { 
             public SimState newInstance(long seed, String[] args) {
  Sim.SEED = seed;
