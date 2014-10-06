@@ -123,6 +123,7 @@ public class Person implements Steppable{
      * not; and if they do, they will have a double value assigned
      * indicating its strength. */
     public static int INDEPENDENT_ATTRIBUTE_POOL = 50;
+
     //independent attributes, which can change but do not affect each other
     private ArrayList<Double> attributesK2      //Independent attributes
       = new ArrayList<Double>(Collections.nCopies(
