@@ -5,28 +5,10 @@
 # Stephen Davies, Ph.D. -- University of Mary Washington
 # 10/5/2014
 #
-# At a minimum, you will want to change everything marked CHANGE in this file
-# and in ui.R. You will often also want to change things marked OPTIONAL.
-#
-# Assumptions:
-#  The UI (defined in ui.R) has a "maxTime" input with the total number of 
-#    years/periods/generations for the sim to run.
-#  UI has a "seedType" radio button which can be set to "specific" or "rand".
-#    If "specific," then a "seed" input will be set to contain an integer seed.
-#  The sim has other parameters, many of which will probably be passed to it
-#    on the command-line, and which it will write as key value pairs in a 
-#    plain-text file called SIM.PARAMS.FILE once the sim starts. Each of these 
-#    parameters (other than simtag, which Shiny Sim generates on its own) has
-#    an identically named input in the UI.
-#  The Java simulation's command-line parameters include maxTime preceded 
-#    immediately by "-maxTime" and simtag preceded immediately by "-tag".
-#  As it runs, the sim produces a comma-separated output file called 
-#    SIM.STATS.FILE which it writes to, perhaps slowly, with one line per 
-#    period. The first column of this .csv is called "period" and is an 
-#    integer ranging from 1 to maxTime.
-
 library(shiny)
 library(shinyIncubator)
+library(dplyr)
+library(ggplot2)
 
 
 # -------------------------------- Constants ---------------------------------
@@ -38,7 +20,9 @@ SOURCE.DIR <- "/home/stephen/SocialSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
-SIM.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_statsSIMTAG.csv")
+OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.csv")
+
+PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
 
@@ -71,16 +55,17 @@ shinyServer(function(input,output,session) {
 
 
     # Return a data frame containing the most recent contents of the 
-    # SIM.STATS.FILE.
-    sim.stats <- function() {
-        if (!file.exists(sub("SIMTAG",simtag,SIM.STATS.FILE))) {
+    # PEOPLE.STATS.FILE.
+    people.stats <- function() {
+        if (!file.exists(sub("SIMTAG",simtag,PEOPLE.STATS.FILE))) {
             return(data.frame())
         }
         tryCatch({
             # Change the colClasses argument here, if desired, to control the
             # classes used for each of the data columns.
-            read.csv(sub("SIMTAG",simtag,SIM.STATS.FILE),header=TRUE,
-                colClasses=c("integer", "numeric"),
+            read.csv(sub("SIMTAG",simtag,PEOPLE.STATS.FILE),header=TRUE,
+                colClasses=c(rep("integer",4),rep("factor",2),"numeric",
+                    "integer"),
                 stringsAsFactors=FALSE)
         },error = function(e) return(data.frame())
         )
@@ -126,7 +111,7 @@ shinyServer(function(input,output,session) {
             if (!sim.started) {
                 simtag <<- ceiling(runif(1,1,1e8))
                 cat("Starting sim",simtag,"\n")
-                progress <<- Progress$new(session,min=0,max=maxTime+1)
+                progress <<- Progress$new(session,min=0,max=maxTime)
                 progress$set(message="Launching simulation...",value=0)
                 start.sim(input,simtag)
                 progress$set(message="Initializing simulation...",value=1)
@@ -138,13 +123,13 @@ shinyServer(function(input,output,session) {
             "sim #",simtag,"<br/>",
             "seed: ",seed(),"<br/>")))
 
-        sim.stats.df <- sim.stats()
-        if (nrow(sim.stats.df) > 0) {
+        people.stats.df <- people.stats()
+        if (nrow(people.stats.df) > 0) {
             progress$set("Running simulation...",
-                detail=paste(max(sim.stats.df$period),"of",maxTime,
-                    "periods"),
-                value=1+max(sim.stats.df$period))
-            if (max(sim.stats.df$period) == maxTime) {
+                detail=paste(max(people.stats.df$period)+1,"of",maxTime,
+                    "years"),
+                value=max(people.stats.df$period))
+            if (max(people.stats.df$period) == maxTime-1) {
                 progress$set("Done.",value=1+maxTime)
                 sim.started <<- FALSE
                 progress$close()
@@ -187,7 +172,7 @@ shinyServer(function(input,output,session) {
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),
-                ">",sub("SIMTAG",simtag,SIM.STATS.FILE),"&"))
+                ">",sub("SIMTAG",simtag,OUTPUT.FILE),"&"))
         })
     }
 
@@ -195,17 +180,21 @@ shinyServer(function(input,output,session) {
     # CHANGE: put any graphics commands to produce a visual analysis of the
     # simulation's output here.
     output$analysis1Plot <- renderPlot({
-        # This boilerplate is a simple plot, showing the field called "data" 
-        # in the .csv versus the period number.
         if (input$runsim < 1) return(NULL)
-        sim.stats.df <- sim.stats()
-        if (nrow(sim.stats.df) > 0) {
-            the.plot <- ggplot(sim.stats.df,aes(x=period,y=data)) + 
-                geom_line(color="blue") + 
-                scale_x_continuous(limits=c(1,isolate(input$maxTime)),
-                                    breaks=1:isolate(input$maxTime)) +
-                expand_limits(y=0)
-                labs(title="Data",x="Sim period")
+        people.stats.df <- people.stats()
+        if (nrow(people.stats.df) > 0) {
+            by.race.by.year <- group_by(people.stats.df,period,race) %>%
+                dplyr::summarize(avgFriends=mean(numFriends)) %>%
+                filter(!is.na(avgFriends))
+            the.plot <- ggplot(by.race.by.year,
+                aes(x=period,y=avgFriends,col=race)) + 
+                geom_line() + 
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                labs(title="Average number of friends by race",
+                    x="Simulation year",
+                    y="Mean number of friends")
             print(the.plot)
         }
         # Recreate this plot in a little bit.

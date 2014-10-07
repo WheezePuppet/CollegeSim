@@ -21,6 +21,11 @@ public class Sim extends SimState implements Steppable{
     public static int currentTrial;
 
     /**
+     * A hashtag identifying the current run of the simulation.
+     */
+    public static long simtag;
+
+    /**
      * The number of people, of random year-in-college (fresh, soph, etc.)
      * that the simulation will begin with. */
     public static final int INIT_NUM_PEOPLE = 4000;
@@ -69,7 +74,7 @@ public class Sim extends SimState implements Steppable{
     
     //Platypus do we use both of these?
     public static final int MAX_ITER = 1000;
-    public static final int NUM_SIMULATION_YEARS=  8;
+    public static int NUM_SIMULATION_YEARS=  8;
 
     private static File outF;
     private static BufferedWriter outWriter;
@@ -191,9 +196,9 @@ public class Sim extends SimState implements Steppable{
 
         Person.RACE_WEIGHT = Double.parseDouble(args[1]);
 
-        int maxTime = Integer.valueOf(args[3]);
+        NUM_SIMULATION_YEARS = Integer.valueOf(args[3]);
 
-        long simtag = Long.valueOf(args[5]);
+        simtag = Long.valueOf(args[5]);
 
         long seed = System.currentTimeMillis();
         if (args.length >= 8) {
@@ -207,7 +212,7 @@ public class Sim extends SimState implements Steppable{
             PrintWriter paramsFile = new PrintWriter(new BufferedWriter(
                 new FileWriter("./sim_params" + simtag + ".txt")));
             paramsFile.println("seed="+seed);
-            paramsFile.println("maxTime="+maxTime);
+            paramsFile.println("maxTime="+NUM_SIMULATION_YEARS);
             paramsFile.println("simtag="+simtag);
             paramsFile.println("trialNumber="+currentTrial);
             paramsFile.println("raceWeight="+Person.RACE_WEIGHT);
@@ -254,21 +259,22 @@ public class Sim extends SimState implements Steppable{
         }
         //if((int)(schedule.getTime()/NUM_MONTHS_IN_YEAR)!=NUM_SIMULATION_YEARS){
         if(!isEndOfSim()){
-            String f="P"+Person.RACE_WEIGHT+"T"+currentTrial+"year"+(int) (schedule.getTime()/NUM_MONTHS_IN_YEAR)+".csv";
+            String f="people"+simtag+".csv";
             try{
                 outF = new File(f);
                 outF.createNewFile( );
-                outWriter = new BufferedWriter(new FileWriter(outF));
+                outWriter = new BufferedWriter(new FileWriter(outF,true));
             }catch(IOException e){
                 System.out.println("Couldn't create file");
                 e.printStackTrace();
                 System.exit(1);
             }
-            //Platypus. Indeed.
-            //We can probably leave this but just rewrite the print file for person
+
+            if (Sim.instance().getCurrYearNum() == 0) {
+                Person.printHeaderToFile(outWriter);
+            }
             for(int x = 0; x<peopleList.size(); x++){
                 peopleList.get(x).printToFile(outWriter);
-                peopleList.get(x).toString();
             }
             
             //FILE OF FRIENDSHIPS

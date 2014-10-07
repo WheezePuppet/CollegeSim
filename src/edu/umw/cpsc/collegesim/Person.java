@@ -435,12 +435,20 @@ public class Person implements Steppable{
             }
   }
 
+    public static void printHeaderToFile(BufferedWriter writer) {
+        try {
+            writer.write("period,ID,numFriends,numGroups,race,gender,alienation,yearInSchool\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * Output diagnostic and statistical information about this Person to
      * the writer passed.
      */
     public void printToFile(BufferedWriter writer) {
-        String message = Integer.toString(ID) + ",";
+        String message = Sim.instance().getCurrYearNum() + "," + 
+            Integer.toString(ID) + ",";
         Bag b = Sim.peopleGraph.getEdgesIn(this);
         int numFriends = b.size( );
         message = message + Integer.toString(numFriends) + ","

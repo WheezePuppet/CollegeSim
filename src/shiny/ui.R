@@ -36,8 +36,8 @@ shinyUI(fluidPage(
 
             # OPTIONAL: Only include this if it makes sense for the user to be
             # able to tweak the length of the simulation.
-            numericInput("maxTime","Number of sim periods",
-                value=10,min=1,step=1),
+            numericInput("maxTime","Number of sim years",
+                value=2,min=1,step=1),
             actionButton("runsim",label="Run sim"),
             htmlOutput("log")
         )
