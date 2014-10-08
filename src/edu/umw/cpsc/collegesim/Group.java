@@ -65,7 +65,6 @@ public class Group implements Steppable{
     // in attracting members.
     private double recruitmentFactor;
     private static MersenneTwisterFast rand = Sim.instance( ).random;
-    int numTimes = 0;
   
     private ArrayList<Person> students;
     
@@ -277,22 +276,15 @@ public class Group implements Steppable{
           possiblyLeaveGroup(students.get(x));
         }
         
-        //If we've done the maximum number of iterations, then stop; 
-        //otherwise, keep stepping
-        if(numTimes >= Sim.MAX_ITER){
-          System.out.println(this);
-        }else{
-          if (Sim.instance().nextMonthInAcademicYear()) {
-            // It's not the end of the academic year yet. Run again
-            // next month.
-            Sim.instance( ).schedule.scheduleOnceIn(1, this);
-          } else {
-            // It's summer break! Sleep for the summer.
-            Sim.instance( ).schedule.scheduleOnceIn(
-                Sim.NUM_MONTHS_IN_SUMMER, this);
-          }
+        if (Sim.instance().nextMonthInAcademicYear()) {
+          // It's not the end of the academic year yet. Run again
+          // next month.
+          Sim.instance( ).schedule.scheduleOnceIn(1, this);
+        } else {
+          // It's summer break! Sleep for the summer.
+          Sim.instance( ).schedule.scheduleOnceIn(
+              Sim.NUM_MONTHS_IN_SUMMER, this);
         }
-        numTimes++;
     }
   
   
