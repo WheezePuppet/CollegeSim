@@ -24,6 +24,8 @@ OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.csv")
 
 PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
 
+DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
+
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
 
 # xCHANGE: The package/classname of the main() Java class in your sim.
@@ -44,7 +46,6 @@ CLASSPATH <- paste(
     CLASSES.DIR,sep=":")
 
 
-
 # ------------------------- The Shiny Sim server -----------------------------
 shinyServer(function(input,output,session) {
 
@@ -53,20 +54,33 @@ shinyServer(function(input,output,session) {
     simtag <- 0     # A hashtag we'll create for each particular sim run.
     params <- NULL
 
+    classes.for.person.output.lines <- 
+        c(rep("integer",4),rep("factor",2),"numeric","integer")
 
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
     people.stats <- function() {
-        if (!file.exists(sub("SIMTAG",simtag,PEOPLE.STATS.FILE))) {
+ps <<- parse.stats.df(PEOPLE.STATS.FILE)
+        return(parse.stats.df(PEOPLE.STATS.FILE))
+    }
+
+
+    # Return a data frame containing the most recent contents of the 
+    # DROPOUT.STATS.FILE.
+    dropout.stats <- function() {
+dr <<- parse.stats.df(DROPOUT.STATS.FILE)
+        return(parse.stats.df(DROPOUT.STATS.FILE))
+    }
+
+    parse.stats.df <- function(filename.template) {
+        if (!file.exists(sub("SIMTAG",simtag,filename.template))) {
             return(data.frame())
         }
         tryCatch({
             # Change the colClasses argument here, if desired, to control the
             # classes used for each of the data columns.
-            read.csv(sub("SIMTAG",simtag,PEOPLE.STATS.FILE),header=TRUE,
-                colClasses=c(rep("integer",4),rep("factor",2),"numeric",
-                    "integer"),
-                stringsAsFactors=FALSE)
+            read.csv(sub("SIMTAG",simtag,filename.template),header=TRUE,
+                colClasses=classes.for.person.output.lines)
         },error = function(e) return(data.frame())
         )
     }
@@ -74,6 +88,7 @@ shinyServer(function(input,output,session) {
 
     # Return the seed, as recorded in the SIM.PARAMS.FILE.
     seed <- function() {
+cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n")
         get.param("seed")
     }
     
@@ -111,7 +126,7 @@ shinyServer(function(input,output,session) {
             if (!sim.started) {
                 simtag <<- ceiling(runif(1,1,1e8))
                 cat("Starting sim",simtag,"\n")
-                progress <<- Progress$new(session,min=0,max=maxTime)
+                progress <<- Progress$new(session,min=0,max=maxTime+1)
                 progress$set(message="Launching simulation...",value=0)
                 start.sim(input,simtag)
                 progress$set(message="Initializing simulation...",value=1)
@@ -128,7 +143,7 @@ shinyServer(function(input,output,session) {
             progress$set("Running simulation...",
                 detail=paste(max(people.stats.df$period)+1,"of",maxTime,
                     "years"),
-                value=max(people.stats.df$period))
+                value=max(people.stats.df$period)+1)
             if (max(people.stats.df$period) == maxTime-1) {
                 progress$set("Done.",value=1+maxTime)
                 sim.started <<- FALSE
@@ -148,6 +163,7 @@ shinyServer(function(input,output,session) {
 
     # Start a new instance of the Java simulation.
     start.sim <- function(input,simtag) {
+        params <<- NULL
         isolate({
             if (!file.exists(
                     paste(SOURCE.DIR,
@@ -165,10 +181,14 @@ shinyServer(function(input,output,session) {
             setwd(SIM.FILES.BASE.DIR)
             system(paste("nice java -classpath ",CLASSPATH,
                 JAVA.RUN.TIME.OPTIONS,SIM.CLASS.NAME,
-                "1",   # "trial number" -- just set to 1 for now
-                input$raceWeight,
                 "-maxTime",input$maxTime,
                 "-simtag",simtag,
+                "-raceWeight",input$raceWeight,
+                "-probWhite",input$probWhite,
+                "-initNumPeople",input$initNumPeople,
+                "-initNumGroups",input$initNumGroups,
+                "-numNewGroupsPerYear",input$numNewGroupsPerYear,
+                "-numFreshmenPerYear",input$numFreshmenPerYear,
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),
@@ -179,7 +199,7 @@ shinyServer(function(input,output,session) {
 
     # CHANGE: put any graphics commands to produce a visual analysis of the
     # simulation's output here.
-    output$analysis1Plot <- renderPlot({
+    output$friendshipsPlot <- renderPlot({
         if (input$runsim < 1) return(NULL)
         people.stats.df <- people.stats()
         if (nrow(people.stats.df) > 0) {
@@ -198,7 +218,41 @@ shinyServer(function(input,output,session) {
             print(the.plot)
         }
         # Recreate this plot in a little bit.
-        invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$dropoutPlot <- renderPlot({
+        if (input$runsim < 1) return(NULL)
+        dropout.stats.df <- dropout.stats()
+        people.stats.df <- people.stats()
+        if (nrow(dropout.stats.df) > 0) {
+            people.by.race.by.year <- 
+                group_by(people.stats.df,period,race) %>%
+                summarize(p.count=n())
+            dropout.by.race.by.year <- 
+                group_by(dropout.stats.df,period,race) %>%
+                summarize(d.count=n())
+            dropout.data <- inner_join(people.by.race.by.year,
+                    dropout.by.race.by.year,
+                by=c("period","race")) %>%
+                mutate(percDropouts=d.count/(p.count+d.count)*100)
+            the.plot <- ggplot(dropout.data,
+                aes(x=period,y=percDropouts,col=race)) + 
+                geom_line() + 
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                labs(title="Dropout rate",
+                    x="Simulation year",
+                    y="Percentage dropouts")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
     })
 
 

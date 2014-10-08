@@ -3,7 +3,7 @@ library(shiny)
 library(shinyIncubator)
 
 # CHANGE: The title of your simulation webapp.
-APP.TITLE <- "Shiny Sim"
+APP.TITLE <- "CollegeSim"
 
 
 shinyUI(fluidPage(
@@ -23,8 +23,23 @@ shinyUI(fluidPage(
             # want to be able to change through the Web UI. "Numeric
             # multiplier" is a sample.
             sliderInput("raceWeight",
-                label="Race weight (in # of equivalent attributes)",value=5,
+                label="Race weight (in # of equivalent attributes)",value=400,
                 min=0,max=500),
+            sliderInput("probWhite",
+                label="Probability a new student is white",value=.85,
+                min=0,max=1,step=0.05),
+            sliderInput("initNumPeople",
+                label="Initial number of students",value=100,
+                min=0,max=4000),
+            sliderInput("numFreshmenPerYear",
+                label="Number of new freshmen per year",value=25,
+                min=0,max=1000),
+            sliderInput("initNumGroups",
+                label="Initial number of groups",value=50,
+                min=0,max=200),
+            sliderInput("numNewGroupsPerYear",
+                label="Number of new groups created per year",value=10,
+                min=0,max=10),
 
             radioButtons("seedType",label="",
                 choices=c("Random seed"="rand",
@@ -37,7 +52,7 @@ shinyUI(fluidPage(
             # OPTIONAL: Only include this if it makes sense for the user to be
             # able to tweak the length of the simulation.
             numericInput("maxTime","Number of sim years",
-                value=2,min=1,step=1),
+                value=8,min=1,step=1),
             actionButton("runsim",label="Run sim"),
             htmlOutput("log")
         )
@@ -48,8 +63,9 @@ shinyUI(fluidPage(
         # just have two plots (the second of which isn't even set to anything
         # in server.R) as placeholders.
         tabsetPanel(
-            tabPanel("Analysis 1",
-                plotOutput("analysis1Plot")
+            tabPanel("Time series",
+                plotOutput("friendshipsPlot"),
+                plotOutput("dropoutPlot")
             )
         )
     )
