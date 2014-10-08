@@ -24,7 +24,7 @@ public class Person implements Steppable{
     /**
      * Baseline prior probability that a newly generated student will be of
      * race "WHITE". */
-    public static final double PROBABILITY_WHITE = 0.5;
+    public static double PROBABILITY_WHITE;
 
     /**
      * Baseline prior probability that a newly generated student will be of
@@ -96,8 +96,7 @@ public class Person implements Steppable{
 
     private int ID;
     private int year;
-    private static MersenneTwisterFast generator = Sim.instance( ).random;
-    private Normal normal = new Normal(.5, .15, generator);
+    private Normal normal = new Normal(.5, .15, Sim.instance( ).random);
     private static final int DECAY_THRESHOLD = 2;
     
     private Race race;
@@ -264,7 +263,7 @@ public class Person implements Steppable{
       boolean okay;
       for(int i=0; i<numAttr; i++){
         //pick an attribute to change
-        int index = generator.nextInt(poolSize);
+        int index = Sim.instance( ).random.nextInt(poolSize);
         okay = false;
         //while we have not chosen an appropriate index
         while(!okay){
@@ -274,12 +273,12 @@ public class Person implements Steppable{
             okay = true;
           //otherwise, we have to pick a new attribute
           }else{
-            index = generator.nextInt(poolSize);
+            index = Sim.instance( ).random.nextInt(poolSize);
           }
         }
         //pick a degree to which the person will have this attribute
         //we generate a number between 0 and 1, including 1 but not including 0
-        double degree = generator.nextDouble(false, true);
+        double degree = Sim.instance( ).random.nextDouble(false, true);
         //then we set the attribute at the chosen index to be the generated 
         //degree
         attr.set(index, degree);
@@ -287,7 +286,7 @@ public class Person implements Steppable{
     }
     
     private boolean assignRaceGender(double probability){
-      double gen = generator.nextDouble();
+      double gen = Sim.instance( ).random.nextDouble();
       if(gen <= probability){
         return true;
       }else{
@@ -301,7 +300,7 @@ public class Person implements Steppable{
 
         //Assigning constant attributes
         for(int i=0; i<CONSTANT_ATTRIBUTE_POOL; i++){
-            boolean rand = generator.nextBoolean( );
+            boolean rand = Sim.instance( ).random.nextBoolean( );
             attributesK1.set(i, rand);
         }
         //Assigning independent attributes
@@ -373,7 +372,7 @@ public class Person implements Steppable{
     for(int i=0; i<number; i++){
       Person personToMeet;
       do{
-        personToMeet = (Person) pool.get(generator.nextInt(pool.size( )));
+        personToMeet = (Person) pool.get(Sim.instance( ).random.nextInt(pool.size( )));
       }while(personToMeet.ID == ID);
       if(friendsWith(personToMeet)){
         tickle(personToMeet);
@@ -456,6 +455,7 @@ public class Person implements Steppable{
             + this.getAlienation( ) +  "," + year + "\n";
         try {
             writer.write(message);
+            writer.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -505,7 +505,8 @@ public class Person implements Steppable{
     }
 
     public void printPreferencesToFile(BufferedWriter writer) {
-        String message = this.getID( ) + ",";
+        String message = Sim.instance().getCurrYearNum() + "," + 
+            this.getID( ) + ",";
         Bag b = Sim.peopleGraph.getEdgesIn(this);
         int numFriends = b.size( );
         message = message + numFriends + "," + race + "," + this.getAlienation() + "," + year + "\n";
@@ -665,7 +666,7 @@ public class Person implements Steppable{
   private boolean areFriends(double similarity){
     double acceptProb = 
         FRIENDSHIP_COEFFICIENT * similarity + FRIENDSHIP_INTERCEPT;
-    double friendProb = generator.nextDouble( );
+    double friendProb = Sim.instance( ).random.nextDouble( );
     if(friendProb <= acceptProb){
       return true;
     }else{
