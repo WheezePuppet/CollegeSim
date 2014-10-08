@@ -13,39 +13,45 @@ import java.util.ArrayList;
 
 /** The top-level singleton simulation class, with main(). */
 public class Sim extends SimState implements Steppable{
+
+    /** 
+     * The random number seed for this simulation.
+     */
+    public static long SEED;
+
     /**
      * A graph where each node is a student and each edge is a friendship between
      * those students. It is undirected. */
     public static Network peopleGraph = new Network(false);
 
-    public static int currentTrial;
+    public static int TRIAL_NUM;
 
     /**
      * A hashtag identifying the current run of the simulation.
      */
-    public static long simtag;
+    public static long SIMTAG;
 
     /**
      * The number of people, of random year-in-college (fresh, soph, etc.)
      * that the simulation will begin with. */
-    public static final int INIT_NUM_PEOPLE = 4000;
+    public static int INIT_NUM_PEOPLE;
 
 
     /**
      * The number of groups, with random initial membership, that the
      * simulation will begin with. */
-    public static final int INIT_NUM_GROUPS = 200;
+    public static int INIT_NUM_GROUPS;
 
 
     /**
      * The number of newly enrolling freshmen each year.     */
-    public static final int NUM_PEOPLE_ENROLLING_EACH_YEAR = 1000;
+    public static int NUM_FRESHMEN_ENROLLING_PER_YEAR;
 
 
     /**
-     * The number of groups, with random initial membership, that the
-     * simulation will begin with. */
-    public static final int NUM_GROUPS_ADDED_EACH_YEAR = 100;
+     * The number of new groups to be added each year.
+     */
+    public static int NUM_NEW_GROUPS_PER_YEAR;
     
     /** The coefficient (see also {@link #DROPOUT_INTERCEPT}) of a linear
      * equation to transform alienation to probability of
@@ -64,7 +70,6 @@ public class Sim extends SimState implements Steppable{
     //and then get the size of the bag
     private static ArrayList<Person> peopleList = new ArrayList<Person>();
     
-    private static long SEED = 0;
     private static Sim theInstance;
 
     public static final int NUM_MONTHS_IN_ACADEMIC_YEAR = 9;
@@ -73,7 +78,6 @@ public class Sim extends SimState implements Steppable{
         NUM_MONTHS_IN_SUMMER;
     
     //Platypus do we use both of these?
-    public static final int MAX_ITER = 1000;
     public static int NUM_SIMULATION_YEARS=  8;
 
     private static File outF;
@@ -99,7 +103,6 @@ public class Sim extends SimState implements Steppable{
         return (monthsWithinYear < NUM_MONTHS_IN_ACADEMIC_YEAR);
     }
 
-    //Giraffe
     public static int getNumPeople( ){
         return peopleList.size();
     }
@@ -108,12 +111,22 @@ public class Sim extends SimState implements Steppable{
         return groups.size();
     }
 
-    public static synchronized Sim instance( ){
+    /* creating the instance */
+    public static synchronized Sim instance(long seed){
         if (theInstance == null){
-            theInstance = new Sim(SEED);
+            theInstance = new Sim(seed);
         }
         return theInstance;
     }
+
+    /* getting the instance */
+    static synchronized Sim instance()
+    {
+        if (theInstance == null) throw new AssertionError();
+
+        return theInstance;
+    }
+
 
     //Platypus
     public static ArrayList<Person> getPeople(){
@@ -122,6 +135,7 @@ public class Sim extends SimState implements Steppable{
     
     public Sim(long seed){
         super(seed);
+        this.SEED = seed;
     }
     
     public void start( ){
@@ -186,36 +200,66 @@ public class Sim extends SimState implements Steppable{
      * usage details.
      */
     public static void main(String[] args) throws IOException {
-        if (args.length < 6 ||
-            !args[2].equals("-maxTime") ||
-            !args[4].equals("-simtag")) {
+
+        // Mandatory command-line values.
+        NUM_SIMULATION_YEARS = -1;
+        SIMTAG = -1;
+
+        // Optional values with defaults.
+        Person.RACE_WEIGHT = 5;
+        Person.PROBABILITY_WHITE = .8;
+        TRIAL_NUM = 1;
+        INIT_NUM_PEOPLE = 4000;
+        NUM_FRESHMEN_ENROLLING_PER_YEAR = 1000;
+        INIT_NUM_GROUPS = 200;
+        NUM_NEW_GROUPS_PER_YEAR = 10;
+        SEED = System.currentTimeMillis();
+
+        for (int i=0; i<args.length; i++) {
+            if (args[i].equals("-maxTime")) {
+                NUM_SIMULATION_YEARS = Integer.valueOf(args[++i]);
+            } else if (args[i].equals("-simtag")) {
+                SIMTAG = Long.valueOf(args[++i]);
+            } else if (args[i].equals("-raceWeight")) {
+                Person.RACE_WEIGHT = Integer.valueOf(args[++i]);
+            } else if (args[i].equals("-probWhite")) {
+                Person.PROBABILITY_WHITE = Double.valueOf(args[++i]);
+            } else if (args[i].equals("-trialNum")) {
+                TRIAL_NUM = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-seed")) {
+                SEED = Long.parseLong(args[++i]);
+            } else if (args[i].equals("-initNumPeople")) {
+                INIT_NUM_PEOPLE = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numFreshmenPerYear")) {
+                NUM_FRESHMEN_ENROLLING_PER_YEAR = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-initNumGroups")) {
+                INIT_NUM_GROUPS = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numNewGroupsPerYear")) {
+                NUM_NEW_GROUPS_PER_YEAR = Integer.parseInt(args[++i]);
+            }
+        }
+
+        if (NUM_SIMULATION_YEARS == -1  ||
+            SIMTAG == -1) {
             printUsageAndQuit();
         }
 
-        currentTrial = Integer.parseInt(args[0]);
-
-        Person.RACE_WEIGHT = Double.parseDouble(args[1]);
-
-        NUM_SIMULATION_YEARS = Integer.valueOf(args[3]);
-
-        simtag = Long.valueOf(args[5]);
-
-        long seed = System.currentTimeMillis();
-        if (args.length >= 8) {
-            seed = Long.valueOf(args[7]);
-        }
-        
-
-        // Write the parameters file to a simtag-annotated filename in the 
+        // Write the parameters file to a SIMTAG-annotated filename in the 
         // current directory.
         try {
             PrintWriter paramsFile = new PrintWriter(new BufferedWriter(
-                new FileWriter("./sim_params" + simtag + ".txt")));
-            paramsFile.println("seed="+seed);
+                new FileWriter("./sim_params" + SIMTAG + ".txt")));
+            paramsFile.println("seed="+SEED);
             paramsFile.println("maxTime="+NUM_SIMULATION_YEARS);
-            paramsFile.println("simtag="+simtag);
-            paramsFile.println("trialNumber="+currentTrial);
+            paramsFile.println("simtag="+SIMTAG);
+            paramsFile.println("trialNumber="+TRIAL_NUM);
             paramsFile.println("raceWeight="+Person.RACE_WEIGHT);
+            paramsFile.println("initNumPeople="+INIT_NUM_PEOPLE);
+            paramsFile.println("numFreshmenPerYear="+
+                NUM_FRESHMEN_ENROLLING_PER_YEAR);
+            paramsFile.println("initNumGroups="+INIT_NUM_GROUPS);
+            paramsFile.println("numNewGroupsPerYear="+
+                NUM_NEW_GROUPS_PER_YEAR);
             paramsFile.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -224,8 +268,7 @@ public class Sim extends SimState implements Steppable{
 
         doLoop(new MakesSimState() { 
             public SimState newInstance(long seed, String[] args) {
-                // Sim.SEED = seed;
-                return instance();
+                return instance(seed);
             }
             public Class simulationClass() {
                 return Sim.class;
@@ -259,7 +302,7 @@ public class Sim extends SimState implements Steppable{
         }
         //if((int)(schedule.getTime()/NUM_MONTHS_IN_YEAR)!=NUM_SIMULATION_YEARS){
         if(!isEndOfSim()){
-            String f="people"+simtag+".csv";
+            String f="people"+SIMTAG+".csv";
             try{
                 outF = new File(f);
                 outF.createNewFile( );
@@ -278,7 +321,7 @@ public class Sim extends SimState implements Steppable{
             }
             
             //FILE OF FRIENDSHIPS
-            String ff="P"+Person.RACE_WEIGHT+"T"+currentTrial+"edges"+(int) (schedule.getTime()/NUM_MONTHS_IN_YEAR)+".csv";
+            String ff="P"+Person.RACE_WEIGHT+"T"+TRIAL_NUM+"edges"+(int) (schedule.getTime()/NUM_MONTHS_IN_YEAR)+".csv";
             try{
                 FoutF = new File(ff);
                 FoutF.createNewFile();
@@ -292,6 +335,26 @@ public class Sim extends SimState implements Steppable{
                 peopleList.get(x).printFriendsToFile(FoutWriter);
             }
         }
+    }
+
+    private void dumpToDropoutFile(Person p) {
+        String f="dropout"+SIMTAG+".csv";
+        BufferedWriter outWriter = null;
+        try{
+            File outputFile = new File(f);
+            if (!outputFile.exists()) {
+                outputFile.createNewFile( );
+                outWriter = new BufferedWriter(new FileWriter(outputFile));
+                Person.printHeaderToFile(outWriter);
+            } else {
+                outWriter = new BufferedWriter(new FileWriter(outputFile,true));
+            }
+        }catch(IOException e){
+            System.out.println("Couldn't create file");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        p.printToFile(outWriter);
     }
 
     public void dumpPreferencesOfGraduatedStudent(Person x){
@@ -353,12 +416,15 @@ public class Sim extends SimState implements Steppable{
             }
         }
         try{
-        String string = "P"+Person.RACE_WEIGHT+"T"+currentTrial+"dropout.csv";
+        String string = "dropout" + SIMTAG + ".csv";
                 PrefoutF = new File(string);
                 if(!PrefoutF.exists()){
                     PrefoutF.createNewFile();
+                    PrefoutWriter = 
+                        new BufferedWriter(new FileWriter(PrefoutF));
+                    PrefoutWriter.write(
+                        "period,ID,numFriends,race,alienation,year");
                 }
-                PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
             }catch(IOException e){
                 System.out.println("Couldn't create file");
                 e.printStackTrace();
@@ -397,7 +463,7 @@ public class Sim extends SimState implements Steppable{
                     //Is this something we need to track in the graph?
                     peopleList.get(x).incrementYear();
                 }
-                for(int x = 0; x<NUM_PEOPLE_ENROLLING_EACH_YEAR; x++){
+                for(int x = 0; x<NUM_FRESHMEN_ENROLLING_PER_YEAR; x++){
                     //Create a new student
                     Person person = new Person(currentStudentID);
                     currentStudentID++;
@@ -412,7 +478,7 @@ public class Sim extends SimState implements Steppable{
                     //out the second part.)
                     schedule.scheduleOnceIn(1.4, person);
                 }
-                for(int x = 0; x<NUM_GROUPS_ADDED_EACH_YEAR; x++){
+                for(int x = 0; x<NUM_NEW_GROUPS_PER_YEAR; x++){
                     //Create a new group with the list of people
                     Group group = new Group(currentGroupID, peopleList);
                     currentGroupID++;
@@ -459,7 +525,8 @@ public class Sim extends SimState implements Steppable{
                             if(dropChance <= alienation){
 //                                System.out.println("Person " + student.getID( ) +
 //                                        " has dropped out of school.");
-                                dumpPreferencesOfDropoutStudent(student);
+                //                dumpPreferencesOfDropoutStudent(student);
+                                dumpToDropoutFile(student);
                                 toRemove.add(student);
                             }
                         }
@@ -513,9 +580,17 @@ public class Sim extends SimState implements Steppable{
     }
 
     private static void printUsageAndQuit() {
-        System.err.println("Usage: Sim trialNumber raceWeight " +
-            "-maxTime numGenerations -simtag simulationTag " +
-            "[-seed seed].");
+        System.err.println(
+        "Usage: Sim -maxTime numGenerations     # Integer" +
+        "  -simtag simulationTag                # Long" + 
+        "  [-raceWeight numAttrsRaceIsWorth]    # Integer; default 5" +
+        "  [-probWhite fracNewStudentsWhoAreW]  # Double; default .8" +
+        "  [-trialNum trialNumber]              # Integer; default 1" +
+        "  [-initNumPeople initNumPeople]       # Integer; default 4000" +
+        "  [-numFreshmenPerYear num]            # Integer; default 1000" +
+        "  [-initNumGroups initNumGroups]       # Integer; default 200" +
+        "  [-numNewGroupsPerYear num]           # Integer; default 10" +
+        "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }
 }
