@@ -91,6 +91,7 @@ public class Sim extends SimState implements Steppable{
     // Here is the schedule!
     // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5.
     // Groups run at clock time 1, 2, 3, ..., 9.
+    // The Sim object itself runs at MORGAN?
     boolean nextMonthInAcademicYear() {
         double curTime = Sim.instance().schedule.getTime();
         int curTimeInt = (int) Math.ceil(curTime);
@@ -291,18 +292,19 @@ public class Sim extends SimState implements Steppable{
             }
             
             //FILE OF FRIENDSHIPS
-            String ff="P"+Person.RACE_WEIGHT+"T"+TRIAL_NUM+"edges"+(int) (schedule.getTime()/NUM_MONTHS_IN_YEAR)+".csv";
+            String ff="friendships"+SIMTAG+".csv";
             try{
+                // append to current file, if exists
                 FoutF = new File(ff);
-                FoutF.createNewFile();
-                FoutWriter = new BufferedWriter(new FileWriter(FoutF));
+                FoutWriter = new BufferedWriter(new FileWriter(FoutF, true));
+                for(int x = 0; x<peopleList.size(); x++){
+                    peopleList.get(x).printFriendsToFile(FoutWriter);
+                }
+                FoutWriter.flush();
             }catch(IOException e){
                 System.out.println("Couldn't create file");
                 e.printStackTrace();
                 System.exit(1);
-            }
-            for(int x = 0; x<peopleList.size(); x++){
-                peopleList.get(x).printFriendsToFile(FoutWriter);
             }
         }
     }
@@ -335,46 +337,14 @@ public class Sim extends SimState implements Steppable{
                 System.out.println("Could not close file");
             }
         }
-        /*try{
-                PrefoutF = new File("preferencesGraduate.csv");
-                if(!PrefoutF.exists()){
-                    PrefoutF.createNewFile();
-                }
-                PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-            }catch(IOException e){
-                System.out.println("Couldn't create file");
-                e.printStackTrace();
-                System.exit(1);
-            }
-            x.printPreferencesToFile(PrefoutWriter);*/
 
-
-            if(PrefoutWriter!=null){
+        if(PrefoutWriter!=null){
             try{
                 PrefoutWriter.close();
             }catch(IOException e){
                 System.out.println("Could not close file");
             }
         }
-        /*try{
-                PrefoutF = new File("averageChange.csv");
-                if(!PrefoutF.exists()){
-                    PrefoutF.createNewFile();
-                    try {
-                        PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-            }catch(IOException e){
-                System.out.println("Couldn't create file");
-                e.printStackTrace();
-                System.exit(1);
-            }
-            if(x.hasFullData()){
-                x.printChangeToFile(PrefoutWriter);
-            }*/
     }
 
     public void dumpPreferencesOfDropoutStudent(Person x){
@@ -402,6 +372,7 @@ public class Sim extends SimState implements Steppable{
             }
             x.printPreferencesToFile(PrefoutWriter);
     }
+
 
     public void step(SimState state){
 
@@ -463,21 +434,15 @@ public class Sim extends SimState implements Steppable{
                         Person student = peopleList.get(x);
                         //If they have more than four years, they graduate
                         if(student.getYear( ) >= 4){
-//                            System.out.println("Person " + 
-  //                              student.getID() +
-    //                            " has graduated! Congrats!");
                             dumpPreferencesOfGraduatedStudent(student);
                             toRemove.add(student);
                         //Otherwise
                         }else{
                             double alienationLevel = student.getAlienation( );
-                            double alienation = DROPOUT_RATE * alienationLevel + DROPOUT_INTERCEPT; 
-                            //If they feel alienated, they have a chance to drop out
+                            double alienation = DROPOUT_RATE * alienationLevel 
+                                + DROPOUT_INTERCEPT; 
                             double dropChance = random.nextDouble( );
                             if(dropChance <= alienation){
-//                                System.out.println("Person " + student.getID( ) +
-//                                        " has dropped out of school.");
-                //                dumpPreferencesOfDropoutStudent(student);
                                 dumpToDropoutFile(student);
                                 toRemove.add(student);
                             }
@@ -485,8 +450,6 @@ public class Sim extends SimState implements Steppable{
                     }
                     for(int x = 0; x<allGroups.size(); x++){
                         if(random.nextDouble(true, true)>.75){
-//                            System.out.println("Removing group " +
-//                                allGroups.get(x).getID());
                             toRemoveGroups.add(allGroups.get(x));
                         }
                     }
@@ -497,11 +460,7 @@ public class Sim extends SimState implements Steppable{
                     for(int x = 0; x<toRemove.size(); x++){
                         //Let the person leave their groups
                         toRemove.get(x).leaveUniversity();
-                        //remove the person from the list of people
                         peopleList.remove(toRemove.get(x));
-
-
-                        //remove the person from the graph of people and friendships
                         peopleGraph.removeNode(toRemove.get(x));
                     }
                     toRemoveGroups.clear();
@@ -512,18 +471,6 @@ public class Sim extends SimState implements Steppable{
                  * Schedule myself to wake up in August.
                  */
                 schedule.scheduleOnceIn(NUM_MONTHS_IN_SUMMER, this);
-//Bag b = peopleGraph.getAllNodes();
-//boolean itIsInThere = false;
-//for (int i=0; i<b.size(); i++) {
-//    if (((Person)b.get(i)).getID() == personInQuestion) {
-//        itIsInThere = true;
-//    }
-//}
-//if (itIsInThere) {
-//System.out.println(personInQuestion + " is IN the graph.");
-//} else {
-//System.out.println(personInQuestion + " is NOT in the graph.");
-//}
             }
         }else{
             schedule.seal();
