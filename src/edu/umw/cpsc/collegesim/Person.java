@@ -29,7 +29,7 @@ public class Person implements Steppable{
     /**
      * Baseline prior probability that a newly generated student will be of
      * gender "FEMALE". */
-    public static final double PROBABILITY_FEMALE = .5;
+    public static final double PROBABILITY_FEMALE = 1;
     
     /** A number reflecting the relative importance that race has in
      * determining perceived similarity. The "units" of this constant are
@@ -94,7 +94,10 @@ public class Person implements Steppable{
 
     
 
-    private int ID;
+    // Hand out consecutive unique numbers to new people.
+    private static int nextPersonId = 0;
+    private int id;
+
     private int year;
     private Normal normal = new Normal(.5, .15, Sim.instance( ).random);
     private static final int DECAY_THRESHOLD = 2;
@@ -191,7 +194,7 @@ public class Person implements Steppable{
     
     
     /**
-     * The person whose ID (index) is passed has now been tickled, so this
+     * The person whose id (index) is passed has now been tickled, so this
      * sets the last tickle time for this person to the current time.
      */
     public void refreshLastTickleTime(int index){
@@ -219,7 +222,7 @@ public class Person implements Steppable{
               Bag bIn = Sim.peopleGraph.getEdgesIn(this);
               //for each of these edges
               for(int j=0; j<bIn.size( ); j++){
-                //look for the person whose ID matches the ID of the 
+                //look for the person whose id matches the id of the 
                 //person we want to decay
                 Edge edgeIn = (Edge)bIn.get(j);
                 Person otherPerson = (Person) edgeIn.getOtherNode(this);
@@ -236,7 +239,7 @@ public class Person implements Steppable{
               Person otherPerson = null;
               //for each of these edges
               for(int j=0; j<bOut.size( ); j++){
-                //look for the person whose ID matches the ID of the person 
+                //look for the person whose id matches the id of the person 
                 //we want to decay
                 Edge edgeOut = (Edge)bOut.get(j);
                 otherPerson = (Person) edgeOut.getOtherNode(this);
@@ -245,7 +248,7 @@ public class Person implements Steppable{
                   //when we find the person, make their edge the one we 
                   //want to remove
                   toRemoveOut = edgeOut;
-                  otherPerson.resetLastTickleTime(ID);
+                  otherPerson.resetLastTickleTime(id);
                   j = bOut.size( );
                 }
               }
@@ -294,8 +297,8 @@ public class Person implements Steppable{
       }
     }
     
-    Person(int ID){
-        this.ID = ID;
+    Person() {
+        this.id = nextPersonId++;
         groups = new ArrayList<Group>( );
 
         //Assigning constant attributes
@@ -343,7 +346,7 @@ public class Person implements Steppable{
     if(friends){
         Sim.peopleGraph.addEdge(this, personToMeet, 1);
         refreshLastTickleTime(personToMeetID);
-        personToMeet.refreshLastTickleTime(ID);
+        personToMeet.refreshLastTickleTime(id);
     }
   }
   
@@ -355,7 +358,7 @@ public class Person implements Steppable{
     //reset when the two last encountered each other
     int tickleID = person.getID( );
     refreshLastTickleTime(tickleID);
-    person.refreshLastTickleTime(ID);
+    person.refreshLastTickleTime(id);
   }
   
   /**
@@ -373,7 +376,7 @@ public class Person implements Steppable{
       Person personToMeet;
       do{
         personToMeet = (Person) pool.get(Sim.instance( ).random.nextInt(pool.size( )));
-      }while(personToMeet.ID == ID);
+      }while(personToMeet.id == id);
       if(friendsWith(personToMeet)){
         tickle(personToMeet);
       }else{
@@ -436,7 +439,7 @@ public class Person implements Steppable{
 
     public static void printHeaderToFile(BufferedWriter writer) {
         try {
-            writer.write("period,ID,numFriends,numGroups,race,gender,alienation,yearInSchool\n");
+            writer.write("period,id,numFriends,numGroups,race,gender,alienation,yearInSchool\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -447,7 +450,7 @@ public class Person implements Steppable{
      */
     public void printToFile(BufferedWriter writer) {
         String message = Sim.instance().getCurrYearNum() + "," + 
-            Integer.toString(ID) + ",";
+            Integer.toString(id) + ",";
         Bag b = Sim.peopleGraph.getEdgesIn(this);
         int numFriends = b.size( );
         message = message + Integer.toString(numFriends) + ","
@@ -469,7 +472,7 @@ public class Person implements Steppable{
         Bag b = Sim.peopleGraph.getEdgesIn(this);
         for (int i=0; i<b.size( ); i++) {
         	Person friend = (Person) ((Edge)b.get(i)).getOtherNode(this);
-        	//We only document the friendship if the other person's ID is greater
+        	//We only document the friendship if the other person's id is greater
         	//otherwise, the friendship edge was already documented
         	message = message + this.getID( ) + "," + friend.getID( ) + "\n";
         }
@@ -488,7 +491,7 @@ public class Person implements Steppable{
         for (int i=0; i<b.size(); i++) {
             Person otherSideOfThisEdge = 
                 (Person) ((Edge)b.get(i)).getOtherNode(this);
-            if (other.ID == otherSideOfThisEdge.ID) {
+            if (other.id == otherSideOfThisEdge.id) {
                 return true;
             }
         }
@@ -540,11 +543,11 @@ public class Person implements Steppable{
     public String toString() {
         Bag b = Sim.peopleGraph.getEdgesIn(this);
         if (b.size() == 0) {
-            return "Person " + ID + " (lonely with no friends)";
+            return "Person " + id + " (lonely with no friends)";
         }
-        String retval = "Person " + ID + " (friends with ";
+        String retval = "Person " + id + " (friends with ";
         for (int i=0; i<b.size(); i++) {
-            retval += ((Person)(((Edge)b.get(i)).getOtherNode(this))).ID;
+            retval += ((Person)(((Edge)b.get(i)).getOtherNode(this))).id;
             if (i == b.size()-1) {
                 retval += ")";
             } else {
@@ -555,7 +558,7 @@ public class Person implements Steppable{
     }
     
     public int getID( ){
-      return ID;
+      return id;
     }
   
   public Race getRace( ){
@@ -778,7 +781,7 @@ public class Person implements Steppable{
     for(int x = 0; x < groups.size( ); x++){
       for(int y = 0; y < groups.get(x).getSize(); y++){
         for(int z = 0; z < groupmates.size(); z++){
-          if(groups.get(x).getPersonAtIndex(y).ID == ((Person) groupmates.get(z)).ID){
+          if(groups.get(x).getPersonAtIndex(y).id == ((Person) groupmates.get(z)).id){
             repeat = true;    //student is already in this bag, don't add again
           }
         }
@@ -835,7 +838,7 @@ public class Person implements Steppable{
       }
 
 //   public boolean equals(Person p){
-//     return(ID==p.getID());
+//     return(id==p.getID());
 //   }
 
     /** Sets the school year (1=freshman, 2=sophomore, etc.) of this

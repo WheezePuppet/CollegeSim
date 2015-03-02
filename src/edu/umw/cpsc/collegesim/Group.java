@@ -59,6 +59,8 @@ public class Group implements Steppable{
      */
     public static final int NUM_PEOPLE_TO_RECRUIT = 10;
 
+    // Hand out consecutive unique numbers to new groups.
+    private static int nextGroupId = 0;
     private int id;
 
     // A number in the range 0 to 1 indicating how aggressive the group is
@@ -70,16 +72,17 @@ public class Group implements Steppable{
     
     /**
      * Constructs a new Group object with the id passed, which is
-     * <i>not</i> checked for uniqueness, and pre-populate it with members
-     * from the list passed. */
-    public Group(int id, ArrayList<Person> peopleList){
-      this.id = id;
+     * <i>not</i> checked for uniqueness, and pre-populate it with 
+     * members. */
+    public Group() {
+      this.id = nextGroupId++;
       students = new ArrayList<Person>();
-      selectStartingStudents(peopleList);
+      selectStartingStudents();
       recruitmentFactor = rand.nextDouble();
     }
 
-    private void selectStartingStudents(ArrayList<Person> people){
+    private void selectStartingStudents() {
+        ArrayList<Person> people = Sim.getPeople();
         int initialGroupSize = rand.nextInt(
             MAXIMUM_START_GROUP_SIZE-MINIMUM_START_GROUP_SIZE) + 
             MINIMUM_START_GROUP_SIZE + 1;
@@ -89,7 +92,7 @@ public class Group implements Steppable{
           // the min
         }
         if(initialGroupSize>Sim.getNumPeople()){
-          initialGroupSize=Sim.getNumPeople();    //to insure the initial 
+          initialGroupSize=Sim.getNumPeople();    //to ensure the initial 
           // group size is never greater than the number of total people
         }
         for(int x = 0; x < initialGroupSize; x++){

@@ -63,13 +63,14 @@ public class Sim extends SimState implements Steppable{
     /** See {@link #DROPOUT_RATE}. */
     public static final double DROPOUT_INTERCEPT = 0.05;
 
-    private static ArrayList<Group> groups = new ArrayList<Group>();
+    // The list of every group in the entire simulation. 
+    private static ArrayList<Group> allGroups = new ArrayList<Group>();
     
-    //Platypus Do we need this now? It looks like it because the network doesn't
-    //have a method to determine the size - you could get a bag of the people from the network
-    //and then get the size of the bag
+    // The list of every student in the entire simulation. (Maintained in
+    // addition to the Network for convenience.)
     private static ArrayList<Person> peopleList = new ArrayList<Person>();
     
+    // Singleton pattern.
     private static Sim theInstance;
 
     public static final int NUM_MONTHS_IN_ACADEMIC_YEAR = 9;
@@ -77,7 +78,6 @@ public class Sim extends SimState implements Steppable{
     public static final int NUM_MONTHS_IN_YEAR = NUM_MONTHS_IN_ACADEMIC_YEAR +
         NUM_MONTHS_IN_SUMMER;
     
-    //Platypus do we use both of these?
     public static int NUM_SIMULATION_YEARS=  8;
 
     private static File outF;
@@ -87,10 +87,6 @@ public class Sim extends SimState implements Steppable{
     private static File PrefoutF;
     private static BufferedWriter PrefoutWriter;
     
-    //Platypus do we need these?
-    private static int currentStudentID = 0;
-    private static int currentGroupID = 0; 
-
     
     // Here is the schedule!
     // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5.
@@ -103,12 +99,18 @@ public class Sim extends SimState implements Steppable{
         return (monthsWithinYear < NUM_MONTHS_IN_ACADEMIC_YEAR);
     }
 
+    /**
+     * Return the total number of students currently in the simulation.
+     */
     public static int getNumPeople( ){
         return peopleList.size();
     }
 
-    public int getNumGroups(){
-        return groups.size();
+    /**
+     * Return the total number of groups currently in the simulation.
+     */
+    public static int getNumGroups(){
+        return allGroups.size();
     }
 
     /* creating the instance */
@@ -128,7 +130,7 @@ public class Sim extends SimState implements Steppable{
     }
 
 
-    //Platypus
+    /** Return the list of all students in the simulation. */
     public static ArrayList<Person> getPeople(){
         return peopleList;
     }
@@ -140,53 +142,21 @@ public class Sim extends SimState implements Steppable{
     
     public void start( ){
         super.start( );
-        //create people, put them in the network, and add them to the
-        //schedule
-        /*PrefoutF= new File("preferencesDropout.csv");
-        FoutF.delete();
-        PrefoutF= new File("preferencesGraduate.csv");
-        FoutF.delete();
-        */
-
-        /*try{
-            File file = new File("preferencesGraduate.csv");
-            file.delete();
-            file = new File("preferencesDropout.csv");
-            file.delete();
-            file = new File("averageChange.csv");
-            file.delete();
-            }catch(Exception e){
-            e.printStackTrace();
- 
-        }*/
 
         for(int i=0; i<INIT_NUM_PEOPLE; i++){
-            //Create a new student with the desired student ID. Here,
-            //currentStudentID and i will be identical. But we want to
-            //increment currentStudentID so we can use it later as the
-            //years go on, when the number of students and the assignment
-            //of IDs will no longer match the iterator (i)
-            Person person = new Person(currentStudentID);
-            currentStudentID++;
-            //Give them a random year
+            //Create a person of random year, add and schedule them.
+            Person person = new Person();
             person.setYear(random.nextInt(4)+1);
-            //Add them to the list of students
-            //Platypus
             peopleList.add(person);
-            //Add the student to the Network
             peopleGraph.addNode(person);
-//            lastMet.addNode(person);
-            //Schedule the student to step
+//            lastMet.addNode(person);       MORGAN
             schedule.scheduleOnceIn(1.5, person);
         }
 
         for(int x = 0; x<INIT_NUM_GROUPS; x++){
-            //Create a new group with a group ID and give it the list of people
-            Group group = new Group(currentGroupID, peopleList);
-            currentGroupID++;
-            //Add it to the list of groups
-            groups.add(group);
-            //Schedule the group to step
+            //Create a new group, add and schedule it.
+            Group group = new Group();
+            allGroups.add(group);
             schedule.scheduleOnceIn(2.0, group);
         }
 
@@ -435,7 +405,7 @@ public class Sim extends SimState implements Steppable{
 
     public void step(SimState state){
 
-//System.out.println("Sim::step(). The clock is now " + schedule.getTime());
+        System.out.println("############### SIM (" + schedule.getTime() + ")");
         if(!isEndOfSim()) {
 
             if(nextMonthInAcademicYear()){
@@ -446,30 +416,13 @@ public class Sim extends SimState implements Steppable{
                  */
                 System.out.println("---------------");
                 System.out.println("Starting year: "+getCurrYearNum());
-//Bag b = peopleGraph.getAllNodes();
-//boolean itIsInThere = false;
-//for (int i=0; i<b.size(); i++) {
-//    if (((Person)b.get(i)).getID() == personInQuestion) {
-//        itIsInThere = true;
-//    }
-//}
-//if (itIsInThere) {
-//System.out.println("At start of year, " + personInQuestion + " is IN the graph.");
-//} else {
-//System.out.println("At start of year, " + personInQuestion + " is NOT in the graph.");
-//}
                 for(int x = 0; x<peopleList.size(); x++){
-                    //Platypus
-                    //Is this something we need to track in the graph?
                     peopleList.get(x).incrementYear();
                 }
                 for(int x = 0; x<NUM_FRESHMEN_ENROLLING_PER_YEAR; x++){
-                    //Create a new student
-                    Person person = new Person(currentStudentID);
-                    currentStudentID++;
-                    //Make them a freshman
+                    //Create and add a new freshman
+                    Person person = new Person();
                     person.setYear(1);
-                    //Add the student to the list and the graph
                     peopleList.add(person);
                     peopleGraph.addNode(person);
                     //Schedule the person
@@ -480,10 +433,9 @@ public class Sim extends SimState implements Steppable{
                 }
                 for(int x = 0; x<NUM_NEW_GROUPS_PER_YEAR; x++){
                     //Create a new group with the list of people
-                    Group group = new Group(currentGroupID, peopleList);
-                    currentGroupID++;
+                    Group group = new Group();
                     //Add the group
-                    groups.add(group);
+                    allGroups.add(group);
                     //Schedule the group
                     schedule.scheduleOnceIn(2.0,group);
                 }
@@ -531,16 +483,16 @@ public class Sim extends SimState implements Steppable{
                             }
                         }
                     }
-                    for(int x = 0; x<groups.size(); x++){
+                    for(int x = 0; x<allGroups.size(); x++){
                         if(random.nextDouble(true, true)>.75){
 //                            System.out.println("Removing group " +
-//                                groups.get(x).getID());
-                            toRemoveGroups.add(groups.get(x));
+//                                allGroups.get(x).getID());
+                            toRemoveGroups.add(allGroups.get(x));
                         }
                     }
                     for(int x = 0; x<toRemoveGroups.size(); x++){
                         toRemoveGroups.get(x).removeEveryoneFromGroup();
-                        groups.remove(toRemoveGroups.get(x));
+                        allGroups.remove(toRemoveGroups.get(x));
                     }
                     for(int x = 0; x<toRemove.size(); x++){
                         //Let the person leave their groups
