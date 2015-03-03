@@ -271,7 +271,7 @@ public class Sim extends SimState implements Steppable{
                 System.out.println("Could not close file");
             }
         }
-        //if((int)(schedule.getTime()/NUM_MONTHS_IN_YEAR)!=NUM_SIMULATION_YEARS){
+
         if(!isEndOfSim()){
             String f="people"+SIMTAG+".csv";
             try{
@@ -376,7 +376,7 @@ public class Sim extends SimState implements Steppable{
 
     public void step(SimState state){
 
-        System.out.println("############### SIM (" + schedule.getTime() + ")");
+        System.out.println("#### SIM (" + schedule.getTime() + ")");
         if(!isEndOfSim()) {
 
             if(nextMonthInAcademicYear()){
@@ -396,10 +396,9 @@ public class Sim extends SimState implements Steppable{
                     person.setYear(1);
                     peopleList.add(person);
                     peopleGraph.addNode(person);
-                    //Schedule the person
-                    //Why 1.4? Because (1) we the Sim are running at int.1,
-                    //and (2) (Morgan and Stephen are too tired to figure
-                    //out the second part.)
+                    //Schedule the person.
+                    //Why 1.4 from now? Because (1) we the Sim are running at 
+                    //int.1, and (2) students each run at int.5.
                     schedule.scheduleOnceIn(1.4, person);
                 }
                 for(int x = 0; x<NUM_NEW_GROUPS_PER_YEAR; x++){
@@ -407,8 +406,10 @@ public class Sim extends SimState implements Steppable{
                     Group group = new Group();
                     //Add the group
                     allGroups.add(group);
-                    //Schedule the group
-                    schedule.scheduleOnceIn(2.0,group);
+                    //Schedule the group.
+                    //Why 1.9 from now? Because (1) we the Sim are running at 
+                    //int.1, and (2) groups each run at integer times.
+                    schedule.scheduleOnceIn(1.9,group);
                 }
                 /*
                  * The new academic year is now ready to begin! Schedule
@@ -480,15 +481,15 @@ public class Sim extends SimState implements Steppable{
 
     private static void printUsageAndQuit() {
         System.err.println(
-        "Usage: Sim -maxTime numGenerations     # Integer" +
-        "  -simtag simulationTag                # Long" + 
-        "  [-raceWeight numAttrsRaceIsWorth]    # Integer; default 5" +
-        "  [-probWhite fracNewStudentsWhoAreW]  # Double; default .8" +
-        "  [-trialNum trialNumber]              # Integer; default 1" +
-        "  [-initNumPeople initNumPeople]       # Integer; default 4000" +
-        "  [-numFreshmenPerYear num]            # Integer; default 1000" +
-        "  [-initNumGroups initNumGroups]       # Integer; default 200" +
-        "  [-numNewGroupsPerYear num]           # Integer; default 10" +
+        "Usage: Sim -maxTime numGenerations     # Integer\n" +
+        "  -simtag simulationTag                # Long\n" + 
+        "  [-raceWeight numAttrsRaceIsWorth]    # Integer; default 5\n" +
+        "  [-probWhite fracNewStudentsWhoAreW]  # Double; default .8\n" +
+        "  [-trialNum trialNumber]              # Integer; default 1\n" +
+        "  [-initNumPeople initNumPeople]       # Integer; default 4000\n" +
+        "  [-numFreshmenPerYear num]            # Integer; default 1000\n" +
+        "  [-initNumGroups initNumGroups]       # Integer; default 200\n" +
+        "  [-numNewGroupsPerYear num]           # Integer; default 10\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

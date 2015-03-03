@@ -258,7 +258,8 @@ public class Group implements Steppable{
      * <p>Note that Groups only step during academic months.</p>
      */
       public void step(SimState state){
-        System.out.println("############### GROUP (" + state.schedule.getTime() + ")");
+        System.out.println("#### GROUP " + id + " (" + 
+            state.schedule.getTime() + ")");
         influenceMembers();
         ArrayList<Person> recruits = findStudentsToRecruit(Sim.getPeople());
         for(int x = 0; x < recruits.size(); x++){

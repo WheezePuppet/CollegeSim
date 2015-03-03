@@ -16,7 +16,7 @@ import sim.field.network.*;
 /**
  * A student in the CollegeSim model.
  */
-public class Person implements Steppable{
+public class Person implements Steppable {
 
     public enum Race { WHITE, MINORITY };
     public enum Gender { MALE, FEMALE };
@@ -99,7 +99,8 @@ public class Person implements Steppable{
     private int id;
 
     private int year;
-    private Normal normal = new Normal(.5, .15, Sim.instance( ).random);
+    private Normal extroversionDistro = 
+        new Normal(.5, .15, Sim.instance( ).random);
     private static final int DECAY_THRESHOLD = 2;
     
     private Race race;
@@ -326,7 +327,7 @@ public class Person implements Steppable{
         }else{
             gender = Gender.MALE;
         }
-        extroversion = normal.nextDouble();
+        extroversion = extroversionDistro.nextDouble();
     }
   
   /**
@@ -401,6 +402,8 @@ public class Person implements Steppable{
    * <p>Note that Persons only step during academic months.</p>
    */
   public void step(SimState state){
+    System.out.println("#### PERSON " + id + " (" + state.schedule.getTime() +
+                                                                        ")");
 	    Bag peopleBag = Sim.peopleGraph.getAllNodes( );
 	    if(!peopleBag.contains(this)){
 	        return;
@@ -474,7 +477,8 @@ public class Person implements Steppable{
         	Person friend = (Person) ((Edge)b.get(i)).getOtherNode(this);
         	//We only document the friendship if the other person's id is greater
         	//otherwise, the friendship edge was already documented
-        	message = message + this.getID( ) + "," + friend.getID( ) + "\n";
+        	message = message + Sim.instance().getCurrYearNum() + "," +
+                this.getID( ) + "," + friend.getID( ) + "\n";
         }
         //We'll only try to write if there are actually friends
         if(b.size( ) > 0){
