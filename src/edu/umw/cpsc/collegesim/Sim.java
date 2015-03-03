@@ -58,10 +58,10 @@ public class Sim extends SimState implements Steppable{
      * dropping out. If x is based on the alienation level,
      * then y=mx+b, where m is the DROPOUT_RATE and b the
      * DROPOUT_INTERCEPT, gives the probability of dropping out. */
-    public static final double DROPOUT_RATE = 0.01;
+    public static double DROPOUT_RATE;
     
     /** See {@link #DROPOUT_RATE}. */
-    public static final double DROPOUT_INTERCEPT = 0.05;
+    public static double DROPOUT_INTERCEPT;
 
     // The list of every group in the entire simulation. 
     private static ArrayList<Group> allGroups = new ArrayList<Group>();
@@ -207,6 +207,13 @@ public class Sim extends SimState implements Steppable{
                 INIT_NUM_GROUPS = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numNewGroupsPerYear")) {
                 NUM_NEW_GROUPS_PER_YEAR = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-driftRate")) {
+                Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
+                    Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-dropoutRate")) {
+                DROPOUT_RATE = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-dropoutIntercept")) {
+                DROPOUT_INTERCEPT = Double.parseDouble(args[++i]);
             }
         }
 
@@ -500,6 +507,9 @@ public class Sim extends SimState implements Steppable{
         "  [-numFreshmenPerYear num]            # Integer; default 1000\n" +
         "  [-initNumGroups initNumGroups]       # Integer; default 200\n" +
         "  [-numNewGroupsPerYear num]           # Integer; default 10\n" +
+        "  [-driftRate probChangeAttribute]     # Double; default .1\n" +
+        "  [-dropoutRate rate]                  # Double; default .01\n" +
+        "  [-dropoutIntercept intercept]        # Double; default .05\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

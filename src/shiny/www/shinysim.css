@@ -1,2 +1,10 @@
 
 /* shinysim.css */
+
+.inputCategory {margin-top:35px;}
+.inputCategory > div { margin-left:20px; }
+.inputCategory > div > label.control-label { margin-top:5px; font-size:small;}
+
+div > label.control-label { margin-top:35px; }
+
+.morgan { color:darkred; border:1px solid; margin-top:35px; font-style:italic;}

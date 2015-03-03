@@ -43,7 +43,7 @@ public class Group implements Steppable{
     /** Each time step, the probability that a student will change one of
      * their attribute values <i>provided</i> that said attribute is "different
      * enough" from their influencing peers to warrant change. */
-    public static final double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
   
     /**
      * Each time step, the number of students who will be "invited" to a
@@ -59,7 +59,6 @@ public class Group implements Steppable{
     // A number in the range 0 to 1 indicating how aggressive the group is
     // in attracting members.
     private double recruitmentFactor;
-    private static MersenneTwisterFast rand = Sim.instance( ).random;
   
     private ArrayList<Person> students;
     
@@ -70,12 +69,12 @@ public class Group implements Steppable{
       this.id = nextGroupId++;
       students = new ArrayList<Person>();
       selectStartingStudents();
-      recruitmentFactor = rand.nextDouble();
+      recruitmentFactor = Sim.instance().random.nextDouble();
     }
 
     private void selectStartingStudents() {
         ArrayList<Person> people = Sim.getPeople();
-        int initialGroupSize = rand.nextInt(
+        int initialGroupSize = Sim.instance().random.nextInt(
             MAXIMUM_START_GROUP_SIZE-MINIMUM_START_GROUP_SIZE) + 
             MINIMUM_START_GROUP_SIZE + 1;
         Person randStudent;
@@ -88,9 +87,9 @@ public class Group implements Steppable{
           // group size is never greater than the number of total people
         }
         for(int x = 0; x < initialGroupSize; x++){
-          randStudent = people.get(rand.nextInt(people.size()));
+          randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           while(groupContainsStudent(randStudent)){
-            randStudent = people.get(rand.nextInt(people.size()));
+            randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           }
           students.add(randStudent);
           randStudent.joinGroup(this);
@@ -106,9 +105,9 @@ public class Group implements Steppable{
           // is never greater than the number of total people
         }
         for(int x = 0; x < numPeople; x++){
-          randStudent = people.get(rand.nextInt(people.size()));
+          randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           while(groupContainsStudent(randStudent)){
-            randStudent = people.get(rand.nextInt(people.size()));
+            randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           }
           recruits.add(randStudent);
         }
@@ -120,7 +119,7 @@ public class Group implements Steppable{
 
           //FIX FOR DECIMALS
             double r = (affinityTo(s) + recruitmentFactor + 
-                s.getExtroversion()*2 + rand.nextDouble()*2)/6.0; 
+                s.getExtroversion()*2 + Sim.instance().random.nextDouble()*2)/6.0; 
                 //want to mess with balance here
             if(r>RECRUITMENT_REQUIRED){
                 students.add(s);
@@ -211,10 +210,9 @@ public class Group implements Steppable{
                     students.get(x).getIndependentAttributes().get(y);
           		distanceD = dependentAverage.get(y) - 
                     students.get(x).getDependentAttributes().get(y);
-          		if(rand.nextDouble(true,true)<
+          		if(Sim.instance().random.nextDouble(true,true)<
                     LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE && distanceI>0){
-                    //rand subject to change 
-            		increment = (rand.nextDouble(true,true)/52)*distanceI; 
+            		increment = (Sim.instance().random.nextDouble(true,true)/52)*distanceI; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
                     //the group's average
@@ -223,9 +221,9 @@ public class Group implements Steppable{
                         increment);
           		}  
 
-          		if(rand.nextDouble(true,true)<
+          		if(Sim.instance().random.nextDouble(true,true)<
                     LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE && distanceD>0){  
-            		increment = (rand.nextDouble(true, true)/5)*distanceD;
+            		increment = (Sim.instance().random.nextDouble(true, true)/5)*distanceD;
             		students.get(x).setDepAttrValue(y, 
                         (students.get(x).getDependentAttributes().get(y)) +
                         increment);  //Morgan's method
@@ -236,7 +234,7 @@ public class Group implements Steppable{
     }
 
      private void possiblyLeaveGroup(Person p){
-      if(rand.nextDouble(true,true)<
+      if(Sim.instance().random.nextDouble(true,true)<
             LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP && 
             students.size()>MINIMUM_GROUP_SIZE){
         p.leaveGroup(this);
