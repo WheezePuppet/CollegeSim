@@ -237,6 +237,16 @@ public class Sim extends SimState implements Steppable{
             System.exit(2);
         }
 
+        // Add the "-seed SEED" arguments to args so that when doLoop() runs,
+        // it has the same seed we just randomly set from above.
+        String newargs[] = new String[args.length + 2];
+        for (int i=0; i<args.length; i++) {
+            newargs[i] = args[i];
+        }
+        newargs[newargs.length-2] = "-seed";
+        newargs[newargs.length-1] = "" + SEED;
+        args = newargs;
+
         doLoop(new MakesSimState() { 
             public SimState newInstance(long seed, String[] args) {
                 return instance(seed);

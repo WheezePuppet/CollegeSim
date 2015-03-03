@@ -16,7 +16,7 @@ SIM.FILES.BASE.DIR <- "/tmp"
 
 # xCHANGE: The full path of your project directory. Any .java file that appears
 # in this directory hierarchy will be compiled as part of the simulation.
-SOURCE.DIR <- "/home/stephen/SocialSim"
+SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
@@ -88,7 +88,6 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
 
     # Return the seed, as recorded in the SIM.PARAMS.FILE.
     seed <- function() {
-cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n")
         get.param("seed")
     }
     
