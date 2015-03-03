@@ -20,8 +20,8 @@ public class Sim extends SimState implements Steppable{
     public static long SEED;
 
     /**
-     * A graph where each node is a student and each edge is a friendship between
-     * those students. It is undirected. */
+     * A graph where each node is a student and each edge is a friendship 
+     * between those students. It is undirected. */
     public static Network peopleGraph = new Network(false);
 
     public static int TRIAL_NUM;
@@ -63,6 +63,14 @@ public class Sim extends SimState implements Steppable{
     /** See {@link #DROPOUT_RATE}. */
     public static double DROPOUT_INTERCEPT;
 
+    public static final int NUM_MONTHS_IN_ACADEMIC_YEAR = 9;
+    public static final int NUM_MONTHS_IN_SUMMER = 3;
+    public static final int NUM_MONTHS_IN_YEAR = NUM_MONTHS_IN_ACADEMIC_YEAR +
+        NUM_MONTHS_IN_SUMMER;
+    
+    public static int NUM_SIMULATION_YEARS;
+
+
     // The list of every group in the entire simulation. 
     private static ArrayList<Group> allGroups = new ArrayList<Group>();
     
@@ -73,12 +81,6 @@ public class Sim extends SimState implements Steppable{
     // Singleton pattern.
     private static Sim theInstance;
 
-    public static final int NUM_MONTHS_IN_ACADEMIC_YEAR = 9;
-    public static final int NUM_MONTHS_IN_SUMMER = 3;
-    public static final int NUM_MONTHS_IN_YEAR = NUM_MONTHS_IN_ACADEMIC_YEAR +
-        NUM_MONTHS_IN_SUMMER;
-    
-    public static int NUM_SIMULATION_YEARS=  8;
 
     private static File outF;
     private static BufferedWriter outWriter;
@@ -89,9 +91,12 @@ public class Sim extends SimState implements Steppable{
     
     
     // Here is the schedule!
-    // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5.
-    // Groups run at clock time 1, 2, 3, ..., 9.
-    // The Sim object itself runs at MORGAN?
+    // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5, ..summer.., 12.5...
+    // Groups run at clock time 1, 2, 3, ..., 9 ..summer.. 13...
+    // The Sim object itself runs at 0.1, 9.1, 12.1, 21.1, 33.1, ... in other
+    // words, every August and May, just before all Persons and Groups run for
+    // the first time that academic year and after they all run for the last
+    // time that academic year.
     boolean nextMonthInAcademicYear() {
         double curTime = Sim.instance().schedule.getTime();
         int curTimeInt = (int) Math.ceil(curTime);
@@ -143,6 +148,11 @@ public class Sim extends SimState implements Steppable{
     
     public void start( ){
         super.start( );
+
+        // NOTE: the simulation starts at time -1. (Yes, NEGATIVE one.) This
+        // is why we do things like schedule the first students at time 1.5
+        // from now, and groups at time 2.0 from now: so they run at times 0.5
+        // and 1.0, respectively.
 
         for(int i=0; i<INIT_NUM_PEOPLE; i++){
             //Create a person of random year, add and schedule them.
@@ -266,6 +276,11 @@ public class Sim extends SimState implements Steppable{
 
     private boolean isEndOfSim() {
         return (schedule.getTime()/NUM_MONTHS_IN_YEAR) > NUM_SIMULATION_YEARS;
+    }
+
+    boolean isLastYearOfSim() {
+        return (schedule.getTime()/NUM_MONTHS_IN_YEAR) >= 
+            NUM_SIMULATION_YEARS - 1;
     }
 
     int getCurrYearNum() {
@@ -486,12 +501,15 @@ public class Sim extends SimState implements Steppable{
                 }
                 /*
                  * The academic year is now complete -- have a great summer!
-                 * Schedule myself to wake up in August.
+                 * Schedule myself to wake up in August, unless this is truly
+                 * the end.
                  */
-                schedule.scheduleOnceIn(NUM_MONTHS_IN_SUMMER, this);
+                if (!isLastYearOfSim()) {
+                    schedule.scheduleOnceIn(NUM_MONTHS_IN_SUMMER, this);
+                } else {
+                    schedule.seal();
+                }
             }
-        }else{
-            schedule.seal();
         }
 
     }

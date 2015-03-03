@@ -272,9 +272,11 @@ public class Group implements Steppable{
           // next month.
           Sim.instance( ).schedule.scheduleOnceIn(1, this);
         } else {
-          // It's summer break! Sleep for the summer.
-          Sim.instance( ).schedule.scheduleOnceIn(
-              Sim.NUM_MONTHS_IN_SUMMER + 1, this);
+            if (!Sim.instance().isLastYearOfSim()) {
+              // It's summer break! Sleep for the summer.
+              Sim.instance( ).schedule.scheduleOnceIn(
+                  Sim.NUM_MONTHS_IN_SUMMER + 1, this);
+            }
         }
     }
   

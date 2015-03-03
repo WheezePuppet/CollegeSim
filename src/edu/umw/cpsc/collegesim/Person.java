@@ -386,59 +386,62 @@ public class Person implements Steppable {
     }
   }
   
-  /**
-   * Make this person perform one month's actions. These include:
-   * <ol>
-   * <li>Encounter {@link #NUM_TO_MEET_GROUP} other people who are members
-   * of one or more of their current groups.</li>
-   * <li>Encounter {@link #NUM_TO_MEET_POP} other people from the student
-   * body at large (who may or may not be members of their current
-   * groups.)</li>
-   * <li>Decay this user's existing friendships to reflect the passage of
-   * time.</li>
-   * </ol>
-   * After this, the Person reschedules itself for the next month (or
-   * August, if it's coming up on summertime.)
-   * <p>Note that Persons only step during academic months.</p>
-   */
-  public void step(SimState state){
-    System.out.println("#### PERSON " + id + " (" + state.schedule.getTime() +
-                                                                        ")");
-	    Bag peopleBag = Sim.peopleGraph.getAllNodes( );
-	    if(!peopleBag.contains(this)){
-	        return;
-	    }
-    //Get a bag of all the people in the groups
-    Bag groupBag = getPeopleInGroups( );
-    if(groupBag.size( ) > 1){
-    	encounter(NUM_TO_MEET_GROUP, groupBag);
-    }
-    //Get a bag of all the people and then encounter some number of those people
-    if(peopleBag.size( ) > 1){
-    	encounter(NUM_TO_MEET_POP, peopleBag);
-    }
+    /**
+     * Make this person perform one month's actions. These include:
+     * <ol>
+     * <li>Encounter {@link #NUM_TO_MEET_GROUP} other people who are members
+     * of one or more of their current groups.</li>
+     * <li>Encounter {@link #NUM_TO_MEET_POP} other people from the student
+     * body at large (who may or may not be members of their current
+     * groups.)</li>
+     * <li>Decay this user's existing friendships to reflect the passage of
+     * time.</li>
+     * </ol>
+     * After this, the Person reschedules itself for the next month (or
+     * August, if it's coming up on summertime.)
+     * <p>Note that Persons only step during academic months.</p>
+     */
+    public void step(SimState state){
+        System.out.println("#### PERSON " + id + " (" +
+             state.schedule.getTime() + ")");
+        Bag peopleBag = Sim.peopleGraph.getAllNodes( );
+        if(!peopleBag.contains(this)){
+            return;
+        }
+        //Get a bag of all the people in the groups
+        Bag groupBag = getPeopleInGroups( );
+        if(groupBag.size( ) > 1){
+            encounter(NUM_TO_MEET_GROUP, groupBag);
+        }
+        //Get a bag of all the people and then encounter some number of those 
+        //people
+        if(peopleBag.size( ) > 1){
+            encounter(NUM_TO_MEET_POP, peopleBag);
+        }
 
 
-    //NOTE: Decay only matters if the people are friends- you can't decay a
-    //friendship that doesn't exist. So, the time they last met only
-    //matters if they are friends already or if they become friends this
-    //turn If they aren't already friends and if they don't become
-    //friends this turn, then -1 for last met is fine (unless we
-    //implement something where if two people meet enough times, they
-    //become friends by brute force)
-    //Now we want to see if any of the friendships have decayed
-    decay( );
-    
-            if (Sim.instance().nextMonthInAcademicYear()) {
-                // It's not the end of the academic year yet. Run again
-                // next month.
-                Sim.instance( ).schedule.scheduleOnceIn(1, this);
-            } else {
+        //NOTE: Decay only matters if the people are friends- you can't decay a
+        //friendship that doesn't exist. So, the time they last met only
+        //matters if they are friends already or if they become friends this
+        //turn If they aren't already friends and if they don't become
+        //friends this turn, then -1 for last met is fine (unless we
+        //implement something where if two people meet enough times, they
+        //become friends by brute force)
+        //Now we want to see if any of the friendships have decayed
+        decay( );
+
+        if (Sim.instance().nextMonthInAcademicYear()) {
+            // It's not the end of the academic year yet. Run again
+            // next month.
+            Sim.instance( ).schedule.scheduleOnceIn(1, this);
+        } else {
+            if (!Sim.instance().isLastYearOfSim()) {
                 // It's summer break! Sleep for the summer.
                 Sim.instance( ).schedule.scheduleOnceIn(
-                    Sim.NUM_MONTHS_IN_SUMMER + 1, this);
+                        Sim.NUM_MONTHS_IN_SUMMER + 1, this);
             }
-  }
+        }
+    }
 
     public static void printHeaderToFile(BufferedWriter writer) {
         try {
