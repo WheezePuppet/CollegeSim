@@ -20,7 +20,7 @@ SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
-OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.csv")
+OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.txt")
 
 PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
 
