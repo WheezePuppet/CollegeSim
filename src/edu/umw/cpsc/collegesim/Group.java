@@ -6,13 +6,6 @@ import ec.util.*;
 import sim.engine.*;
 import sim.util.Bag;
 
-/*TODO: clean up size stuff, maybe get rid of the variable all together and just keep the setter and use students.size() in the class. 
-* Should I change students to people? That way it would be consistant throughout the program
-* maybe change factors to 0-1 rather than 0-10?
-* What are we doing with tightness? Does it help determine recruitement? Or should it deal with leaving a group?
-* maybe have a max/min num students per group factor?
-*/
-
 
 /**
  * A group of students in the CollegeSim model, perhaps representing a
@@ -39,13 +32,13 @@ public class Group implements Steppable{
      * join a group. Higher numbers means less acceptance into groups. The
      * number itself is difficult to interpret, since a complex conflagration
      * of factors will be put together to compare to it. */
-    public static final double RECRUITMENT_REQUIRED = .6;     //lower this to accept more students in group per step
+    public static final double RECRUITMENT_REQUIRED = .6;
   
     /**
      * Each time step, the probability that each student will leave each of
      * their groups, provided that leaving said group would not push the
      * group size below the minimum. */
-    public static final double LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;   //increase this to remove more students in group per step
+    public static final double LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
   
     /** Each time step, the probability that a student will change one of
      * their attribute values <i>provided</i> that said attribute is "different
@@ -71,9 +64,8 @@ public class Group implements Steppable{
     private ArrayList<Person> students;
     
     /**
-     * Constructs a new Group object with the id passed, which is
-     * <i>not</i> checked for uniqueness, and pre-populate it with 
-     * members. */
+     * Constructs a new Group object with the id passed, 
+     * and pre-populate it with members. */
     public Group() {
       this.id = nextGroupId++;
       students = new ArrayList<Person>();
@@ -97,7 +89,7 @@ public class Group implements Steppable{
         }
         for(int x = 0; x < initialGroupSize; x++){
           randStudent = people.get(rand.nextInt(people.size()));
-          while(doesGroupContainStudent(randStudent)){
+          while(groupContainsStudent(randStudent)){
             randStudent = people.get(rand.nextInt(people.size()));
           }
           students.add(randStudent);
@@ -110,12 +102,12 @@ public class Group implements Steppable{
         ArrayList<Person> recruits = new ArrayList<Person>();
         Person randStudent;
         if(numPeople>Sim.getNumPeople()){
-          numPeople=Sim.getNumPeople();    //to insure the initial group size 
+          numPeople=Sim.getNumPeople();    //to ensure the initial group size 
           // is never greater than the number of total people
         }
         for(int x = 0; x < numPeople; x++){
           randStudent = people.get(rand.nextInt(people.size()));
-          while(doesGroupContainStudent(randStudent)){
+          while(groupContainsStudent(randStudent)){
             randStudent = people.get(rand.nextInt(people.size()));
           }
           recruits.add(randStudent);
@@ -124,7 +116,7 @@ public class Group implements Steppable{
     }
 
     private void recruitStudent(Person s){
-        if(!doesGroupContainStudent(s)){
+        if(!groupContainsStudent(s)){
 
           //FIX FOR DECIMALS
             double r = (affinityTo(s) + recruitmentFactor + 
@@ -137,7 +129,7 @@ public class Group implements Steppable{
         }
     }
   
-    private boolean doesGroupContainStudent(Person p){
+    private boolean groupContainsStudent(Person p){
         for (int x = 0; x<students.size(); x++){
           if (p.getID()==students.get(x).getID()){
             return true;
@@ -146,9 +138,6 @@ public class Group implements Steppable{
         return false;
     }
   
-//    public boolean equals(Group a){
-//        return (id==a.getID());
-//    }
 
     /**
      * Return a number from 0 to 1 indicating the degree of affinity the
@@ -250,7 +239,6 @@ public class Group implements Steppable{
       if(rand.nextDouble(true,true)<
             LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP && 
             students.size()>MINIMUM_GROUP_SIZE){
-    //    System.out.println("Person " + p.getID() + " has randomly left group " + getID());
         p.leaveGroup(this);
         removeStudent(p);
       }
@@ -270,6 +258,7 @@ public class Group implements Steppable{
      * <p>Note that Groups only step during academic months.</p>
      */
       public void step(SimState state){
+        System.out.println("############### GROUP (" + state.schedule.getTime() + ")");
         influenceMembers();
         ArrayList<Person> recruits = findStudentsToRecruit(Sim.getPeople());
         for(int x = 0; x < recruits.size(); x++){
@@ -300,8 +289,8 @@ public class Group implements Steppable{
       recruitmentFactor=r;
     }
     
-      /** Returns the number of students currently in the group.
-       */
+    /** Returns the number of students currently in the group.
+     */
     public int getSize(){
       return students.size();
     }
@@ -313,11 +302,6 @@ public class Group implements Steppable{
       return recruitmentFactor;
     }
     
-    /* public int getCloseness(){
-      return (tightness+frequency+recruitmentFactor)/3; 
-      //maybe this could be used for leaving the group
-    }*/
-  
 
     private void listMembers(){
       System.out.println("The following students are in group " + id + ":");
