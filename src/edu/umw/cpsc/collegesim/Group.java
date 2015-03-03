@@ -274,7 +274,7 @@ public class Group implements Steppable{
         } else {
           // It's summer break! Sleep for the summer.
           Sim.instance( ).schedule.scheduleOnceIn(
-              Sim.NUM_MONTHS_IN_SUMMER, this);
+              Sim.NUM_MONTHS_IN_SUMMER + 1, this);
         }
     }
   
