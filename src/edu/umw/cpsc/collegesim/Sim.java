@@ -24,8 +24,6 @@ public class Sim extends SimState implements Steppable{
      * between those students. It is undirected. */
     public static Network peopleGraph = new Network(false);
 
-    public static int TRIAL_NUM;
-
     /**
      * A hashtag identifying the current run of the simulation.
      */
@@ -189,7 +187,6 @@ public class Sim extends SimState implements Steppable{
         // Optional values with defaults.
         Person.RACE_WEIGHT = 5;
         Person.PROBABILITY_WHITE = .8;
-        TRIAL_NUM = 1;
         INIT_NUM_PEOPLE = 4000;
         NUM_FRESHMEN_ENROLLING_PER_YEAR = 1000;
         INIT_NUM_GROUPS = 200;
@@ -205,8 +202,6 @@ public class Sim extends SimState implements Steppable{
                 Person.RACE_WEIGHT = Integer.valueOf(args[++i]);
             } else if (args[i].equals("-probWhite")) {
                 Person.PROBABILITY_WHITE = Double.valueOf(args[++i]);
-            } else if (args[i].equals("-trialNum")) {
-                TRIAL_NUM = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-seed")) {
                 SEED = Long.parseLong(args[++i]);
             } else if (args[i].equals("-initNumPeople")) {
@@ -240,7 +235,6 @@ public class Sim extends SimState implements Steppable{
             paramsFile.println("seed="+SEED);
             paramsFile.println("maxTime="+NUM_SIMULATION_YEARS);
             paramsFile.println("simtag="+SIMTAG);
-            paramsFile.println("trialNumber="+TRIAL_NUM);
             paramsFile.println("raceWeight="+Person.RACE_WEIGHT);
             paramsFile.println("initNumPeople="+INIT_NUM_PEOPLE);
             paramsFile.println("numFreshmenPerYear="+
@@ -514,7 +508,8 @@ public class Sim extends SimState implements Steppable{
 
     }
 
-    private static void printUsageAndQuit() {
+    /** (public simply to get it in the JavaDoc.) */
+    public static void printUsageAndQuit() {
         System.err.println(
         "Usage: Sim -maxTime numGenerations     # Integer\n" +
         "  -simtag simulationTag                # Long\n" + 
