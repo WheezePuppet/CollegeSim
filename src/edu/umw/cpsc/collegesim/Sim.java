@@ -514,7 +514,8 @@ public class Sim extends SimState implements Steppable{
 
     }
 
-    private static void printUsageAndQuit() {
+    /** (public simply to get it in the JavaDoc.) */
+    static void printUsageAndQuit() {
         System.err.println(
         "Usage: Sim -maxTime numGenerations     # Integer\n" +
         "  -simtag simulationTag                # Long\n" + 
