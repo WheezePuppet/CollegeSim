@@ -66,6 +66,7 @@ public class Sim extends SimState implements Steppable{
     public static final int NUM_MONTHS_IN_YEAR = NUM_MONTHS_IN_ACADEMIC_YEAR +
         NUM_MONTHS_IN_SUMMER;
     
+    /** The length of the simulation in years, settable via command-line. */
     public static int NUM_SIMULATION_YEARS;
 
 
@@ -323,6 +324,9 @@ public class Sim extends SimState implements Steppable{
                 // append to current file, if exists
                 FoutF = new File(ff);
                 FoutWriter = new BufferedWriter(new FileWriter(FoutF, true));
+                if (Sim.instance().getCurrYearNum() == 0) {
+                    printHeaderToFriendshipsFile(FoutWriter);
+                }
                 for(int x = 0; x<peopleList.size(); x++){
                     peopleList.get(x).printFriendsToFile(FoutWriter);
                 }
@@ -335,6 +339,13 @@ public class Sim extends SimState implements Steppable{
         }
     }
 
+    static void printHeaderToFriendshipsFile(BufferedWriter writer) {
+        try {
+            writer.write("period,id,friendId\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void dumpToDropoutFile(Person p) {
         String f="dropout"+SIMTAG+".csv";
         BufferedWriter outWriter = null;

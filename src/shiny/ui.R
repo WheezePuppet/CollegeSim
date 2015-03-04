@@ -94,6 +94,7 @@ shinyUI(fluidPage(
         tabsetPanel(
             tabPanel("Time series",
                 plotOutput("friendshipsPlot"),
+                plotOutput("interracialRelationshipsPlot"),
                 plotOutput("dropoutPlot")
             )
         )

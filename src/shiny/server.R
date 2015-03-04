@@ -24,6 +24,8 @@ OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.txt")
 
 PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
 
+FRIENDSHIPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","friendshipsSIMTAG.csv")
+
 DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
@@ -57,22 +59,34 @@ shinyServer(function(input,output,session) {
     classes.for.person.output.lines <- 
         c(rep("integer",4),rep("factor",2),"numeric","integer")
 
+    classes.for.friendship.lines <- rep("integer",3)
+
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
     people.stats <- function() {
-ps <<- parse.stats.df(PEOPLE.STATS.FILE)
-        return(parse.stats.df(PEOPLE.STATS.FILE))
+ps <<- parse.stats.df(PEOPLE.STATS.FILE, classes.for.person.output.lines)
+        return(parse.stats.df(PEOPLE.STATS.FILE,
+            classes.for.person.output.lines))
     }
 
 
     # Return a data frame containing the most recent contents of the 
     # DROPOUT.STATS.FILE.
     dropout.stats <- function() {
-dr <<- parse.stats.df(DROPOUT.STATS.FILE)
-        return(parse.stats.df(DROPOUT.STATS.FILE))
+dr <<- parse.stats.df(DROPOUT.STATS.FILE, classes.for.person.output.lines)
+        return(parse.stats.df(DROPOUT.STATS.FILE,
+            classes.for.person.output.lines))
     }
 
-    parse.stats.df <- function(filename.template) {
+    # Return a data frame containing the most recent contents of the 
+    # FRIENDSHIPS.STATS.FILE.
+    friendship.stats <- function() {
+fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
+        return(parse.stats.df(FRIENDSHIPS.STATS.FILE,
+            classes.for.friendship.lines))
+    }
+
+    parse.stats.df <- function(filename.template, classes.list) {
         if (!file.exists(sub("SIMTAG",simtag,filename.template))) {
             return(data.frame())
         }
@@ -80,7 +94,7 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
             # Change the colClasses argument here, if desired, to control the
             # classes used for each of the data columns.
             read.csv(sub("SIMTAG",simtag,filename.template),header=TRUE,
-                colClasses=classes.for.person.output.lines)
+                colClasses=classes.list)
         },error = function(e) return(data.frame())
         )
     }
@@ -236,6 +250,17 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
             dropout.by.race.by.year <- 
                 group_by(dropout.stats.df,period,race) %>%
                 summarize(d.count=n())
+            for (year in 0:(max(dropout.stats.df$period))) {
+                for (race in levels(dropout.by.race.by.year$race)) {
+                    if (nrow(dropout.by.race.by.year[
+                        dropout.by.race.by.year$period == year &
+                        dropout.by.race.by.year$race == race,]) == 0) {
+                        dropout.by.race.by.year <- rbind(
+                            dropout.by.race.by.year, 
+                            data.frame(period=year, race=race, d.count=0))
+                    }
+                }
+            }
             dropout.data <- inner_join(people.by.race.by.year,
                     dropout.by.race.by.year,
                 by=c("period","race")) %>%
@@ -257,6 +282,61 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
         }
     })
 
+    output$interracialRelationshipsPlot <- renderPlot({
+        if (input$runsim < 1) return(NULL)
+        friendships.stats.df <- friendship.stats()
+        people.stats.df <- people.stats()
+        if (nrow(people.stats.df) > 0) {
+            friendships <- inner_join(friendships.stats.df,
+                select(people.stats.df,period,id,race),by=c("period","id"))
+            friendships <- inner_join(friendships,people.stats.df,
+                by=c("period"="period","friendId"="id")) %>%
+                select(period,id,friendId,race.x,race.y)
+
+            # friendships is now this data frame:
+            #  period id friendId race.x race.y
+            #1      0  0       66  WHITE  WHITE
+            #2      0  0       10  WHITE  WHITE
+            #3      0  0        7  WHITE  WHITE
+
+            friendships.by.race <- 
+                group_by(friendships,period,race.x,race.y) %>%
+                dplyr::summarize(numRels=n())
+            class(friendships.by.race) <- "data.frame"
+            minority.with.minority.rels <- 
+                filter(friendships.by.race,race.x=="MINORITY",
+                    race.y=="MINORITY") %>%
+                select(period,mm.rels=numRels)
+            minority.with.white.rels <- 
+                filter(friendships.by.race,race.x=="WHITE",
+                    race.y=="MINORITY") %>%
+                select(period,mw.rels=numRels)
+            rels.df <- 
+                inner_join(minority.with.white.rels, 
+                    minority.with.minority.rels,
+                    by=c("period")) %>%
+                mutate(perc.mm.rels=100*mm.rels/(mm.rels+mw.rels))
+            # "perc.mm.rels" now represents, for each year, the percentage of
+            # total relationships that minorities have (with anybody) that are
+            # with other minorities.
+
+            the.plot <- ggplot(rels.df,
+                aes(x=period,y=perc.mm.rels)) + 
+                geom_line() + 
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                labs(title="Minority segregation",
+                    x="Simulation year",
+                    y="% of minority friendships that are same race")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+
+    })
 
     # Nuke any sims that are still currently running.
     kill.all.sims <- function() {
