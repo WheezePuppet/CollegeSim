@@ -16,7 +16,7 @@ SIM.FILES.BASE.DIR <- "/tmp"
 
 # xCHANGE: The full path of your project directory. Any .java file that appears
 # in this directory hierarchy will be compiled as part of the simulation.
-SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
+SOURCE.DIR <- "/home/stephen/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
@@ -226,7 +226,8 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                 aes(x=period,y=avgFriends,col=race)) + 
                 geom_line() + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
-                                    breaks=0:isolate(input$maxTime)-1) +
+                                    breaks=0:isolate(input$maxTime)-1) + 
+                scale_color_manual(values=c("MINORITY"="red","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Average number of friends by race",
                     x="Simulation year",
@@ -270,6 +271,7 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                 geom_line() + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
+                scale_color_manual(values=c("MINORITY"="red","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Dropout rate",
                     x="Simulation year",
@@ -315,20 +317,30 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                 inner_join(minority.with.white.rels, 
                     minority.with.minority.rels,
                     by=c("period")) %>%
-                mutate(perc.mm.rels=100*mm.rels/(mm.rels+mw.rels))
-            # "perc.mm.rels" now represents, for each year, the percentage of
+                mutate(perc.mw.rels=100*mw.rels/(mm.rels+mw.rels))
+            # "perc.mw.rels" now represents, for each year, the percentage of
             # total relationships that minorities have (with anybody) that are
-            # with other minorities.
+            # with whites.
 
-            the.plot <- ggplot(rels.df,
-                aes(x=period,y=perc.mm.rels)) + 
-                geom_line() + 
+            the.plot <- ggplot(rels.df %>% 
+                    gather(measure, value, mw.rels:perc.mw.rels),
+                aes(x=period, y=value, color=measure)) + 
+                geom_line() +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
+                scale_color_manual(name="",
+                     breaks=c("mm.rels", "mw.rels", "perc.mw.rels"),
+                     labels=c("# min-min fships",
+                        "# min-whi fships", 
+                        "% that are min-min"),
+                    values=c("mm.rels"="red","mw.rels"="blue",
+                        "perc.mw.rels"="black")) +
                 expand_limits(y=0) +
-                labs(title="Minority segregation",
-                    x="Simulation year",
-                    y="% of minority friendships that are same race")
+                geom_hline(yintercept=100,linetype="dotted",color="black") +
+                geom_hline(yintercept=input$probWhite*100,linetype="dashed",
+                    color="blue") +
+                labs(title="Racial composition of minorities' friendships",
+                    x="Simulation year", y="")
             print(the.plot)
         }
         # Recreate this plot in a little bit.

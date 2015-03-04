@@ -11,12 +11,19 @@ shinyUI(fluidPage(
     tags$head(tags$link(rel="stylesheet", type="text/css",
         href="shinysim.css")),
 
-    progressInit(),
+    #progressInit(),
 
     headerPanel(APP.TITLE),
 
     sidebarPanel(
-        h3("Simulation parameters"),
+        h3("Parameters"), 
+            div(id="runsimstuff",
+        flowLayout(
+            numericInput("maxTime","Number of sim years",
+                value=8,min=1,step=1),
+            actionButton("runsim",label="Run sim")
+        )
+            ),
         fluidRow(
 
             # xCHANGE: Insert input widgets for each simulation parameter you
@@ -35,19 +42,16 @@ shinyUI(fluidPage(
 
             hr(),
 
-            radioButtons("seedType",label="",
-                choices=c("Random seed"="rand",
-                    "Specific seed"="specific"),
+            flowLayout(
+            radioButtons("seedType",label="Seed",
+                choices=c("Random"="rand",
+                    "Specific"="specific"),
                 selected="rand",
                 inline=TRUE),
             conditionalPanel(condition="input.seedType == 'specific'",
-                numericInput("seed","Seed",value=0)),
+                numericInput("seed","",value=0))
+),
 
-            # OPTIONAL: Only include this if it makes sense for the user to be
-            # able to tweak the length of the simulation.
-            numericInput("maxTime","Number of sim years",
-                value=8,min=1,step=1),
-            actionButton("runsim",label="Run sim"),
             htmlOutput("log"),
 
             hr(),
@@ -92,9 +96,11 @@ shinyUI(fluidPage(
         # just have two plots (the second of which isn't even set to anything
         # in server.R) as placeholders.
         tabsetPanel(
-            tabPanel("Time series",
+            tabPanel("Friendships",
                 plotOutput("friendshipsPlot"),
-                plotOutput("interracialRelationshipsPlot"),
+                plotOutput("interracialRelationshipsPlot")
+            ),
+            tabPanel("Dropouts",
                 plotOutput("dropoutPlot")
             )
         )
