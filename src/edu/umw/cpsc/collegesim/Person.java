@@ -346,7 +346,7 @@ public class Person implements Steppable {
     //Calculate their similarity rating, and then see if they should become 
     //friends
     similar = similarityTo(personToMeet);
-    friends = areFriends(similar);
+    friends = becomeFriends(similar);
     //if they become friends, add their edge to the network
     //and reset when they met
     if(friends){
@@ -677,7 +677,7 @@ public class Person implements Steppable {
     return similarity;
     }
     
-  private boolean areFriends(double similarity){
+  private boolean becomeFriends(double similarity){
     double acceptProb = 
         FRIENDSHIP_COEFFICIENT * similarity + FRIENDSHIP_INTERCEPT;
     double friendProb = Sim.instance( ).random.nextDouble( );
