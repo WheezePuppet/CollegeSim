@@ -159,7 +159,6 @@ public class Sim extends SimState implements Steppable{
             person.setYear(random.nextInt(4)+1);
             peopleList.add(person);
             peopleGraph.addNode(person);
-//            lastMet.addNode(person);       MORGAN
             schedule.scheduleOnceIn(1.5, person);
         }
 
