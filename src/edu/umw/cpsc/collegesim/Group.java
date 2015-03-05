@@ -32,7 +32,7 @@ public class Group implements Steppable{
     /**
      * The lower bound on the size of a group at any point during its
      * lifespan. */
-    public static final int MINIMUM_GROUP_SIZE = 3;
+    public static final int MINIMUM_GROUP_SIZE = 1;
 
     /**
      * The lower bound on the size of a newly created group. (See {@link
