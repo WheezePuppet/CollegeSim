@@ -159,7 +159,6 @@ public class Sim extends SimState implements Steppable{
             person.setYear(random.nextInt(4)+1);
             peopleList.add(person);
             peopleGraph.addNode(person);
-//            lastMet.addNode(person);       MORGAN
             schedule.scheduleOnceIn(1.5, person);
         }
 
@@ -170,7 +169,7 @@ public class Sim extends SimState implements Steppable{
             schedule.scheduleOnceIn(2.0, group);
         }
 
-        //Schedule this (why?) Platypus
+        //Schedule ourselves to run at start of first academic year.
         schedule.scheduleOnceIn(1.1, this);
 
     }
@@ -192,6 +191,9 @@ public class Sim extends SimState implements Steppable{
         NUM_FRESHMEN_ENROLLING_PER_YEAR = 1000;
         INIT_NUM_GROUPS = 200;
         NUM_NEW_GROUPS_PER_YEAR = 10;
+        Person.NUM_TO_MEET_POP = 5;
+        Person.NUM_TO_MEET_GROUP = 10;
+        Person.DECAY_THRESHOLD = 2;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -220,6 +222,12 @@ public class Sim extends SimState implements Steppable{
                 DROPOUT_RATE = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-dropoutIntercept")) {
                 DROPOUT_INTERCEPT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-numToMeetPop")) {
+                Person.NUM_TO_MEET_POP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numToMeetGroup")) {
+                Person.NUM_TO_MEET_GROUP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-decayThreshold")) {
+                Person.DECAY_THRESHOLD = Integer.parseInt(args[++i]);
             }
         }
 
@@ -463,7 +471,7 @@ public class Sim extends SimState implements Steppable{
                  */
                 System.out.println("End of year: "+getCurrYearNum());
                 ArrayList<Person> toRemove = new ArrayList<Person>();
-                ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
+                // ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
 
                 dumpToFiles();
                 if(!isEndOfSim()) {
@@ -486,6 +494,8 @@ public class Sim extends SimState implements Steppable{
                             }
                         }
                     }
+/*
+ * Nuke groups randomly...do we want to do this?
                     for(int x = 0; x<allGroups.size(); x++){
                         if(random.nextDouble(true, true)>.75){
                             toRemoveGroups.add(allGroups.get(x));
@@ -495,13 +505,14 @@ public class Sim extends SimState implements Steppable{
                         toRemoveGroups.get(x).removeEveryoneFromGroup();
                         allGroups.remove(toRemoveGroups.get(x));
                     }
+*/
                     for(int x = 0; x<toRemove.size(); x++){
                         //Let the person leave their groups
                         toRemove.get(x).leaveUniversity();
                         peopleList.remove(toRemove.get(x));
                         peopleGraph.removeNode(toRemove.get(x));
                     }
-                    toRemoveGroups.clear();
+                    // toRemoveGroups.clear();
                     toRemove.clear();
                 }
                 /*
@@ -534,6 +545,9 @@ public class Sim extends SimState implements Steppable{
         "  [-driftRate probChangeAttribute]     # Double; default .1\n" +
         "  [-dropoutRate rate]                  # Double; default .01\n" +
         "  [-dropoutIntercept intercept]        # Double; default .05\n" +
+        "  [-numToMeetPop num]                  # Integer; default 5\n" +
+        "  [-numToMeetGroup num]                # Integer; default 10\n" +
+        "  [-decayThreshold numMonthsStayAlive] # Integer; default 2\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

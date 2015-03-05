@@ -84,24 +84,28 @@ public class Person implements Steppable {
      * groups that person will encounter. Note that this number is only
      * unidirectional; <i>i.e.</i>, this person may well "be met by" 
      * numerous other people when their step() methods run. */
-    public static final int NUM_TO_MEET_GROUP = 10;
+    public static int NUM_TO_MEET_GROUP;
 
     /** Each time step (= 1 month), how many other people from the overall
      * student body a person will encounter. Note that this number is only
      * unidirectional; <i>i.e.</i>, this person may well "be met by" 
      * numerous other people when their step() methods run. */
-    public static final int NUM_TO_MEET_POP = 5;
+    public static int NUM_TO_MEET_POP;
 
-    
+    /** The number of consecutive months that two friends can <i>not</i>
+     * tickle each other and yet remain friends. */
+    public static int DECAY_THRESHOLD;
 
     // Hand out consecutive unique numbers to new people.
     private static int nextPersonId = 0;
     private int id;
 
     private int year;
+/*
+ *  Take out extroversion for now. Everyone is at .5.
     private Normal extroversionDistro = 
         new Normal(.5, .15, Sim.instance( ).random);
-    private static final int DECAY_THRESHOLD = 2;
+*/
     
     private Race race;
     private Gender gender;
@@ -253,7 +257,6 @@ public class Person implements Steppable {
                   j = bOut.size( );
                 }
               }
-              //Platypus
               //Do we have to do this? Remove the edge in and the edge out?
               Sim.peopleGraph.removeEdge(toRemoveIn);
               Sim.peopleGraph.removeEdge(toRemoveOut);
@@ -327,7 +330,9 @@ public class Person implements Steppable {
         }else{
             gender = Gender.MALE;
         }
-        extroversion = extroversionDistro.nextDouble();
+        //extroversion = extroversionDistro.nextDouble();
+        //Take out extroversion for now.
+        extroversion = .5;
     }
   
   /**
@@ -363,12 +368,11 @@ public class Person implements Steppable {
   }
   
   /**
- * THIS COMMENT IS INSANELY OUT OF DATE
-   * Make this person encounter the person passed as an argument, who may
-   * or may not already be friends with them. If they are not already
-   * friends, they have a chance to become so, and may be by the time this
-   * method returns. If they <i>are</i> already friends, their friendship
-   * will be "tickled" (refreshed). */
+   * Make this person encounter some number of other people from the given pool.
+	* Note that the pool could be group membership, the entire campus, and so on.
+	* Choose a person from the pool at random. If the two are already friends,
+	* tickle the friendship. Otherwise, meet this person. Do this until we have
+	* encountered the appropriate number of friends.*/
   private void encounter(int number, Bag pool){
     if(pool.size( ) < number){
       number = pool.size( );
@@ -705,7 +709,6 @@ public class Person implements Steppable {
 	  int numFriends = bIn.size( );
 	  //Find the percent of the population with which this person is friends
 	  //int totalPeople = Sim.getNumPeople( );
-	  //Platypus
 	  double requiredNumFriends = 3.0;
 	  double percFriends = numFriends / requiredNumFriends;
 	  //As extroversion increases, the likelihood to feel alienated increases

@@ -2,7 +2,6 @@
 library(shiny)
 library(shinyIncubator)
 
-# CHANGE: The title of your simulation webapp.
 APP.TITLE <- "CollegeSim"
 
 
@@ -26,9 +25,6 @@ shinyUI(fluidPage(
             ),
         fluidRow(
 
-            # xCHANGE: Insert input widgets for each simulation parameter you
-            # want to be able to change through the Web UI. "Numeric
-            # multiplier" is a sample.
             sliderInput("raceWeight",
                 label="Race weight (in # of equivalent attributes)",value=400,
                 min=0,max=500),
@@ -38,7 +34,15 @@ shinyUI(fluidPage(
             sliderInput("driftRate",
                 label="Drift rate (prob of changing attribute)",
                 value=.0, min=0,max=1,step=0.05),
-            HTML("<div class=morgan>decay rate (Morgan?)</div>"),
+            sliderInput("decayThreshold",
+                label="Decay threshold (num months before friends must tickle)",
+                value=2, min=0,max=12,step=1),
+            sliderInput("numToMeetPop",
+                label="Number of random people encountered monthly",
+                value=5, min=0,max=25,step=1),
+            sliderInput("numToMeetGroup",
+                label="Number of group members encountered monthly",
+                value=10, min=0,max=25,step=1),
 
             hr(),
 
@@ -92,9 +96,6 @@ shinyUI(fluidPage(
     ),
 
     mainPanel(
-        # CHANGE: Insert output widgets for each type of analysis. Here we
-        # just have two plots (the second of which isn't even set to anything
-        # in server.R) as placeholders.
         tabsetPanel(
             tabPanel("Friendships",
                 plotOutput("friendshipsPlot"),

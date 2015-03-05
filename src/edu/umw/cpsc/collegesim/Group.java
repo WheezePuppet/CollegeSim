@@ -142,16 +142,32 @@ public class Group implements Steppable{
      * Return a number from 0 to 1 indicating the degree of affinity the
      *   Person passed has to the existing members of this group.
      */
-    public double affinityTo(Person p) {
-        if(getSize()>0){
-              double temp=0;
-              for(int x = 0; x<students.size(); x++){
-                temp = p.similarityTo(students.get(x));
-              }
-              return temp/students.size();
-        }else{
-          return .5;
-        }
+     
+     public double affinityTo(Person p){
+         if(getSize( ) > 0){
+             double temp = 0;
+             for(int x = 0; x < students.size( ); x++){
+                 Person q = students.get(x);
+                 if(q.getID( ) != p.getID( )){
+                     temp = temp + p.similarityTo(q);
+                 }
+             }
+             return temp / students.size( );
+         }else{
+             return 0.5;
+         }
+     }
+     
+    //public double affinityTo(Person p) {
+    //    if(getSize()>0){
+    //          double temp=0;
+    //          for(int x = 0; x<students.size(); x++){
+    //            temp = p.similarityTo(students.get(x));
+    //          }
+    //          return temp/students.size();
+    //    }else{
+    //      return .5;
+    //    }
 
         // write this maddie
         // ideas:
@@ -166,28 +182,29 @@ public class Group implements Steppable{
         //
         // question: what to return from this method if the group is empty?
         // .5?
-    }
+    //}
 
-   	private void influenceMembers(){
-      if(students.size()>0){
+   	private void influenceMembers( ){
+   	    //should we add something short for if n=1 or just let it go through
+   	    //the loop even though that's kind of a waste
+   	    int n = students.size( );
+      if(n > 0){
     	ArrayList<Double> independentAverage = new ArrayList<Double>();
     	ArrayList<Double> dependentAverage = new ArrayList<Double>();
       	double tempTotal;
-      	for (int x = 0; x<students.get(0).getIndependentAttributes().size(); 
-                x++){    
+      	for (int x = 0; x < students.get(0).getIndependentAttributes( ).size( ); x++){    
         	tempTotal=0;
-        	for (int y = 0; y<students.size(); y++){
-          		tempTotal+=students.get(y).getIndependentAttributes().get(x);
+        	for (int y = 0; y < n; y++){
+          		tempTotal+=students.get(y).getIndependentAttributes( ).get(x);
         	}
-        	independentAverage.add(tempTotal/students.size());
+        	independentAverage.add(tempTotal/n);
       	}
-      	for (int x = 0; x<students.get(0).getDependentAttributes().size(); 
-                x++){
+      	for (int x = 0; x < students.get(0).getDependentAttributes( ).size( ); x++){
         	tempTotal=0;
-        	for (int y = 0; y<students.size(); y++){
+        	for (int y = 0; y < n; y++){
           		tempTotal+=students.get(y).getDependentAttributes().get(x);
         	}
-        	dependentAverage.add(tempTotal/students.size());
+        	dependentAverage.add(tempTotal/n);
       	}
 
         //At this point, both independentAverage and dependentAverage are
@@ -204,28 +221,24 @@ public class Group implements Steppable{
       	double distanceD;  //distance between current person's current 
         // dependent attribute and group's average attribute
       	double increment; //how much each attribute will increment by
-      	for(int x = 0; x<students.size(); x++){
-        	for (int y = 0; y<independentAverage.size(); y++){
-          		distanceI = independentAverage.get(y) - 
-                    students.get(x).getIndependentAttributes().get(y);
-          		distanceD = dependentAverage.get(y) - 
-                    students.get(x).getDependentAttributes().get(y);
-          		if(Sim.instance().random.nextDouble(true,true)<
-                    LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE && distanceI>0){
-            		increment = (Sim.instance().random.nextDouble(true,true)/52)*distanceI; 
+      	for(int x = 0; x < n; x++){
+        	for (int y = 0; y < independentAverage.size( ); y++){
+          		distanceI = independentAverage.get(y) - students.get(x).getIndependentAttributes().get(y);
+          		distanceD = dependentAverage.get(y) - students.get(x).getDependentAttributes().get(y);
+          		if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE
+          		        && distanceI > 0){
+            		increment = (Sim.instance( ).random.nextDouble(true,true)/52) * distanceI; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
                     //the group's average
-            		students.get(x).setIndAttrValue(y, 
-                        (students.get(x).getIndependentAttributes().get(y)) +
+            		students.get(x).setIndAttrValue(y, (students.get(x).getIndependentAttributes().get(y)) +
                         increment);
           		}  
 
-          		if(Sim.instance().random.nextDouble(true,true)<
-                    LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE && distanceD>0){  
-            		increment = (Sim.instance().random.nextDouble(true, true)/5)*distanceD;
-            		students.get(x).setDepAttrValue(y, 
-                        (students.get(x).getDependentAttributes().get(y)) +
+          		if(Sim.instance().random.nextDouble(true,true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE
+          		        && distanceD > 0){  
+            		increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceD;
+            		students.get(x).setDepAttrValue(y,(students.get(x).getDependentAttributes().get(y)) +
                         increment);  //Morgan's method
           		}
         	}
