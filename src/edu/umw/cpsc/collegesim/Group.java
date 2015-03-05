@@ -147,7 +147,7 @@ public class Group implements Steppable{
          if(getSize( ) > 0){
              double temp = 0;
              for(int x = 0; x < students.size( ); x++){
-                 q = students.get(x);
+                 Person q = students.get(x);
                  if(q.getID( ) != p.getID( )){
                      temp = temp + p.similarityTo(q);
                  }
@@ -187,7 +187,7 @@ public class Group implements Steppable{
    	private void influenceMembers( ){
    	    //should we add something short for if n=1 or just let it go through
    	    //the loop even though that's kind of a waste
-   	    int n = students.size( )
+   	    int n = students.size( );
       if(n > 0){
     	ArrayList<Double> independentAverage = new ArrayList<Double>();
     	ArrayList<Double> dependentAverage = new ArrayList<Double>();
