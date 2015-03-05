@@ -462,7 +462,7 @@ public class Sim extends SimState implements Steppable{
                  */
                 System.out.println("End of year: "+getCurrYearNum());
                 ArrayList<Person> toRemove = new ArrayList<Person>();
-                ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
+                // ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
 
                 dumpToFiles();
                 if(!isEndOfSim()) {
@@ -485,6 +485,8 @@ public class Sim extends SimState implements Steppable{
                             }
                         }
                     }
+/*
+ * Nuke groups randomly...do we want to do this?
                     for(int x = 0; x<allGroups.size(); x++){
                         if(random.nextDouble(true, true)>.75){
                             toRemoveGroups.add(allGroups.get(x));
@@ -494,13 +496,14 @@ public class Sim extends SimState implements Steppable{
                         toRemoveGroups.get(x).removeEveryoneFromGroup();
                         allGroups.remove(toRemoveGroups.get(x));
                     }
+*/
                     for(int x = 0; x<toRemove.size(); x++){
                         //Let the person leave their groups
                         toRemove.get(x).leaveUniversity();
                         peopleList.remove(toRemove.get(x));
                         peopleGraph.removeNode(toRemove.get(x));
                     }
-                    toRemoveGroups.clear();
+                    // toRemoveGroups.clear();
                     toRemove.clear();
                 }
                 /*
