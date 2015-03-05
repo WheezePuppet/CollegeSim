@@ -47,7 +47,7 @@ public class Person implements Steppable {
      * gender as you, this will impact your perceived similarity to them
      * (and theirs to you) to the same degree that four of your individual
      * attributes being the same would. */   
-    public static final double GEN_WEIGHT = 1;
+    public static final double GEN_WEIGHT = 0;
 
     /** The relative importance of "constant" attributes, with respect to
      * other types of attributes. ("Constant" attributes are those that are
