@@ -84,13 +84,13 @@ public class Person implements Steppable {
      * groups that person will encounter. Note that this number is only
      * unidirectional; <i>i.e.</i>, this person may well "be met by" 
      * numerous other people when their step() methods run. */
-    public static final int NUM_TO_MEET_GROUP = 10;
+    public static int NUM_TO_MEET_GROUP;
 
     /** Each time step (= 1 month), how many other people from the overall
      * student body a person will encounter. Note that this number is only
      * unidirectional; <i>i.e.</i>, this person may well "be met by" 
      * numerous other people when their step() methods run. */
-    public static final int NUM_TO_MEET_POP = 5;
+    public static int NUM_TO_MEET_POP;
 
     
 

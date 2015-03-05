@@ -205,6 +205,8 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                 "-driftRate",input$driftRate,
                 "-dropoutRate",input$dropoutRate,
                 "-dropoutIntercept",input$dropoutIntercept,
+                "-numToMeetPop",input$numToMeetPop,
+                "-numToMeetGroup",input$numToMeetGroup,
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),

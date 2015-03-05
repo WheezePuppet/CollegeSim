@@ -191,6 +191,8 @@ public class Sim extends SimState implements Steppable{
         NUM_FRESHMEN_ENROLLING_PER_YEAR = 1000;
         INIT_NUM_GROUPS = 200;
         NUM_NEW_GROUPS_PER_YEAR = 10;
+        Person.NUM_TO_MEET_POP = 5;
+        Person.NUM_TO_MEET_GROUP = 10;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -219,6 +221,10 @@ public class Sim extends SimState implements Steppable{
                 DROPOUT_RATE = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-dropoutIntercept")) {
                 DROPOUT_INTERCEPT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-numToMeetPop")) {
+                Person.NUM_TO_MEET_POP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numToMeetGroup")) {
+                Person.NUM_TO_MEET_GROUP = Integer.parseInt(args[++i]);
             }
         }
 
@@ -536,6 +542,8 @@ public class Sim extends SimState implements Steppable{
         "  [-driftRate probChangeAttribute]     # Double; default .1\n" +
         "  [-dropoutRate rate]                  # Double; default .01\n" +
         "  [-dropoutIntercept intercept]        # Double; default .05\n" +
+        "  [-numToMeetPop num]                  # Integer; default 5\n" +
+        "  [-numToMeetGroup num]                # Integer; default 10\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }
