@@ -15,6 +15,37 @@ import sim.field.network.*;
 
 /**
  * A student in the CollegeSim model.
+ * <p/>
+ * Purpose in life:
+ * <ul>
+ * <li>Maintain a list of attributes, including constant, independent,
+ * dependent, and race. (In the case of dependent attributes, which
+ * auto-normalize, this is non-trivial.)</li>
+ * <li>Every month, <b>encounter</b> some people who are members of your
+ * groups, and some totally random people. Encounter means:
+ *      <ul>
+ *      <li>If you're friends with them, <b>tickle</b> (refresh).</li>
+ *      <li>If you're not friends with them, <b>meet</b> them. Meet means:
+ *          <ol>
+ *          <li>Compute their <b>similarity</b>, on a scale of 0 to 1. This
+ *          involves constant, independent, dependent, and race attributes,
+ *          all weighted differently.</li> 
+ *          <li>Based on the similarity, determine whether they become
+ *          friends. (This is random, but based in part on {@link
+ *          #FRIENDSHIP_COEFFICIENT} and {@link #FRIENDSHIP_INTERCEPT}.)</li>
+ *          </ol>
+ *      </li>
+ *      </ul>
+ * </li>
+ * <li>Every month, decay friendships. Any friend who has not tickled / been
+ * tickled since {@link #DECAY_THRESHOLD} becomes a non-friend.</li>
+ * <li>This class can also compute how alienated the person feels based on her
+ * number of friends (and your extroversion, currently constant). This is used
+ * by {@link Sim} to drop students out.</li>
+ * <li>This class has various group-related functions, like
+ * <code>joinGroup()</code>, <code>isStudentInGroup()</code>, and
+ * <code>leaveGroup()</code>.</li>
+ * </ul>
  */
 public class Person implements Steppable {
 
@@ -188,7 +219,8 @@ public class Person implements Steppable {
 
 
 
-    /** Removes this student from the university, forcing them to leave all groups. */
+    /** Removes this student from the university, forcing them to leave all 
+     * groups. */
     public void leaveUniversity( ){
     	//This removes this person from all of their groups
     	for(int i=0; i<groups.size( ); i++){
@@ -368,11 +400,11 @@ public class Person implements Steppable {
   }
   
   /**
-   * Make this person encounter some number of other people from the given pool.
-	* Note that the pool could be group membership, the entire campus, and so on.
-	* Choose a person from the pool at random. If the two are already friends,
-	* tickle the friendship. Otherwise, meet this person. Do this until we have
-	* encountered the appropriate number of friends.*/
+   * Make this person encounter some number of other people from the given
+   * pool. Note that the pool could be group membership, the entire campus,
+   * and so on. Choose a person from the pool at random. If the two are
+   * already friends, tickle the friendship. Otherwise, meet this person. Do
+   * this until we have encountered the appropriate number of friends.*/
   private void encounter(int number, Bag pool){
     if(pool.size( ) < number){
       number = pool.size( );
@@ -380,7 +412,8 @@ public class Person implements Steppable {
     for(int i=0; i<number; i++){
       Person personToMeet;
       do{
-        personToMeet = (Person) pool.get(Sim.instance( ).random.nextInt(pool.size( )));
+        personToMeet = (Person) 
+            pool.get(Sim.instance( ).random.nextInt(pool.size( )));
       }while(personToMeet.id == id);
       if(friendsWith(personToMeet)){
         tickle(personToMeet);
@@ -762,29 +795,11 @@ public class Person implements Steppable {
     attributesK3.set(index, newNonNormalVal);
   }
 
-//  public ArrayList<Person> getPeopleInGroups( ){
-//    ArrayList<Person> groupmates = new ArrayList<Person>();
-//    boolean addPerson;
-//    for(int x = 0; x < groups.size(); x++){
-//      for(int y = 0; y < groups.get(x).getSize(); y++){
-//        addPerson = true;
-//        for(int z = 0; z < groupmates.size(); z++){
-//          if (groups.get(x).getPersonAtIndex(y).equals(groupmates.get(z))){
-//            addPerson = false;
-//          }
-//        }
-//        if(addPerson&&!(groups.get(x).getPersonAtIndex(y).equals(this))){
-//          groupmates.add(groups.get(x).getPersonAtIndex(y));
-//        }
-//      }
-//    }
-//    return groupmates;
-//  }
-  
-  /**
-   * FIX: Is this essentially just "get a bag of all the people who are in
-   * one or more of this person's groups"? */
 
+    /**
+     * Returns the union of all the students who are in at least one of
+     * this student's groups.
+     */
   public Bag getPeopleInGroups( ){
     boolean repeat = false;
     Bag groupmates = new Bag();
@@ -804,34 +819,6 @@ public class Person implements Steppable {
     return groupmates;
   }
 
-  /*
-  public Bag getPeopleInGroups( ){
-    Bag groupmates = new Bag();
-    boolean addPerson;
-    boolean first = true;
-    for(int x = 0; x < groups.size( ); x++){
-      for(int y = 0; y < groups.get(x).getSize(); y++){
-        addPerson = true;
-        Person personToAdd = groups.get(x).getPersonAtIndex(y);
-        if(first){
-          if(!personToAdd.equals(this)){
-            groupmates.add(personToAdd);
-          }
-        }else{
-          for(int z = 0; z < groupmates.size(); z++){
-            if(personToAdd.equals(groupmates.get(z))){
-              addPerson = false;
-            }
-          }
-          if(addPerson && !(groups.get(x).getPersonAtIndex(y).equals(this))){
-            groupmates.add(groups.get(x).getPersonAtIndex(y));
-          }
-        }
-      }
-    }
-    return groupmates;
-  }
-*/
     /** Marks this Person as no longer being a member of the Group passed.
      * Should <i>not</i> be called in isolation, else the Group object will
      * still think the Person is a member! See {@link

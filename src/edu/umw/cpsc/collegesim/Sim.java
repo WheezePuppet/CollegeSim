@@ -11,7 +11,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-/** The top-level singleton simulation class, with main(). */
+/** The top-level singleton simulation class, with main(). 
+ * <p/>
+ * Purpose in life:
+ * <ol>
+ * <li>At start of simulation, create {@link #INIT_NUM_PEOPLE} people and
+ * {@link #INIT_NUM_GROUPS} groups. Schedule them all to run, and
+ * ourselves.</li>
+ * <li>Each August, increment everyone's year, enroll the new freshman class,
+ * create new groups, and schedule all these.</li>
+ * <li>Each May, dump year-end statistics, graduate and/or dropout students
+ * (based on their alienation). (And remove random groups?).</li>
+ * </ol>
+ */
 public class Sim extends SimState implements Steppable{
 
     /** 

@@ -10,6 +10,22 @@ import sim.util.Bag;
 /**
  * A group of students in the CollegeSim model, perhaps representing a
  * campus club, orientation group, dorm room floor, or group of friends.
+ * <p/>
+ * Purpose in life:
+ * <ul>
+ * <li>Upon creation, populates with random students.</li>
+ * <li>Every month, influences each of its members, using {@link
+ * #LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE}, among other things. Each
+ * student can have any of his/her attributes drift some amount towards the
+ * mean of that attribute for other students in that group, or not.</li>
+ * <li>Every month, randomly selects students to <b>recruit</b> to the group.
+ * Students who are already members are simply ignored. Those who are not will
+ * join with a probability related to their <b>affinity</b> to the group.</li>
+ * <li>Every month, allow students to leave the group. This depends on {@link
+ * #LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP}, but will also not allow the group
+ * size to drift below the {@link #MINIMUM_GROUP_SIZE}. <i>(but Morgan doesn't
+ * like this)</i></li>
+ * </ul>
  */
 public class Group implements Steppable{
 
@@ -157,32 +173,6 @@ public class Group implements Steppable{
              return 0.5;
          }
      }
-     
-    //public double affinityTo(Person p) {
-    //    if(getSize()>0){
-    //          double temp=0;
-    //          for(int x = 0; x<students.size(); x++){
-    //            temp = p.similarityTo(students.get(x));
-    //          }
-    //          return temp/students.size();
-    //    }else{
-    //      return .5;
-    //    }
-
-        // write this maddie
-        // ideas:
-        //    for each of the person's attributes, find the avg number of
-        //    group members (with that attribute, and then take the avg of
-        //    those averages.
-        //  Ex: The group has persons F, T, Q. The Person in question is
-        //  person A. Person A has three attributes: 1, 4, and 5. Attribute
-        //  1 is owned by F and T. Attribute 4 is owned by F, T, and Q.
-        //  Attribute 5 is owned by no one in the group. So, the affinity
-        //  for Person A to this group is (2/3 + 3/3 + 0/3)/3 = 5/3/3
-        //
-        // question: what to return from this method if the group is empty?
-        // .5?
-    //}
 
    	private void influenceMembers( ){
    	    //should we add something short for if n=1 or just let it go through
