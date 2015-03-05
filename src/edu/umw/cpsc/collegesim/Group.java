@@ -215,8 +215,7 @@ public class Group implements Steppable{
         	for (int y = 0; y < independentAverage.size( ); y++){
           		distanceI = independentAverage.get(y) - students.get(x).getIndependentAttributes().get(y);
           		distanceD = dependentAverage.get(y) - students.get(x).getDependentAttributes().get(y);
-          		if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE
-          		        && distanceI > 0){
+          		if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
             		increment = (Sim.instance( ).random.nextDouble(true,true)/52) * distanceI; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
@@ -225,8 +224,7 @@ public class Group implements Steppable{
                         increment);
           		}  
 
-          		if(Sim.instance().random.nextDouble(true,true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE
-          		        && distanceD > 0){  
+          		if(Sim.instance().random.nextDouble(true,true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){  
             		increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceD;
             		students.get(x).setDepAttrValue(y,(students.get(x).getDependentAttributes().get(y)) +
                         increment);  //Morgan's method
