@@ -253,7 +253,6 @@ public class Person implements Steppable {
                   j = bOut.size( );
                 }
               }
-              //Platypus
               //Do we have to do this? Remove the edge in and the edge out?
               Sim.peopleGraph.removeEdge(toRemoveIn);
               Sim.peopleGraph.removeEdge(toRemoveOut);
@@ -705,7 +704,6 @@ public class Person implements Steppable {
 	  int numFriends = bIn.size( );
 	  //Find the percent of the population with which this person is friends
 	  //int totalPeople = Sim.getNumPeople( );
-	  //Platypus
 	  double requiredNumFriends = 3.0;
 	  double percFriends = numFriends / requiredNumFriends;
 	  //As extroversion increases, the likelihood to feel alienated increases

@@ -169,7 +169,7 @@ public class Sim extends SimState implements Steppable{
             schedule.scheduleOnceIn(2.0, group);
         }
 
-        //Schedule this (why?) Platypus
+        //Schedule ourselves to run at start of first academic year.
         schedule.scheduleOnceIn(1.1, this);
 
     }
