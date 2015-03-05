@@ -16,7 +16,7 @@ SIM.FILES.BASE.DIR <- "/tmp"
 
 # xCHANGE: The full path of your project directory. Any .java file that appears
 # in this directory hierarchy will be compiled as part of the simulation.
-SOURCE.DIR <- "/home/stephen/CollegeSim"
+SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
@@ -332,7 +332,7 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                      breaks=c("mm.rels", "mw.rels", "perc.mw.rels"),
                      labels=c("# min-min fships",
                         "# min-whi fships", 
-                        "% that are min-min"),
+                        "% that are min-whi"),
                     values=c("mm.rels"="red","mw.rels"="blue",
                         "perc.mw.rels"="black")) +
                 expand_limits(y=0) +
