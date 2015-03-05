@@ -7,6 +7,7 @@
 #
 library(shiny)
 library(shinyIncubator)
+library(tidyr)
 library(dplyr)
 library(ggplot2)
 
