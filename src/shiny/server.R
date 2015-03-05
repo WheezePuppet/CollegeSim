@@ -14,8 +14,6 @@ library(ggplot2)
 # -------------------------------- Constants ---------------------------------
 SIM.FILES.BASE.DIR <- "/tmp"
 
-# xCHANGE: The full path of your project directory. Any .java file that appears
-# in this directory hierarchy will be compiled as part of the simulation.
 SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
@@ -30,17 +28,12 @@ DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
 
-# xCHANGE: The package/classname of the main() Java class in your sim.
 SIM.CLASS.NAME <- "edu.umw.cpsc.collegesim.Sim"
 
 JAVA.RUN.TIME.OPTIONS <- ""
 
-# OPTIONAL: The rate (number of milliseconds between refreshes) at which the
-# web app will read the simulator's output file for progress to update plots
-# and such.
 REFRESH.PERIOD.MILLIS <- 500
 
-# OPTIONAL: Any Java libraries needed by the simulation.
 LIBS <- c("mason.17.jar")
 
 CLASSPATH <- paste(
@@ -207,6 +200,7 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                 "-dropoutIntercept",input$dropoutIntercept,
                 "-numToMeetPop",input$numToMeetPop,
                 "-numToMeetGroup",input$numToMeetGroup,
+                "-decayThreshold",input$decayThreshold,
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),
@@ -215,8 +209,6 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
     }
 
 
-    # CHANGE: put any graphics commands to produce a visual analysis of the
-    # simulation's output here.
     output$friendshipsPlot <- renderPlot({
         if (input$runsim < 1) return(NULL)
         people.stats.df <- people.stats()

@@ -92,7 +92,9 @@ public class Person implements Steppable {
      * numerous other people when their step() methods run. */
     public static int NUM_TO_MEET_POP;
 
-    
+    /** The number of consecutive months that two friends can <i>not</i>
+     * tickle each other and yet remain friends. */
+    public static int DECAY_THRESHOLD;
 
     // Hand out consecutive unique numbers to new people.
     private static int nextPersonId = 0;
@@ -104,7 +106,6 @@ public class Person implements Steppable {
     private Normal extroversionDistro = 
         new Normal(.5, .15, Sim.instance( ).random);
 */
-    private static final int DECAY_THRESHOLD = 2;
     
     private Race race;
     private Gender gender;

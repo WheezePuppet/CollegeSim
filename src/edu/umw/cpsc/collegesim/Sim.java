@@ -193,6 +193,7 @@ public class Sim extends SimState implements Steppable{
         NUM_NEW_GROUPS_PER_YEAR = 10;
         Person.NUM_TO_MEET_POP = 5;
         Person.NUM_TO_MEET_GROUP = 10;
+        Person.DECAY_THRESHOLD = 2;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -225,6 +226,8 @@ public class Sim extends SimState implements Steppable{
                 Person.NUM_TO_MEET_POP = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numToMeetGroup")) {
                 Person.NUM_TO_MEET_GROUP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-decayThreshold")) {
+                Person.DECAY_THRESHOLD = Integer.parseInt(args[++i]);
             }
         }
 
@@ -544,6 +547,7 @@ public class Sim extends SimState implements Steppable{
         "  [-dropoutIntercept intercept]        # Double; default .05\n" +
         "  [-numToMeetPop num]                  # Integer; default 5\n" +
         "  [-numToMeetGroup num]                # Integer; default 10\n" +
+        "  [-decayThreshold numMonthsStayAlive] # Integer; default 2\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }
