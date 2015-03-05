@@ -99,8 +99,11 @@ public class Person implements Steppable {
     private int id;
 
     private int year;
+/*
+ *  Take out extroversion for now. Everyone is at .5.
     private Normal extroversionDistro = 
         new Normal(.5, .15, Sim.instance( ).random);
+*/
     private static final int DECAY_THRESHOLD = 2;
     
     private Race race;
@@ -326,7 +329,9 @@ public class Person implements Steppable {
         }else{
             gender = Gender.MALE;
         }
-        extroversion = extroversionDistro.nextDouble();
+        //extroversion = extroversionDistro.nextDouble();
+        //Take out extroversion for now.
+        extroversion = .5;
     }
   
   /**
