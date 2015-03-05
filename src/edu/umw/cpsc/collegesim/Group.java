@@ -142,16 +142,32 @@ public class Group implements Steppable{
      * Return a number from 0 to 1 indicating the degree of affinity the
      *   Person passed has to the existing members of this group.
      */
-    public double affinityTo(Person p) {
-        if(getSize()>0){
-              double temp=0;
-              for(int x = 0; x<students.size(); x++){
-                temp = p.similarityTo(students.get(x));
-              }
-              return temp/students.size();
-        }else{
-          return .5;
-        }
+     
+     public double affinityTo(Person p){
+         if(getSize( ) > 0){
+             double temp = 0;
+             for(int x = 0; x < students.size( ); x++){
+                 q = students.get(x);
+                 if(q.getID( ) != p.getID( )){
+                     temp = temp + p.similarityTo(q);
+                 }
+             }
+             return temp / students.size( );
+         }else{
+             return 0.5;
+         }
+     }
+     
+    //public double affinityTo(Person p) {
+    //    if(getSize()>0){
+    //          double temp=0;
+    //          for(int x = 0; x<students.size(); x++){
+    //            temp = p.similarityTo(students.get(x));
+    //          }
+    //          return temp/students.size();
+    //    }else{
+    //      return .5;
+    //    }
 
         // write this maddie
         // ideas:
@@ -166,7 +182,7 @@ public class Group implements Steppable{
         //
         // question: what to return from this method if the group is empty?
         // .5?
-    }
+    //}
 
    	private void influenceMembers(){
       if(students.size()>0){
