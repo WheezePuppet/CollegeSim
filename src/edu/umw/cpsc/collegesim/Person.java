@@ -368,12 +368,11 @@ public class Person implements Steppable {
   }
   
   /**
- * THIS COMMENT IS INSANELY OUT OF DATE
-   * Make this person encounter the person passed as an argument, who may
-   * or may not already be friends with them. If they are not already
-   * friends, they have a chance to become so, and may be by the time this
-   * method returns. If they <i>are</i> already friends, their friendship
-   * will be "tickled" (refreshed). */
+   * Make this person encounter some number of other people from the given pool.
+	* Note that the pool could be group membership, the entire campus, and so on.
+	* Choose a person from the pool at random. If the two are already friends,
+	* tickle the friendship. Otherwise, meet this person. Do this until we have
+	* encountered the appropriate number of friends.*/
   private void encounter(int number, Bag pool){
     if(pool.size( ) < number){
       number = pool.size( );
