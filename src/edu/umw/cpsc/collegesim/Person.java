@@ -1,6 +1,8 @@
 package edu.umw.cpsc.collegesim;
 import java.io.IOException;
 import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -15,7 +17,7 @@ import sim.field.network.*;
 
 /**
  * A student in the CollegeSim model.
- * <p/>
+ * <p></p>
  * Purpose in life:
  * <ul>
  * <li>Maintain a list of attributes, including constant, independent,
@@ -255,6 +257,10 @@ public class Person implements Steppable {
             double val = lastTickleTime.get(friendID);
             //if the people last met longer than the threshold ago
             if(Sim.instance().schedule.getTime() - val >= DECAY_THRESHOLD){
+                Sim.instance().encounterWriter.println(
+                    Sim.instance().getCurrYearNum()+","+id+","+friendID+
+                        ",decay");
+                Sim.instance().encounterWriter.flush();
               //Get a bag of all the edges into this person
               Bag bIn = Sim.peopleGraph.getEdgesIn(this);
               //for each of these edges
@@ -385,14 +391,26 @@ public class Person implements Steppable {
         Sim.peopleGraph.addEdge(this, personToMeet, 1);
         refreshLastTickleTime(personToMeetID);
         personToMeet.refreshLastTickleTime(id);
+        Sim.instance().encounterWriter.println(
+            Sim.instance().getCurrYearNum()+","+id+","+personToMeet.id+
+                ",meetFriends");
+    } else {
+        Sim.instance().encounterWriter.println(
+            Sim.instance().getCurrYearNum()+","+id+","+personToMeet.id+
+                ",meetNoFriends");
     }
+    Sim.instance().encounterWriter.flush();
   }
-  
+
   /**
    * Make this person "tickle" the person passed as an argument, who is
    * presumed to <i>already</i> be friends with the person. ("Tickle"
    * essentially means "refresh their friendship.") */
   public void tickle(Person person){
+    Sim.instance().encounterWriter.println(
+        Sim.instance().getCurrYearNum()+","+id+","+person.id+",tickle");
+    Sim.instance().encounterWriter.flush();
+
     //reset when the two last encountered each other
     int tickleID = person.getID( );
     refreshLastTickleTime(tickleID);

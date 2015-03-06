@@ -10,7 +10,7 @@ import sim.util.Bag;
 /**
  * A group of students in the CollegeSim model, perhaps representing a
  * campus club, orientation group, dorm room floor, or group of friends.
- * <p/>
+ * <p></p>
  * Purpose in life:
  * <ul>
  * <li>Upon creation, populates with random students.</li>

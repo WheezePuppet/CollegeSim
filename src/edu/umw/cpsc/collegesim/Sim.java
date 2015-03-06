@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 
 /** The top-level singleton simulation class, with main(). 
- * <p/>
+ * <p></p>
  * Purpose in life:
  * <ol>
  * <li>At start of simulation, create {@link #INIT_NUM_PEOPLE} people and
@@ -99,7 +99,7 @@ public class Sim extends SimState implements Steppable{
     private static BufferedWriter FoutWriter;
     private static File PrefoutF;
     private static BufferedWriter PrefoutWriter;
-    
+    static PrintWriter encounterWriter;
     
     // Here is the schedule!
     // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5, ..summer.., 12.5...
@@ -155,6 +155,13 @@ public class Sim extends SimState implements Steppable{
     public Sim(long seed){
         super(seed);
         this.SEED = seed;
+
+        try {
+            encounterWriter = new PrintWriter(
+                new FileWriter("encounters"+Sim.SIMTAG+".csv"));
+            encounterWriter.println("year,id1,id2,type");
+            encounterWriter.flush();
+        } catch (IOException e) { e.printStackTrace(); }
     }
     
     public void start( ){
