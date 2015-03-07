@@ -26,8 +26,8 @@ shinyUI(fluidPage(
         fluidRow(
 
             sliderInput("raceWeight",
-                label="Race weight (in # of equivalent attributes)",value=400,
-                min=0,max=500),
+                label="Race weight (in # of equivalent attributes)",value=40,
+                min=0,max=100),
             sliderInput("probWhite",
                 label="White student body proportion",value=.85,
                 min=0,max=1,step=0.05),
