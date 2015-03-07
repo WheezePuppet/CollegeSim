@@ -568,8 +568,10 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                           breaks=c("MINORITY","MIXED","WHITE"),
                           labels=c("min-min",
                              "min-whi","whi-whi")) +
-                expand_limits(y=0) +
-                labs(title="Similarity")
+                scale_x_discrete(labels=c("minority-minority encounters",
+                    "minority-white encounters","white-white encounters")) +
+                expand_limits(y=c(0,1)) +
+                labs(title="Perceived similarity upon encountering")
 
             print(the.plot)
         }
