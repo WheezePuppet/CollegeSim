@@ -29,6 +29,8 @@ ENCOUNTERS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","encountersSIMTAG.csv")
 
 GROUPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","groupsSIMTAG.csv")
 
+SIMILARITY.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","similaritySIMTAG.csv")
+
 DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
@@ -62,6 +64,8 @@ shinyServer(function(input,output,session) {
     classes.for.encounters.lines <- c(rep("integer",3),"factor")
 
     classes.for.groups.lines <- c(rep("integer",4))
+
+    classes.for.similarity.lines <- c("integer","factor","double")
 
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
@@ -102,6 +106,14 @@ en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
 gr <<- parse.stats.df(GROUPS.STATS.FILE, classes.for.groups.lines)
         return(parse.stats.df(GROUPS.STATS.FILE,
             classes.for.groups.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # SIMILARITY.STATS.FILE.
+    similarity.stats <- function() {
+si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
+        return(parse.stats.df(SIMILARITY.STATS.FILE,
+            classes.for.similarity.lines))
     }
 
     parse.stats.df <- function(filename.template, classes.list) {
@@ -540,6 +552,33 @@ gr <<- parse.stats.df(GROUPS.STATS.FILE, classes.for.groups.lines)
             invalidateLater(REFRESH.PERIOD.MILLIS,session)
         }
     })
+
+    output$similarityPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        similarity.stats.df <- similarity.stats()
+
+        if (nrow(similarity.stats.df) > 0) {
+
+            the.plot <- ggplot(similarity.stats.df) +
+                geom_boxplot(aes(y=similarity,x=races,fill=races))+
+                scale_fill_manual(values=c("MINORITY"="red",
+                    "MIXED"="grey","WHITE"="blue"),
+                          breaks=c("MINORITY","MIXED","WHITE"),
+                          labels=c("min-min",
+                             "min-whi","whi-whi")) +
+                expand_limits(y=0) +
+                labs(title="Similarity")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
     # Nuke any sims that are still currently running.
     kill.all.sims <- function() {
         system(paste("pkill -f",SIM.CLASS.NAME))
