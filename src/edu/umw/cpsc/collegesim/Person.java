@@ -725,6 +725,15 @@ public class Person implements Steppable {
           + (INDEPENDENT_ATTRIBUTE_POOL * INDEP_WEIGHT)
           + (DEPENDENT_ATTRIBUTE_POOL * DEP_WEIGHT) + RACE_WEIGHT + GEN_WEIGHT;
       double similarity = similar / maxRating;
+    
+        if (race==other.race) {
+          Sim.instance().similarityWriter.println(
+              Sim.instance().getCurrYearNum()+","+race+","+similarity);
+        } else {
+          Sim.instance().similarityWriter.println(
+              Sim.instance().getCurrYearNum()+",MIXED,"+similarity);
+        }
+        Sim.instance().similarityWriter.flush();
     return similarity;
     }
     

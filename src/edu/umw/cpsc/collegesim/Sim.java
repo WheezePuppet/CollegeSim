@@ -102,6 +102,7 @@ public class Sim extends SimState implements Steppable{
     private static File groupF;
     private static PrintWriter groupWriter;
     static PrintWriter encounterWriter;
+    static PrintWriter similarityWriter;
     
     // Here is the schedule!
     // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5, ..summer.., 12.5...
@@ -163,6 +164,11 @@ public class Sim extends SimState implements Steppable{
                 new FileWriter("encounters"+Sim.SIMTAG+".csv"));
             encounterWriter.println("year,id1,id2,type");
             encounterWriter.flush();
+
+            similarityWriter = new PrintWriter(
+                new FileWriter("similarity"+Sim.SIMTAG+".csv"));
+            similarityWriter.println("year,races,similarity");
+            similarityWriter.flush();
         } catch (IOException e) { e.printStackTrace(); }
     }
     
