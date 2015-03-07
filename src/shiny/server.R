@@ -516,6 +516,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                         "avg total size"),
                     values=c("meanMin"="brown","meanWhi"="blue",
                         "meanTot"="darkgrey")) + 
+                        "meanTot"="black")) + 
                 labs(title="Group composition",
                     x="Simulation year", y="")
 
