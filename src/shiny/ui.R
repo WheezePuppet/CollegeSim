@@ -76,19 +76,19 @@ shinyUI(fluidPage(
                 div(class="inputCategory",
                     HTML("Groups:<br/>"),
                     sliderInput("initNumGroups",
-                        label="Initial number of groups",value=50,
-                        min=0,max=200),
+                        label="Initial number of groups",value=20,
+                        min=0,max=40),
                     sliderInput("numNewGroupsPerYear",
-                        label="Number of new groups created per year",value=10,
+                        label="Number of new groups created per year",value=2,
                         min=0,max=10)
                 ),
                 div(class="inputCategory",
                     HTML("Dropout rate:<br/>"),
                     sliderInput("dropoutRate",
-                        label="Dropout Rate",value=0.01,
+                        label="Dropout Rate",value=0.00,
                         min=0,max=.2,step=0.005),
                     sliderInput("dropoutIntercept",
-                        label="Dropout Intercept",value=0.05,
+                        label="Dropout Intercept",value=0.00,
                         min=0,max=.2,step=0.005)
                 )
             )
