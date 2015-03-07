@@ -255,10 +255,10 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 filter(!is.na(avgFriends))
             the.plot <- ggplot(by.race.by.year,
                 aes(x=period,y=avgFriends,col=race)) + 
-                geom_line() + 
+                geom_line(size=1.2) + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) + 
-                scale_color_manual(values=c("MINORITY"="red","WHITE"="blue")) +
+                scale_color_manual(values=c("MINORITY"="brown","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Average number of friends by race",
                     x="Simulation year",
@@ -303,7 +303,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 geom_line() + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
-                scale_color_manual(values=c("MINORITY"="red","WHITE"="blue")) +
+                scale_color_manual(values=c("MINORITY"="brown","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Dropout rate",
                     x="Simulation year",
@@ -357,7 +357,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
             the.plot <- ggplot(rels.df %>% 
                     gather(measure, value, mw.rels:perc.mw.rels),
                 aes(x=period, y=value, color=measure)) + 
-                geom_line() +
+                geom_line(size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
                 scale_color_manual(name="",
@@ -365,12 +365,16 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                      labels=c("# min-min fships",
                         "# min-whi fships", 
                         "% that are min-whi"),
-                    values=c("mm.rels"="red","mw.rels"="blue",
-                        "perc.mw.rels"="black")) +
+                    values=c("mm.rels"="brown","mw.rels"="purple",
+                        "perc.mw.rels"="darkgrey")) +
                 expand_limits(y=0) +
                 geom_hline(yintercept=100,linetype="dotted",color="black") +
+                annotate("text", x=0, y=100+5, hjust=0, size=4,
+                    label="max") +
                 geom_hline(yintercept=input$probWhite*100,linetype="dashed",
                     color="blue") +
+                annotate("text", x=0, y=input$probWhite*100-5, hjust=0, size=4,
+                    label="expected proportion") +
                 labs(title="Racial composition of minorities' friendships",
                     x="Simulation year", y="")
             print(the.plot)
@@ -421,7 +425,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                         "new friendships",
                         "rejected friendships",
                         "decayed friendships"),
-                    values=c("tickle"="purple","meetFriends"="darkgreen",
+                    values=c("tickle"="orange","meetFriends"="darkgreen",
                         "meetNoFriends"="red","decay"="black")) + 
                 scale_linetype_manual(name="",
                      breaks=c("tickle","meetFriends","meetNoFriends","decay"),
@@ -468,7 +472,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                           breaks=c("numMin","numWhi"),
                           labels=c("num minorities",
                              "num whites"),
-                         values=c("numMin"="red","numWhi"="blue")) +
+                         values=c("numMin"="brown","numWhi"="blue")) +
                      labs(title=paste(
                         "Group composition: year",last.full.year),
                          x="Group ID", y="")
@@ -501,7 +505,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
             summary.group.stats.df <- summary.group.stats.df %>%
                 gather(measure, value, meanMin:meanTot)
             the.plot <- ggplot(summary.group.stats.df) +
-                geom_line(aes(x=year,group=measure,col=measure,y=value)) +
+                geom_line(aes(x=year,group=measure,col=measure,y=value),size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
                 expand_limits(y=0) +
@@ -510,8 +514,8 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                      labels=c("avg # min",
                         "avg # whi",
                         "avg total size"),
-                    values=c("meanMin"="red","meanWhi"="blue",
-                        "meanTot"="black")) + 
+                    values=c("meanMin"="brown","meanWhi"="blue",
+                        "meanTot"="darkgrey")) + 
                 labs(title="Group composition",
                     x="Simulation year", y="")
 
@@ -538,7 +542,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 summarize(numGrp=n())
 
             the.plot <- ggplot(summary.group.stats.df) +
-                geom_line(aes(x=year,y=numGrp),col="brown") +
+                geom_line(aes(x=year,y=numGrp),col="darkgrey",size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
                 expand_limits(y=0) +
@@ -563,7 +567,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
 
             the.plot <- ggplot(similarity.stats.df) +
                 geom_boxplot(aes(y=similarity,x=races,fill=races))+
-                scale_fill_manual(values=c("MINORITY"="red",
+                scale_fill_manual(values=c("MINORITY"="brown",
                     "MIXED"="grey","WHITE"="blue"),
                           breaks=c("MINORITY","MIXED","WHITE"),
                           labels=c("min-min",
