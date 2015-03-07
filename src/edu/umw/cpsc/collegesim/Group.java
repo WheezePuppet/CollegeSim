@@ -1,6 +1,7 @@
 package edu.umw.cpsc.collegesim;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import ec.util.*;
 import sim.engine.*;
@@ -297,6 +298,28 @@ public class Group implements Steppable{
       return students.size();
     }
   
+    /** Returns the number of students of a particular race currently in the 
+     * group.
+     */
+    public int getSize(Person.Race race){
+        int num=0;
+        for (int i=0; i<students.size(); i++) {
+            if (students.get(i).getRace() == race) {
+                num++;
+            }
+        }
+        return num;
+    }
+
+    public static void printHeaderToGroupsFile(PrintWriter pw) {
+        pw.println("year,id,numMin,numWhi");
+    }
+
+    public void printToFile(PrintWriter pw) {
+        pw.println(Sim.instance().getCurrYearNum() + "," + id + "," + 
+            getSize(Person.Race.MINORITY) + "," + getSize(Person.Race.WHITE));
+    }
+
     /** Gets the recruitment factor for this group (See {@link
      * #setRecruitmentFactor(double)}.)
      */

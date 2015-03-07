@@ -99,6 +99,8 @@ public class Sim extends SimState implements Steppable{
     private static BufferedWriter FoutWriter;
     private static File PrefoutF;
     private static BufferedWriter PrefoutWriter;
+    private static File groupF;
+    private static PrintWriter groupWriter;
     static PrintWriter encounterWriter;
     
     // Here is the schedule!
@@ -325,6 +327,9 @@ public class Sim extends SimState implements Steppable{
                 System.out.println("Could not close file");
             }
         }
+        if(groupWriter!=null){
+            groupWriter.close();
+        }
 
         if(!isEndOfSim()){
             String f="people"+SIMTAG+".csv";
@@ -358,6 +363,25 @@ public class Sim extends SimState implements Steppable{
                     peopleList.get(x).printFriendsToFile(FoutWriter);
                 }
                 FoutWriter.flush();
+            }catch(IOException e){
+                System.out.println("Couldn't create file");
+                e.printStackTrace();
+                System.exit(1);
+            }
+            
+            //FILE OF GROUPS
+            String gf="groups"+SIMTAG+".csv";
+            try{
+                // append to current file, if exists
+                groupF = new File(gf);
+                groupWriter = new PrintWriter(new FileWriter(groupF, true));
+                if (Sim.instance().getCurrYearNum() == 0) {
+                    Group.printHeaderToGroupsFile(groupWriter);
+                }
+                for(int x = 0; x<allGroups.size(); x++){
+                    allGroups.get(x).printToFile(groupWriter);
+                }
+                groupWriter.flush();
             }catch(IOException e){
                 System.out.println("Couldn't create file");
                 e.printStackTrace();
