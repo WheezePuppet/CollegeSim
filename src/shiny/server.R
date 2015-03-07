@@ -65,7 +65,7 @@ shinyServer(function(input,output,session) {
 
     classes.for.groups.lines <- c(rep("integer",4))
 
-    classes.for.similarity.lines <- c("integer","factor","double")
+    classes.for.similarity.lines <- c("integer","factor","double","logical")
 
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
@@ -580,6 +580,44 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
             invalidateLater(REFRESH.PERIOD.MILLIS,session)
         }
     })
+
+    output$similarityImpactPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        similarity.stats.df <- similarity.stats()
+
+        if (nrow(similarity.stats.df) > 0) {
+
+            x <- similarity.stats.df %>%
+                group_by(races,becameFriends) %>% 
+                summarize(num=n())
+            fractions <- sapply(levels(x$races), function(race) { 
+                x$num[x$races==race & x$becameFriends] / 
+                    sum(x[x$races==race,"num"]) 
+            })
+
+            the.plot <- ggplot(x,aes(y=num,x=races)) +
+                geom_bar(aes(fill=becameFriends),
+                    stat="identity") +
+                scale_fill_manual(values=c("TRUE"="darkgreen","FALSE"="red"),
+                          breaks=c("MINORITY","MIXED","WHITE"),
+                          labels=c("min-min",
+                             "min-whi","whi-whi")) +
+                scale_x_discrete(labels=c("minority-minority encounters",
+                    "minority-white encounters","white-white encounters")) +
+                annotate("text",x=1:3,label=paste0(round(fractions*100,2),"%"),
+                    y=Inf, vjust=1.5, size=6) +
+                labs(title="Fraction of encounters leading to friendship")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
 
     # Nuke any sims that are still currently running.
     kill.all.sims <- function() {

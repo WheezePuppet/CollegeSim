@@ -378,13 +378,21 @@ public class Person implements Steppable {
    * already be friends with that person. Determine whether these two will
    * become friends, and if so, make them so. */
   public void meet(Person personToMeet){
-    double similar;
+    double similarity;
     boolean friends = false;
     int personToMeetID = personToMeet.getID( );
     //Calculate their similarity rating, and then see if they should become 
     //friends
-    similar = similarityTo(personToMeet);
-    friends = becomeFriends(similar);
+    similarity = similarityTo(personToMeet);
+    friends = becomeFriends(similarity);
+    if (race==personToMeet.race) {
+      Sim.instance().similarityWriter.println(
+          Sim.instance().getCurrYearNum()+","+race+","+similarity+","+friends);
+    } else {
+      Sim.instance().similarityWriter.println(
+          Sim.instance().getCurrYearNum()+",MIXED,"+similarity+","+friends);
+    }
+    Sim.instance().similarityWriter.flush();
     //if they become friends, add their edge to the network
     //and reset when they met
     if(friends){
@@ -690,7 +698,7 @@ public class Person implements Steppable {
      * Returns a number between 0 and 1 indicating how similar this person
      * is perceived to be to the person passed. (1 = perfect similarity.) */
     public double similarityTo(Person other) {
-      double similar = 0.0;
+      double similarity = 0.0;
       
       //Kind 1: Constant
       int constantCount = attrCounter(CONSTANT_ATTRIBUTE_POOL, attributesK1, 
@@ -718,23 +726,14 @@ public class Person implements Steppable {
         }
         //Calculate their similarity rating, taking importance of each 
         //category (the weight) into account
-      similar = (constantCount * CONST_WEIGHT) + (indepCount * INDEP_WEIGHT)
+      similarity = (constantCount * CONST_WEIGHT) + (indepCount * INDEP_WEIGHT)
           + (depCount * DEP_WEIGHT) + (raceCount * RACE_WEIGHT) 
           + (genCount * GEN_WEIGHT);
       double maxRating = (CONSTANT_ATTRIBUTE_POOL * CONST_WEIGHT) 
           + (INDEPENDENT_ATTRIBUTE_POOL * INDEP_WEIGHT)
           + (DEPENDENT_ATTRIBUTE_POOL * DEP_WEIGHT) + RACE_WEIGHT + GEN_WEIGHT;
-      double similarity = similar / maxRating;
+      return similarity / maxRating;
     
-        if (race==other.race) {
-          Sim.instance().similarityWriter.println(
-              Sim.instance().getCurrYearNum()+","+race+","+similarity);
-        } else {
-          Sim.instance().similarityWriter.println(
-              Sim.instance().getCurrYearNum()+",MIXED,"+similarity);
-        }
-        Sim.instance().similarityWriter.flush();
-    return similarity;
     }
     
   private boolean becomeFriends(double similarity){

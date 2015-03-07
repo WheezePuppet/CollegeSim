@@ -167,7 +167,7 @@ public class Sim extends SimState implements Steppable{
 
             similarityWriter = new PrintWriter(
                 new FileWriter("similarity"+Sim.SIMTAG+".csv"));
-            similarityWriter.println("year,races,similarity");
+            similarityWriter.println("year,races,similarity,becameFriends");
             similarityWriter.flush();
         } catch (IOException e) { e.printStackTrace(); }
     }

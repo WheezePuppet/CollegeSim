@@ -113,7 +113,8 @@ shinyUI(fluidPage(
                 plotOutput("numGroupsPlot")
             ),
             tabPanel("Similarity",
-                plotOutput("similarityPlot")
+                plotOutput("similarityPlot"),
+                plotOutput("similarityImpactPlot",height="600px")
             )
         )
     )
