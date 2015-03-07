@@ -27,6 +27,8 @@ FRIENDSHIPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","friendshipsSIMTAG.csv")
 
 ENCOUNTERS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","encountersSIMTAG.csv")
 
+GROUPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","groupsSIMTAG.csv")
+
 DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
@@ -59,6 +61,8 @@ shinyServer(function(input,output,session) {
 
     classes.for.encounters.lines <- c(rep("integer",3),"factor")
 
+    classes.for.groups.lines <- c(rep("integer",4))
+
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
     people.stats <- function() {
@@ -90,6 +94,14 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
 en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
         return(parse.stats.df(ENCOUNTERS.STATS.FILE,
             classes.for.encounters.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # GROUPS.STATS.FILE.
+    groups.stats <- function() {
+gr <<- parse.stats.df(GROUPS.STATS.FILE, classes.for.groups.lines)
+        return(parse.stats.df(GROUPS.STATS.FILE,
+            classes.for.groups.lines))
     }
 
     parse.stats.df <- function(filename.template, classes.list) {
@@ -251,7 +263,8 @@ en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
         if (input$runsim < 1) return(NULL)
         dropout.stats.df <- dropout.stats()
         people.stats.df <- people.stats()
-        if (nrow(dropout.stats.df) > 0) {
+        if (nrow(dropout.stats.df) > 0 &&
+            nrow(people.stats.df) > 0) {
             people.by.race.by.year <- 
                 group_by(people.stats.df,period,race) %>%
                 summarize(p.count=n())
@@ -418,6 +431,115 @@ en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
 
     })
 
+    output$currentGroupsPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        groups.stats.df <- groups.stats()
+
+        if (nrow(groups.stats.df) > 0) {
+
+            last.full.year <- max(groups.stats.df$year) - 1
+
+            if (last.full.year >= 1) {
+
+                groups.stats.df <- 
+                    filter(groups.stats.df, year==last.full.year)
+
+                groups.stats.df <- groups.stats.df %>%
+                    gather(measure, value, numMin, numWhi)
+
+                the.plot <- ggplot(groups.stats.df) +
+                    geom_bar(aes(x=id,fill=measure,y=value),stat="identity") +
+                    expand_limits(y=0) +
+                    scale_fill_manual(name="",
+                          breaks=c("numMin","numWhi"),
+                          labels=c("num minorities",
+                             "num whites"),
+                         values=c("numMin"="red","numWhi"="blue")) +
+                     labs(title=paste(
+                        "Group composition: year",last.full.year),
+                         x="Group ID", y="")
+
+                print(the.plot)
+            }
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$groupsHistoryPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        groups.stats.df <- groups.stats()
+
+        if (nrow(groups.stats.df) > 0) {
+
+            groups.stats.df$numTot <- 
+                groups.stats.df$numMin + groups.stats.df$numWhi
+            summary.group.stats.df <- groups.stats.df %>%
+                group_by(year) %>%
+                summarize(meanMin=mean(numMin),
+                          meanWhi=mean(numWhi),
+                          meanTot=mean(numTot))
+
+            summary.group.stats.df <- summary.group.stats.df %>%
+                gather(measure, value, meanMin:meanTot)
+            the.plot <- ggplot(summary.group.stats.df) +
+                geom_line(aes(x=year,group=measure,col=measure,y=value)) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                scale_color_manual(name="",
+                     breaks=c("meanMin","meanWhi","meanTot"),
+                     labels=c("avg # min",
+                        "avg # whi",
+                        "avg total size"),
+                    values=c("meanMin"="red","meanWhi"="blue",
+                        "meanTot"="black")) + 
+                labs(title="Group composition",
+                    x="Simulation year", y="")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$numGroupsPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        groups.stats.df <- groups.stats()
+
+        if (nrow(groups.stats.df) > 0) {
+
+            groups.stats.df$numTot <- 
+                groups.stats.df$numMin + groups.stats.df$numWhi
+            summary.group.stats.df <- groups.stats.df %>%
+                group_by(year) %>%
+                summarize(numGrp=n())
+
+            the.plot <- ggplot(summary.group.stats.df) +
+                geom_line(aes(x=year,y=numGrp),col="brown") +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                labs(title="Number of groups",
+                    x="Simulation year", y="")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
     # Nuke any sims that are still currently running.
     kill.all.sims <- function() {
         system(paste("pkill -f",SIM.CLASS.NAME))

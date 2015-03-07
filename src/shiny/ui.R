@@ -106,6 +106,11 @@ shinyUI(fluidPage(
             ),
             tabPanel("Encounters",
                 plotOutput("encountersPlot",height="800px")
+            ),
+            tabPanel("Groups",
+                plotOutput("currentGroupsPlot"),
+                plotOutput("groupsHistoryPlot"),
+                plotOutput("numGroupsPlot")
             )
         )
     )
