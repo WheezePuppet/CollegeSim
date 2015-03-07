@@ -25,6 +25,8 @@ PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
 
 FRIENDSHIPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","friendshipsSIMTAG.csv")
 
+ENCOUNTERS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","encountersSIMTAG.csv")
+
 DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
@@ -55,6 +57,8 @@ shinyServer(function(input,output,session) {
 
     classes.for.friendship.lines <- rep("integer",3)
 
+    classes.for.encounters.lines <- c(rep("integer",3),"factor")
+
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
     people.stats <- function() {
@@ -78,6 +82,14 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE, classes.for.person.output.lines)
 fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
         return(parse.stats.df(FRIENDSHIPS.STATS.FILE,
             classes.for.friendship.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # ENCOUNTERS.STATS.FILE.
+    encounters.stats <- function() {
+en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
+        return(parse.stats.df(ENCOUNTERS.STATS.FILE,
+            classes.for.encounters.lines))
     }
 
     parse.stats.df <- function(filename.template, classes.list) {
@@ -336,6 +348,67 @@ fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
                     color="blue") +
                 labs(title="Racial composition of minorities' friendships",
                     x="Simulation year", y="")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+
+    })
+
+    output$encountersPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        encounters.stats.df <- encounters.stats()
+        people.stats.df <- people.stats()
+
+        if (nrow(encounters.stats.df) > 0 &&
+            nrow(people.stats.df) > 0) {
+
+            num.students.df <- people.stats.df %>% 
+                group_by(period,race) %>% summarize(numStudents=n())
+
+            x <- inner_join(encounters.stats.df,people.stats.df,
+                    by=c("id1"="id")) %>%
+                select(year,type,race)
+            encounter.types <- group_by(x,year,race,type) %>%
+                dplyr::summarize(numEvents=n())
+            encounter.types <- inner_join(num.students.df,encounter.types,
+                by=c("period"="year","race"="race"))
+
+            # encounter.types now looks like this:
+            #  period     race numStudents          type numEvents
+            #1      0 MINORITY          21         decay       359
+            #2      0 MINORITY          21   meetFriends       714
+            # ...
+
+            the.plot <- ggplot(encounter.types, 
+                aes(x=period,y=numEvents/numStudents)) +
+                facet_grid(race ~ .) +
+                geom_line(aes(color=type,linetype=type,group=type),size=1.2) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                scale_color_manual(name="",
+                     breaks=c("tickle","meetFriends","meetNoFriends","decay"),
+                     labels=c("tickles",
+                        "new friendships",
+                        "rejected friendships",
+                        "decayed friendships"),
+                    values=c("tickle"="purple","meetFriends"="darkgreen",
+                        "meetNoFriends"="red","decay"="black")) + 
+                scale_linetype_manual(name="",
+                     breaks=c("tickle","meetFriends","meetNoFriends","decay"),
+                     labels=c("tickles",
+                        "new friendships",
+                        "rejected friendships",
+                        "decayed friendships"),
+                    values=c("tickle"="dotted","meetFriends"="solid",
+                        "meetNoFriends"="dashed","decay"="dashed")) + 
+                expand_limits(y=0) +
+                labs(title="Encounter/decay events per student",
+                    x="Simulation year", y="Events per student")
             print(the.plot)
         }
         # Recreate this plot in a little bit.

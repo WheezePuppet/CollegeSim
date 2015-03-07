@@ -103,6 +103,9 @@ shinyUI(fluidPage(
             ),
             tabPanel("Dropouts",
                 plotOutput("dropoutPlot")
+            ),
+            tabPanel("Encounters",
+                plotOutput("encountersPlot",height="800px")
             )
         )
     )
