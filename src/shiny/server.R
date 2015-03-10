@@ -238,6 +238,8 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 "-numToMeetPop",input$numToMeetPop,
                 "-numToMeetGroup",input$numToMeetGroup,
                 "-decayThreshold",input$decayThreshold,
+                "-friendshipCoefficient",input$friendshipCoefficient,
+                "-friendshipIntercept",input$friendshipIntercept,
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),

@@ -221,6 +221,8 @@ public class Sim extends SimState implements Steppable{
         Person.NUM_TO_MEET_POP = 5;
         Person.NUM_TO_MEET_GROUP = 10;
         Person.DECAY_THRESHOLD = 2;
+        Person.FRIENDSHIP_COEFFICIENT = .22;
+        Person.FRIENDSHIP_INTERCEPT = .05;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -255,6 +257,10 @@ public class Sim extends SimState implements Steppable{
                 Person.NUM_TO_MEET_GROUP = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-decayThreshold")) {
                 Person.DECAY_THRESHOLD = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-friendshipCoefficient")) {
+                Person.FRIENDSHIP_COEFFICIENT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-friendshipIntercept")) {
+                Person.FRIENDSHIP_INTERCEPT = Double.parseDouble(args[++i]);
             }
         }
 
@@ -597,6 +603,8 @@ public class Sim extends SimState implements Steppable{
         "  [-numToMeetPop num]                  # Integer; default 5\n" +
         "  [-numToMeetGroup num]                # Integer; default 10\n" +
         "  [-decayThreshold numMonthsStayAlive] # Integer; default 2\n" +
+        "  [-friendshipCoefficient coeff]       # Double; default .22\n" +
+        "  [-friendshipIntercept intercept]     # Double; default .05\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }
