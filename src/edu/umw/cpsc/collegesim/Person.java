@@ -106,7 +106,7 @@ public class Person implements Steppable {
     /** The coefficient (see also {@link #FRIENDSHIP_INTERCEPT}) of a linear
      * equation to transform perceived similarity to probability of
      * friendship. If x is the perceived similarity, then y=mx+b, where m
-     * is the FRIENDSHIP_COEFFICIENT and b the FRIENDSHIP_INTERCEPT gives
+     * is the FRIENDSHIP_COEFFICIENT, b the FRIENDSHIP_INTERCEPT, and y gives
      * the probability of becoming friends. */
     public static double FRIENDSHIP_COEFFICIENT;
 
