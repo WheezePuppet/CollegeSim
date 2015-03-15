@@ -1,7 +1,7 @@
 
 /* shinysim.css */
 
-.inputCategory {margin-top:35px;}
+.inputCategory {margin-top:25px;margin-bottom:20px;}
 .inputCategory > div { margin-left:20px; }
 .inputCategory > div > label.control-label { margin-top:5px; font-size:small;}
 

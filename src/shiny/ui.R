@@ -16,26 +16,31 @@ shinyUI(fluidPage(
 
     sidebarPanel(
         h3("Parameters"), 
-            div(id="runsimstuff",
-        flowLayout(
-            numericInput("maxTime","Number of sim years",
-                value=8,min=1,step=1),
-            actionButton("runsim",label="Run sim")
-        )
-            ),
+        div(id="runsimstuff",
+            flowLayout(
+                numericInput("maxTime","Number of sim years",
+                    value=8,min=1,step=1),
+                actionButton("runsim",label="Run sim")
+            )
+        ),
         fluidRow(
+            checkboxInput("showAttributeParameters",
+                label="Show attribute-related parameters", value=FALSE),
+            conditionalPanel(
+                condition="input.showAttributeParameters == true",
 
-            sliderInput("raceWeight",
-                label="Race weight (in # of equivalent attributes)",value=40,
-                min=0,max=100),
-            div(class="inputCategory",
-                HTML("Number of attributes per student:"),
-                sliderInput("numIndepAttrs",
-                    label="Independent",value=20,
-                    min=0,max=50),
-                sliderInput("numDepAttrs",
-                    label="Dependent",value=20,
-                    min=0,max=50)
+                sliderInput("raceWeight",
+                    label="Race weight (in # of equivalent attributes)",value=40,
+                    min=0,max=100),
+                div(class="inputCategory",
+                    HTML("Number of attributes per student:"),
+                    sliderInput("numIndepAttrs",
+                        label="Independent",value=20,
+                        min=0,max=50),
+                    sliderInput("numDepAttrs",
+                        label="Dependent",value=20,
+                        min=0,max=50)
+                )
             ),
             div(class="inputCategory",
                 HTML("Similarity &rarr; friendship equation <i>(y=mx+b)</i>:<br/>"),
@@ -46,9 +51,20 @@ shinyUI(fluidPage(
                     label="Intercept",value=.05,
                     min=-.5,max=.5,step=0.01)
             ),
-            sliderInput("probWhite",
-                label="White student body proportion",value=.85,
-                min=0,max=1,step=0.05),
+            div(class="inputCategory",
+                HTML("Policies:<br/>"),
+                radioButtons("forceBiracialFriendships",
+                    label="Force initial biracial friendships",
+                    choices=c("On"="on",
+                        "Off"="off"),
+                    selected="off",
+                    inline=TRUE),
+                conditionalPanel(
+                    condition="input.forceBiracialFriendships == 'on'",
+                    sliderInput("numForcedFriendships",
+                        label="Number of forced friendships",
+                        min=0,max=20,value=5))
+            ),
             sliderInput("driftRate",
                 label="Drift rate (prob of changing attribute)",
                 value=.0, min=0,max=1,step=0.05),
@@ -65,14 +81,14 @@ shinyUI(fluidPage(
             hr(),
 
             flowLayout(
-            radioButtons("seedType",label="Seed",
-                choices=c("Random"="rand",
-                    "Specific"="specific"),
-                selected="rand",
-                inline=TRUE),
-            conditionalPanel(condition="input.seedType == 'specific'",
-                numericInput("seed","",value=0))
-),
+                radioButtons("seedType",label="Seed",
+                    choices=c("Random"="rand",
+                        "Specific"="specific"),
+                    selected="rand",
+                    inline=TRUE),
+                conditionalPanel(condition="input.seedType == 'specific'",
+                    numericInput("seed","",value=0))
+            ),
 
             htmlOutput("log"),
 
@@ -82,6 +98,9 @@ shinyUI(fluidPage(
                 label="Show uninteresting parameters", value=FALSE),
             conditionalPanel(
                 condition="input.showUninterestingParameters == true",
+                sliderInput("probWhite",
+                    label="White student body proportion",value=.85,
+                    min=0,max=1,step=0.05),
                 div(class="inputCategory",
                     HTML("Students:<br/>"),
                     sliderInput("initNumPeople",

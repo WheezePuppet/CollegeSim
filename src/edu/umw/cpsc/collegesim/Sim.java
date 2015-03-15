@@ -196,6 +196,13 @@ public class Sim extends SimState implements Steppable{
             schedule.scheduleOnceIn(2.0, group);
         }
 
+        for(int i = 0; i<peopleList.size(); i++){
+            for (int j=0; j<Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS;
+                                                                        j++){
+                peopleList.get(i).forceAddRandomOppRaceFriend();
+            }
+        }
+
         //Schedule ourselves to run at start of first academic year.
         schedule.scheduleOnceIn(1.1, this);
 
@@ -225,6 +232,7 @@ public class Sim extends SimState implements Steppable{
         Person.FRIENDSHIP_INTERCEPT = .05;
         Person.NUM_INDEPENDENT_ATTRIBUTES = 20;
         Person.NUM_DEPENDENT_ATTRIBUTES = 20;
+        Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -267,6 +275,9 @@ public class Sim extends SimState implements Steppable{
                 Person.NUM_INDEPENDENT_ATTRIBUTES = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numDepAttrs")) {
                 Person.NUM_DEPENDENT_ATTRIBUTES = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-initNumForcedOppRaceFriends")) {
+                Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 
+                    Integer.parseInt(args[++i]);
             }
         }
 
@@ -613,6 +624,7 @@ public class Sim extends SimState implements Steppable{
         "  [-friendshipIntercept intercept]     # Double; default .05\n" +
         "  [-numDepAttrs num]                   # Integer; default 20\n" +
         "  [-numIndepAttrs num]                 # Integer; default 20\n" +
+        "  [-initNumForcedOppRaceFriends num]   # Integer; default 0\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

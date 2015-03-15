@@ -129,6 +129,10 @@ public class Person implements Steppable {
      * tickle each other and yet remain friends. */
     public static int DECAY_THRESHOLD;
 
+    /** When a new Student is created, the number of automatic friends of the
+     *  opposite race that they will get. */
+    public static int INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS;
+
     // Hand out consecutive unique numbers to new people.
     private static int nextPersonId = 0;
     private int id;
@@ -354,6 +358,7 @@ public class Person implements Steppable {
         //Assigning dependent attributes
         assignAttribute(NUM_DEPENDENT_ATTRIBUTES, 
             DEPENDENT_ATTRIBUTE_POOL, attributesK3);
+        //
         //Assign a race   
         boolean white = assignRaceGender(PROBABILITY_WHITE);
         if(white){
@@ -371,6 +376,7 @@ public class Person implements Steppable {
         //extroversion = extroversionDistro.nextDouble();
         //Take out extroversion for now.
         extroversion = .5;
+
     }
   
   /**
@@ -396,9 +402,7 @@ public class Person implements Steppable {
     //if they become friends, add their edge to the network
     //and reset when they met
     if(friends){
-        Sim.peopleGraph.addEdge(this, personToMeet, 1);
-        refreshLastTickleTime(personToMeetID);
-        personToMeet.refreshLastTickleTime(id);
+        makeFriends(personToMeet);
         Sim.instance().encounterWriter.println(
             Sim.instance().getCurrYearNum()+","+id+","+personToMeet.id+
                 ",meetFriends");
@@ -915,4 +919,24 @@ public class Person implements Steppable {
     }
   }
 
+    private void makeFriends(Person newFriend) {
+        Sim.peopleGraph.addEdge(this, newFriend, 1);
+        refreshLastTickleTime(newFriend.id);
+        newFriend.refreshLastTickleTime(id);
+    }
+
+    void forceAddRandomOppRaceFriend() {
+        Bag peopleBag = Sim.peopleGraph.getAllNodes( );
+        Person forcedFriend;
+        do{
+          forcedFriend = (Person) 
+              peopleBag.get(Sim.instance( ).random.nextInt(peopleBag.size( )));
+        }while(forcedFriend.id == id  || 
+            forcedFriend.race == race  ||
+            friendsWith(forcedFriend));
+        this.makeFriends(forcedFriend);
+        System.out.println("Student " + id + " (" + race + ") " +
+            "forced with student " + forcedFriend.id + " (" +
+            forcedFriend.race + ")");
+    }
 }
