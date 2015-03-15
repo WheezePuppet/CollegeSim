@@ -240,6 +240,8 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 "-decayThreshold",input$decayThreshold,
                 "-friendshipCoefficient",input$friendshipCoefficient,
                 "-friendshipIntercept",input$friendshipIntercept,
+                "-numIndepAttrs",input$numIndepAttrs,
+                "-numDepAttrs",input$numDepAttrs,
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),

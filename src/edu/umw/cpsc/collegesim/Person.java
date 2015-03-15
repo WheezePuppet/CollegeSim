@@ -149,7 +149,7 @@ public class Person implements Steppable {
     /** The total number of "constant" attributes in the system. (See {@link
      * #CONST_WEIGHT}.) Each person will have a boolean value for each,
      * indicating whether they do (or do not) possess the attribute. */
-    public static int CONSTANT_ATTRIBUTE_POOL = 100;
+    public static int CONSTANT_ATTRIBUTE_POOL = 0;  // 100;
     private ArrayList<Boolean> attributesK1     //Constant attributes
         = new ArrayList<Boolean>(
             Collections.nCopies(CONSTANT_ATTRIBUTE_POOL, false));
