@@ -69,6 +69,17 @@ public class Group implements Steppable{
      */
     public static final int NUM_PEOPLE_TO_RECRUIT = 10;
 
+    /**
+     * The number of forced-mixed-race orientation groups to start with.
+     */
+    public static int INITIAL_NUM_MIXED_RACE_GROUPS;
+
+    /**
+     * For the forced-mixed-race orientation groups, what fraction should be
+     * composed of minorities?
+     */
+    public static double MIXED_RACE_GROUP_FRACTION;
+
     // Hand out consecutive unique numbers to new groups.
     private static int nextGroupId = 0;
     private int id;
@@ -79,22 +90,33 @@ public class Group implements Steppable{
   
     private ArrayList<Person> students;
     
-    /**
-     * Constructs a new Group object with the id passed, 
-     * and pre-populate it with members. */
-    public Group() {
+    private void init() {
       this.id = nextGroupId++;
       students = new ArrayList<Person>();
-      selectStartingStudents();
       recruitmentFactor = Sim.instance().random.nextDouble();
     }
 
-    private void selectStartingStudents() {
-        ArrayList<Person> people = Sim.getPeople();
+    /**
+     * Constructs a new Group object and pre-populate it with members. 
+     */
+    public Group() {
+        init();
+        selectStartingStudents();
+    }
+
+    /**
+     * Constructs a new Group object and pre-populate it with members of
+     * (approximately) the fraction of minorities passed.
+     */
+    public Group(double minorityFraction) {
+        init();
+        selectStartingStudents(minorityFraction);
+    }
+
+    private int generateInitialGroupSize() {
         int initialGroupSize = Sim.instance().random.nextInt(
             MAXIMUM_START_GROUP_SIZE-MINIMUM_START_GROUP_SIZE) + 
             MINIMUM_START_GROUP_SIZE + 1;
-        Person randStudent;
         if(initialGroupSize>MINIMUM_GROUP_SIZE){
           initialGroupSize=MINIMUM_GROUP_SIZE;    //keeps groups at least 
           // the min
@@ -103,9 +125,50 @@ public class Group implements Steppable{
           initialGroupSize=Sim.getNumPeople();    //to ensure the initial 
           // group size is never greater than the number of total people
         }
+        return initialGroupSize;
+    }
+
+    // Note: make sure this stays in sync with the other
+    // selectStartingStudents(). (I couldn't think of a good way to refactor
+    // common functionality.)
+    private void selectStartingStudents() {
+        int initialGroupSize = generateInitialGroupSize();
+        ArrayList<Person> people = Sim.getPeople();
+        Person randStudent;
         for(int x = 0; x < initialGroupSize; x++){
           randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           while(groupContainsStudent(randStudent)){
+            randStudent = people.get(Sim.instance().random.nextInt(people.size()));
+          }
+          students.add(randStudent);
+          randStudent.joinGroup(this);
+        }
+    }
+
+    // Note: make sure this stays in sync with the other
+    // selectStartingStudents(). (I couldn't think of a good way to refactor
+    // common functionality.)
+    private void selectStartingStudents(double minorityFraction) {
+        double initialGroupSize = (double) generateInitialGroupSize();
+        int numWhites = (int) Math.round(initialGroupSize * minorityFraction);
+        int numMinorities = (int) initialGroupSize - numWhites;
+
+        ArrayList<Person> people = Sim.getPeople();
+        Person randStudent;
+
+        for(int x = 0; x < numWhites; x++){
+          randStudent = people.get(Sim.instance().random.nextInt(people.size()));
+          while(randStudent.getRace() != Person.Race.WHITE  ||
+            groupContainsStudent(randStudent)){
+            randStudent = people.get(Sim.instance().random.nextInt(people.size()));
+          }
+          students.add(randStudent);
+          randStudent.joinGroup(this);
+        }
+        for(int x = 0; x < numMinorities; x++){
+          randStudent = people.get(Sim.instance().random.nextInt(people.size()));
+          while(randStudent.getRace() != Person.Race.MINORITY  ||
+            groupContainsStudent(randStudent)){
             randStudent = people.get(Sim.instance().random.nextInt(people.size()));
           }
           students.add(randStudent);

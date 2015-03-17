@@ -189,9 +189,17 @@ public class Sim extends SimState implements Steppable{
             schedule.scheduleOnceIn(1.5, person);
         }
 
+        // Initialize with some "plain ol' groups."
         for(int x = 0; x<INIT_NUM_GROUPS; x++){
             //Create a new group, add and schedule it.
             Group group = new Group();
+            allGroups.add(group);
+            schedule.scheduleOnceIn(2.0, group);
+        }
+
+        // Initialize with forced-mixed-race orientation groups (if any).
+        for(int x = 0; x<Group.INITIAL_NUM_MIXED_RACE_GROUPS; x++){
+            Group group = new Group(Group.MIXED_RACE_GROUP_FRACTION);
             allGroups.add(group);
             schedule.scheduleOnceIn(2.0, group);
         }
@@ -233,6 +241,8 @@ public class Sim extends SimState implements Steppable{
         Person.NUM_INDEPENDENT_ATTRIBUTES = 20;
         Person.NUM_DEPENDENT_ATTRIBUTES = 20;
         Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
+        Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
+        Group.MIXED_RACE_GROUP_FRACTION = .5;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -278,6 +288,11 @@ public class Sim extends SimState implements Steppable{
             } else if (args[i].equals("-initNumForcedOppRaceFriends")) {
                 Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 
                     Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-initNumMixedRaceGroups")) {
+                Group.INITIAL_NUM_MIXED_RACE_GROUPS = 
+                    Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-mixedRaceGroupFraction")) {
+                Group.MIXED_RACE_GROUP_FRACTION = Double.parseDouble(args[++i]);
             }
         }
 
@@ -625,6 +640,8 @@ public class Sim extends SimState implements Steppable{
         "  [-numDepAttrs num]                   # Integer; default 20\n" +
         "  [-numIndepAttrs num]                 # Integer; default 20\n" +
         "  [-initNumForcedOppRaceFriends num]   # Integer; default 0\n" +
+        "  [-initNumMixedRaceGroups num]        # Integer; default 0\n" +
+        "  [-mixedRaceGroupFraction fracMin]    # Double; default .5\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }
