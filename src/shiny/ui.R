@@ -63,7 +63,24 @@ shinyUI(fluidPage(
                     condition="input.forceBiracialFriendships == 'on'",
                     sliderInput("numForcedFriendships",
                         label="Number of forced friendships",
-                        min=0,max=20,value=5))
+                        min=0,max=20,value=5)),
+                hr(),
+                radioButtons("oGroups",
+                    label="Orientation groups",
+                    choices=c("On"="on",
+                        "Off"="off"),
+                    selected="off",
+                    inline=TRUE),
+                conditionalPanel(
+                    condition="input.oGroups == 'on'",
+                    sliderInput("initNumMixedRaceGroups",
+                        label="Number of orientation groups",
+                        min=0,max=20,value=5)),
+                conditionalPanel(
+                    condition="input.oGroups == 'on'",
+                    sliderInput("mixedRaceGroupFraction",
+                        label="Fraction of minorities in O-groups",
+                        min=.2,max=1,step=.1,value=.5))
             ),
             sliderInput("driftRate",
                 label="Drift rate (prob of changing attribute)",
