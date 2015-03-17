@@ -243,6 +243,8 @@ public class Sim extends SimState implements Steppable{
         Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
         Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
         Group.MIXED_RACE_GROUP_FRACTION = .5;
+        Group.RECRUITMENT_REQUIRED = .6;
+        Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -293,6 +295,11 @@ public class Sim extends SimState implements Steppable{
                     Integer.parseInt(args[++i]);
             } else if (args[i].equals("-mixedRaceGroupFraction")) {
                 Group.MIXED_RACE_GROUP_FRACTION = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-recruitmentRequired")) {
+                Group.RECRUITMENT_REQUIRED = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-likelihoodOfLeavingGroup")) {
+                Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = 
+                    Double.parseDouble(args[++i]);
             }
         }
 
@@ -642,6 +649,8 @@ public class Sim extends SimState implements Steppable{
         "  [-initNumForcedOppRaceFriends num]   # Integer; default 0\n" +
         "  [-initNumMixedRaceGroups num]        # Integer; default 0\n" +
         "  [-mixedRaceGroupFraction fracMin]    # Double; default .5\n" +
+        "  [-recruitmentRequired frac]          # Double; default .6\n" +
+        "  [-likelihoodOfLeavingGroup frac]     # Double; default .1\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

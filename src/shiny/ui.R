@@ -77,6 +77,7 @@ shinyUI(fluidPage(
                         min=.2,max=1,step=.05,value=.5))
             ),
             div(class="inputCategory",
+                HTML("Encounters/decay:<br/>"),
                 sliderInput("numToMeetPop",
                     label="Number of random people encountered monthly",
                     value=5, min=0,max=25,step=1),
@@ -86,6 +87,21 @@ shinyUI(fluidPage(
                 sliderInput("decayThreshold", label=
                     "Decay threshold (num months before friends must tickle)",
                     value=2, min=0,max=12,step=1)
+            ),
+            div(class="inputCategory",
+                HTML("Groups:<br/>"),
+                sliderInput("initNumGroups",
+                    label="Initial number of groups",value=20,
+                    min=0,max=40),
+                sliderInput("recruitmentRequired",
+                    label="\"Recruitment required\"",
+                    value=.6, min=0,max=1,step=.05),
+                sliderInput("likelihoodOfLeavingGroup",
+                    label="Likelihood (per year) of student leaving group ",
+                    value=.1, min=0,max=.2,step=.01),
+                sliderInput("numNewGroupsPerYear",
+                    label="Number of new groups created per year",value=2,
+                    min=0,max=10)
             ),
             sliderInput("driftRate",
                 label="Drift rate (prob of changing attribute)",
@@ -124,15 +140,6 @@ shinyUI(fluidPage(
                     sliderInput("numFreshmenPerYear",
                         label="Number of new freshmen per year",value=25,
                         min=0,max=1000)
-                ),
-                div(class="inputCategory",
-                    HTML("Groups:<br/>"),
-                    sliderInput("initNumGroups",
-                        label="Initial number of groups",value=20,
-                        min=0,max=40),
-                    sliderInput("numNewGroupsPerYear",
-                        label="Number of new groups created per year",value=2,
-                        min=0,max=10)
                 ),
                 div(class="inputCategory",
                     HTML("Dropout rate:<br/>"),

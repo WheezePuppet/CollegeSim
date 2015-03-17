@@ -254,6 +254,8 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),
+                "-recruitmentRequired",input$recruitmentRequired,
+                "-likelihoodOfLeavingGroup",input$likelihoodOfLeavingGroup,
                 ">",sub("SIMTAG",simtag,OUTPUT.FILE),"&"))
         })
     }

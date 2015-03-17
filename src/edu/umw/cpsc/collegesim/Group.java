@@ -49,13 +49,13 @@ public class Group implements Steppable{
      * join a group. Higher numbers means less acceptance into groups. The
      * number itself is difficult to interpret, since a complex conflagration
      * of factors will be put together to compare to it. */
-    public static final double RECRUITMENT_REQUIRED = .6;
+    public static double RECRUITMENT_REQUIRED;
   
     /**
      * Each time step, the probability that each student will leave each of
      * their groups, provided that leaving said group would not push the
      * group size below the minimum. */
-    public static final double LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
+    public static double LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP;
   
     /** Each time step, the probability that a student will change one of
      * their attribute values <i>provided</i> that said attribute is "different
@@ -327,8 +327,9 @@ public class Group implements Steppable{
      * <p>Note that Groups only step during academic months.</p>
      */
       public void step(SimState state){
-        System.out.println("#### GROUP " + id + " (" + 
-            state.schedule.getTime() + ")");
+        System.out.println("#### " + (isFixed ? "FIXED " : "") + "GROUP " + 
+            id + " (" + state.schedule.getTime() + ") (with " +
+            students.size() + " members)");
         influenceMembers();
         if (!isFixed) {
             ArrayList<Person> recruits = 
