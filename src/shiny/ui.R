@@ -24,23 +24,17 @@ shinyUI(fluidPage(
             )
         ),
         fluidRow(
-            checkboxInput("showAttributeParameters",
-                label="Show attribute-related parameters", value=FALSE),
-            conditionalPanel(
-                condition="input.showAttributeParameters == true",
-
+            div(class="inputCategory",
+                HTML("Attributes:<br/>"),
                 sliderInput("raceWeight",
-                    label="Race weight (in # of equivalent attributes)",value=40,
-                    min=0,max=100),
-                div(class="inputCategory",
-                    HTML("Number of attributes per student:"),
+                    label="Race weight (in # of equivalent attributes)",
+                        value=40,min=0,max=100),
                     sliderInput("numIndepAttrs",
-                        label="Independent",value=20,
-                        min=0,max=50),
+                        label="# Independent attributes per student",value=20,
+                        min=0,max=100),
                     sliderInput("numDepAttrs",
-                        label="Dependent",value=20,
-                        min=0,max=50)
-                )
+                        label="# Dependent attributes per student",value=20,
+                        min=0,max=100)
             ),
             div(class="inputCategory",
                 HTML("Similarity &rarr; friendship equation <i>(y=mx+b)</i>:<br/>"),
@@ -80,20 +74,22 @@ shinyUI(fluidPage(
                     condition="input.oGroups == 'on'",
                     sliderInput("mixedRaceGroupFraction",
                         label="Fraction of minorities in O-groups",
-                        min=.2,max=1,step=.1,value=.5))
+                        min=.2,max=1,step=.05,value=.5))
+            ),
+            div(class="inputCategory",
+                sliderInput("numToMeetPop",
+                    label="Number of random people encountered monthly",
+                    value=5, min=0,max=25,step=1),
+                sliderInput("numToMeetGroup",
+                    label="Number of group members encountered monthly",
+                    value=10, min=0,max=25,step=1),
+                sliderInput("decayThreshold", label=
+                    "Decay threshold (num months before friends must tickle)",
+                    value=2, min=0,max=12,step=1)
             ),
             sliderInput("driftRate",
                 label="Drift rate (prob of changing attribute)",
                 value=.0, min=0,max=1,step=0.05),
-            sliderInput("decayThreshold",
-                label="Decay threshold (num months before friends must tickle)",
-                value=2, min=0,max=12,step=1),
-            sliderInput("numToMeetPop",
-                label="Number of random people encountered monthly",
-                value=5, min=0,max=25,step=1),
-            sliderInput("numToMeetGroup",
-                label="Number of group members encountered monthly",
-                value=10, min=0,max=25,step=1),
 
             hr(),
 
@@ -106,6 +102,8 @@ shinyUI(fluidPage(
                 conditionalPanel(condition="input.seedType == 'specific'",
                     numericInput("seed","",value=0))
             ),
+
+            hr(),
 
             htmlOutput("log"),
 
