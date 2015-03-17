@@ -117,7 +117,7 @@ public class Group implements Steppable{
         int initialGroupSize = Sim.instance().random.nextInt(
             MAXIMUM_START_GROUP_SIZE-MINIMUM_START_GROUP_SIZE) + 
             MINIMUM_START_GROUP_SIZE + 1;
-        if(initialGroupSize>MINIMUM_GROUP_SIZE){
+        if(initialGroupSize<MINIMUM_GROUP_SIZE){
           initialGroupSize=MINIMUM_GROUP_SIZE;    //keeps groups at least 
           // the min
         }
