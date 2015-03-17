@@ -84,6 +84,8 @@ public class Group implements Steppable{
     private static int nextGroupId = 0;
     private int id;
 
+    private boolean isFixed;  // more elegant with inheritance, but oh well
+
     // A number in the range 0 to 1 indicating how aggressive the group is
     // in attracting members.
     private double recruitmentFactor;
@@ -101,15 +103,18 @@ public class Group implements Steppable{
      */
     public Group() {
         init();
+        isFixed = false;
         selectStartingStudents();
     }
 
     /**
-     * Constructs a new Group object and pre-populate it with members of
+     * Constructs a new "fixed Group" object (i.e., one whose population
+     * does not change over time) and pre-populate it with members of
      * (approximately) the fraction of minorities passed.
      */
     public Group(double minorityFraction) {
         init();
+        isFixed = true;
         selectStartingStudents(minorityFraction);
     }
 
@@ -150,8 +155,9 @@ public class Group implements Steppable{
     // common functionality.)
     private void selectStartingStudents(double minorityFraction) {
         double initialGroupSize = (double) generateInitialGroupSize();
-        int numWhites = (int) Math.round(initialGroupSize * minorityFraction);
-        int numMinorities = (int) initialGroupSize - numWhites;
+        int numMinorities = 
+            (int) Math.round(initialGroupSize * minorityFraction);
+        int numWhites = (int) initialGroupSize - numMinorities;
 
         ArrayList<Person> people = Sim.getPeople();
         Person randStudent;
@@ -324,12 +330,15 @@ public class Group implements Steppable{
         System.out.println("#### GROUP " + id + " (" + 
             state.schedule.getTime() + ")");
         influenceMembers();
-        ArrayList<Person> recruits = findStudentsToRecruit(Sim.getPeople());
-        for(int x = 0; x < recruits.size(); x++){
-          recruitStudent(recruits.get(x));
-        }
-        for(int x = 0; x<students.size(); x++){
-          possiblyLeaveGroup(students.get(x));
+        if (!isFixed) {
+            ArrayList<Person> recruits = 
+                findStudentsToRecruit(Sim.getPeople());
+            for(int x = 0; x < recruits.size(); x++){
+              recruitStudent(recruits.get(x));
+            }
+            for(int x = 0; x<students.size(); x++){
+              possiblyLeaveGroup(students.get(x));
+            }
         }
         
         if (Sim.instance().nextMonthInAcademicYear()) {
