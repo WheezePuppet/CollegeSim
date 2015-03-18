@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Enumeration;
+
 import sim.util.distribution.Normal;
+
 import java.lang.Math;
 
 import sim.engine.*;
@@ -132,6 +134,12 @@ public class Person implements Steppable {
     /** When a new Student is created, the number of automatic friends of the
      *  opposite race that they will get. */
     public static int INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS;
+    
+    /** Each time step, the probability that a student will change one of
+     * their attribute values. */
+    //I removed "<i>provided</i> that said attribute is different enough from their influencing peers to warrant change"
+    //because it was inaccurate - likelihood has nothing to do with attribute difference but is pure chance
+    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
 
     // Hand out consecutive unique numbers to new people.
     private static int nextPersonId = 0;
@@ -221,8 +229,69 @@ public class Person implements Steppable {
     private Hashtable<Integer,Double> lastTickleTime
       = new Hashtable<Integer,Double>();
 
-    
-
+    /*
+     * Personality drift for being affected by a Person's friends.
+     */
+    private void personalityDrift( ){
+    	//Get a bag of the person's friends
+    	Bag b = Sim.peopleGraph.getEdgesIn(this);
+   	    
+    	//should we add something short for if n=1 or just let it go through
+   	    //the loop even though that's kind of a waste
+   	    int n = b.size( );
+   	    //If we have at least a single friend
+   	    if(n > 0){
+   	    	ArrayList<Double> independentAverage = new ArrayList<Double>();
+   	    	ArrayList<Double> dependentAverage = new ArrayList<Double>();
+   	    	double tempTotal;
+   	    	//For each attribute
+   	    	for (int x = 0; x < INDEPENDENT_ATTRIBUTE_POOL; x++){
+   	    		//Temporary total for attribute at index x
+   	    		tempTotal = 0;
+   	    		//For each friend
+   	    		for (int y = 0; y < n; y++){
+   	    			//add the value for this attribute to the temporary total
+   	    			tempTotal+=((Person) b.get(y)).getIndependentAttributes( ).get(x);
+   	    		}
+   	    		//Set the average value for this attribute
+   	    		independentAverage.add(tempTotal/n);
+   	    	}
+   	    	//Do the same for dependent attributes
+   	    	for (int x = 0; x < DEPENDENT_ATTRIBUTE_POOL; x++){
+   	    		tempTotal = 0;
+   	    		for (int y = 0; y < n; y++){
+   	    			tempTotal+=((Person) b.get(y)).getDependentAttributes().get(x);
+   	    		}
+   	    		dependentAverage.add(tempTotal/n);
+   	    	}
+        
+   	    	double distanceI;
+   	    	double distanceD;
+   	    	double increment;
+   	    	
+   	    	//For each independent attribute 
+   	    	for(int y = 0; y < INDEPENDENT_ATTRIBUTE_POOL; y++){
+   	   			//Calculate the distance between the average attribute and this person's attribute
+   	   			distanceI = independentAverage.get(y) - getIndependentAttributes( ).get(y);
+   	   			//If we randomly decide to change the attribute
+   	    		if(Sim.instance( ).random.nextDouble(true, true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
+   	    			//Calculate an increment by which to change using the distance and a random factor
+   	    			increment = (Sim.instance( ).random.nextDouble(true,true)/5) * distanceI;
+   	    			//Set the new independent attribute factor to whatever it was before plus the increment
+   	    			setIndAttrValue(y, getIndependentAttributes( ).get(y) + increment);
+   	    		}
+   	    	}
+   	    	
+   	    	//The same process for dependent attributes
+   	    	for(int y = 0; y < DEPENDENT_ATTRIBUTE_POOL; y++){
+   	    		distanceD = dependentAverage.get(y) - getDependentAttributes( ).get(y);
+   	    		if(Sim.instance().random.nextDouble(true, true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){  
+   	    			increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceD;
+   	    			setDepAttrValue(y, getDependentAttributes( ).get(y) + increment);
+   	    		}
+   	    	}
+      	}
+   	}
 
 
     /** Removes this student from the university, forcing them to leave all 
@@ -486,7 +555,8 @@ public class Person implements Steppable {
             encounter(NUM_TO_MEET_POP, peopleBag);
         }
 
-
+        personalityDrift( );
+        
         //NOTE: Decay only matters if the people are friends- you can't decay a
         //friendship that doesn't exist. So, the time they last met only
         //matters if they are friends already or if they become friends this
@@ -863,10 +933,6 @@ public class Person implements Steppable {
           }
         }
       }
-
-//   public boolean equals(Person p){
-//     return(id==p.getID());
-//   }
 
     /** Sets the school year (1=freshman, 2=sophomore, etc.) of this
      * Person. No validation checking is performed. */
