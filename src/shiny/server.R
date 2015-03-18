@@ -360,28 +360,51 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 filter(friendships.by.race,race.x=="WHITE",
                     race.y=="MINORITY") %>%
                 select(period,mw.rels=numRels)
+            white.with.white.rels <- 
+                filter(friendships.by.race,race.x=="WHITE",
+                    race.y=="WHITE") %>%
+                select(period,ww.rels=numRels) %>%
+                mutate(ww.rels=ww.rels/10)   # realistic scale
             rels.df <- 
-                inner_join(minority.with.white.rels, 
+                inner_join(inner_join(minority.with.white.rels, 
                     minority.with.minority.rels,
-                    by=c("period")) %>%
-                mutate(perc.mw.rels=100*mw.rels/(mm.rels+mw.rels))
+                    by=c("period")),white.with.white.rels,by=c("period")) %>%
+                mutate(min.perc.mw.rels=100*mw.rels/(mm.rels+mw.rels),
+                       whi.perc.mw.rels=100*mw.rels/(ww.rels+mw.rels))
             # "perc.mw.rels" now represents, for each year, the percentage of
             # total relationships that minorities have (with anybody) that are
             # with whites.
 
             the.plot <- ggplot(rels.df %>% 
-                    gather(measure, value, mw.rels:perc.mw.rels),
-                aes(x=period, y=value, color=measure)) + 
+                    gather(measure, value, mw.rels:whi.perc.mw.rels),
+                aes(x=period, y=value, color=measure, linetype=measure)) + 
                 geom_line(size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
-                scale_color_manual(name="",
-                     breaks=c("mm.rels", "mw.rels", "perc.mw.rels"),
+                scale_linetype_manual(name="",
+                     breaks=c("mm.rels", "mw.rels", "ww.rels",
+                        "min.perc.mw.rels", "whi.perc.mw.rels"),
                      labels=c("# min-min fships",
                         "# min-whi fships", 
-                        "% that are min-whi"),
-                    values=c("mm.rels"="brown","mw.rels"="purple",
-                        "perc.mw.rels"="darkgrey")) +
+                        "# whi-whi fships / 10", 
+                        "% of mins' that are min-whi",
+                        "% of whis' that are min-whi"),
+                    values=c("mm.rels"="dotted","mw.rels"="solid",
+                        "ww.rels"="dashed",
+                        "min.perc.mw.rels"="solid",
+                        "whi.perc.mw.rels"="solid")) +
+                scale_color_manual(name="",
+                     breaks=c("mm.rels", "mw.rels", "ww.rels",
+                        "min.perc.mw.rels", "whi.perc.mw.rels"),
+                     labels=c("# min-min fships",
+                        "# min-whi fships", 
+                        "# whi-whi fships / 10", 
+                        "% of mins' that are min-whi",
+                        "% of whis' that are min-whi"),
+                    values=c("mm.rels"="darkgrey","mw.rels"="darkgrey",
+                        "ww.rels"="darkgrey",
+                        "min.perc.mw.rels"="brown",
+                        "whi.perc.mw.rels"="blue")) +
                 expand_limits(y=0) +
                 geom_hline(yintercept=100,linetype="dotted",color="black") +
                 annotate("text", x=0, y=100+5, hjust=0, size=4,
@@ -390,7 +413,8 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                     color="blue") +
                 annotate("text", x=0, y=input$probWhite*100-5, hjust=0, size=4,
                     label="expected proportion") +
-                labs(title="Racial composition of minorities' friendships",
+                labs(title=paste("Racial composition of minorities' and",
+                    "whites' friendships"),
                     x="Simulation year", y="")
             print(the.plot)
         }
