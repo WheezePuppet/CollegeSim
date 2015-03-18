@@ -174,7 +174,7 @@ public class Person implements Steppable {
      * {@link #INDEP_WEIGHT}.) Each person will either have the attribute or
      * not; and if they do, they will have a double value assigned
      * indicating its strength. */
-    public static int INDEPENDENT_ATTRIBUTE_POOL = 50;
+    public static int INDEPENDENT_ATTRIBUTE_POOL = NUM_INDEPENDENT_ATTRIBUTES;
 
     //independent attributes, which can change but do not affect each other
     private ArrayList<Double> attributesK2      //Independent attributes
@@ -194,7 +194,7 @@ public class Person implements Steppable {
      * {@link #DEP_WEIGHT}.) Each person will either have the attribute or
      * not; and if they do, they will have a double value assigned
      * indicating its strength. */
-    public static int DEPENDENT_ATTRIBUTE_POOL = 50;
+    public static int DEPENDENT_ATTRIBUTE_POOL = NUM_DEPENDENT_ATTRIBUTES;
 
     //dependent attributes, which can change but you only have 1 unit to 
     //split among them
@@ -376,11 +376,10 @@ public class Person implements Steppable {
           }
     }
     
-    private void assignAttribute(int numAttr, int poolSize, 
-        ArrayList<Double> attr){
+    private void assignAttribute(int numAttr, ArrayList<Double> attr){
       boolean okay;
       for(int i=0; i<numAttr; i++){
-        //pick an attribute to change
+     /*   //pick an attribute to change
         int index = Sim.instance( ).random.nextInt(poolSize);
         okay = false;
         //while we have not chosen an appropriate index
@@ -393,13 +392,12 @@ public class Person implements Steppable {
           }else{
             index = Sim.instance( ).random.nextInt(poolSize);
           }
-        }
+        }*/
         //pick a degree to which the person will have this attribute
         //we generate a number between 0 and 1, including 1 but not including 0
         double degree = Sim.instance( ).random.nextDouble(false, true);
-        //then we set the attribute at the chosen index to be the generated 
-        //degree
-        attr.set(index, degree);
+        //then we set the attribute at index i to be degree
+        attr.set(i, degree);
       }
     }
     
@@ -422,11 +420,9 @@ public class Person implements Steppable {
             attributesK1.set(i, rand);
         }
         //Assigning independent attributes
-        assignAttribute(NUM_INDEPENDENT_ATTRIBUTES, 
-            INDEPENDENT_ATTRIBUTE_POOL, attributesK2);
+        assignAttribute(NUM_INDEPENDENT_ATTRIBUTES, attributesK2);
         //Assigning dependent attributes
-        assignAttribute(NUM_DEPENDENT_ATTRIBUTES, 
-            DEPENDENT_ATTRIBUTE_POOL, attributesK3);
+        assignAttribute(NUM_DEPENDENT_ATTRIBUTES, attributesK3);
         //
         //Assign a race   
         boolean white = assignRaceGender(PROBABILITY_WHITE);
