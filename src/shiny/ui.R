@@ -29,9 +29,9 @@ shinyUI(fluidPage(
                 sliderInput("raceWeight",
                     label="Race weight (in # of equivalent attributes)",
                         value=40,min=0,max=100),
-                    sliderInput("numIndepAttrs",
-                        label="# Independent attributes per student",value=20,
-                        min=0,max=100),
+                    sliderInput("numPreferences",
+                        label="Size of preference pool (and # prefs/student)",
+                        value=20,min=0,max=100),
                     sliderInput("numDepAttrs",
                         label="# Dependent attributes per student",value=20,
                         min=0,max=100)

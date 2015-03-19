@@ -240,7 +240,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 "-decayThreshold",input$decayThreshold,
                 "-friendshipCoefficient",input$friendshipCoefficient,
                 "-friendshipIntercept",input$friendshipIntercept,
-                "-numIndepAttrs",input$numIndepAttrs,
+                "-numPreferences",input$numPreferences,
                 "-numDepAttrs",input$numDepAttrs,
                 ifelse(input$forceBiracialFriendships=="on",
                     paste("-initNumForcedOppRaceFriends",

@@ -22,9 +22,9 @@ import sim.field.network.*;
  * <p></p>
  * Purpose in life:
  * <ul>
- * <li>Maintain a list of attributes, including constant, independent,
- * dependent, and race. (In the case of dependent attributes, which
- * auto-normalize, this is non-trivial.)</li>
+ * <li>Maintain a list of attributes, including constants, preferences,
+ * hobbies, and race. (In the case of hobbies, which auto-normalize, this is
+ * non-trivial.)</li>
  * <li>Every month, <b>encounter</b> some people who are members of your
  * groups, and some totally random people. Encounter means:
  *      <ul>
@@ -32,7 +32,7 @@ import sim.field.network.*;
  *      <li>If you're not friends with them, <b>meet</b> them. Meet means:
  *          <ol>
  *          <li>Compute their <b>similarity</b>, on a scale of 0 to 1. This
- *          involves constant, independent, dependent, and race attributes,
+ *          involves constant attributes, preferences, hobbies, and race,
  *          all weighted differently.</li> 
  *          <li>Based on the similarity, determine whether they become
  *          friends. (This is random, but based in part on {@link
@@ -89,13 +89,13 @@ public class Person implements Steppable {
      * unchangeable; <i>e.g.</i>, "where are you from?") */
     public static final double CONST_WEIGHT = 1;
 
-    /** The relative importance of "independent" attributes, with respect to
-     * other types of attributes. ("Independent" attributes are those that 
-     * can vary independently with respect to each other. Having more of
-     * one indep attribute does not impact your value of another indep
-     * attribute. (<i>e.g.</i>, the degree to which you like purple does
-     * not depend on the degree to which you like basketball.) */
-    public static final double INDEP_WEIGHT = 1.5;
+    /** The relative importance of "preferences", with respect to other types
+     * of attributes. ("Preferences" are those attributes that can vary
+     * independently with respect to each other. Having more of one preference
+     * does not impact your value of another preference . (<i>e.g.</i>, the
+     * degree to which you like purple does not depend on the degree to which
+     * you like basketball.) */
+    public static final double PREF_WEIGHT = 1.5;
 
     /** The relative importance of "dependent" attributes, with respect to
      * other types of attributes. ("Dependent" attributes are those that
@@ -159,33 +159,27 @@ public class Person implements Steppable {
     private ArrayList<Group> groups;
   
     /** The total number of "constant" attributes in the system. (See {@link
-     * #CONST_WEIGHT}.) Each person will have a boolean value for each,
-     * indicating whether they do (or do not) possess the attribute. */
+     * #CONST_WEIGHT}.) Each person will have a value from 0 to 1 for each,
+     * indicating the extent to which they possess the attribute. */
     public static int CONSTANT_ATTRIBUTE_POOL = 0;  // 100;
-    private ArrayList<Boolean> attributesK1     //Constant attributes
-        = new ArrayList<Boolean>(
-            Collections.nCopies(CONSTANT_ATTRIBUTE_POOL, false));
+    private ArrayList<Double> constantAttrs     //Constant attributes
+        = new ArrayList<Double>(
+            Collections.nCopies(CONSTANT_ATTRIBUTE_POOL, 0.0));
   
-    /** The number of "independent" attributes each person has. (See {@link
-     * #INDEP_WEIGHT}.) */
-    public static int NUM_INDEPENDENT_ATTRIBUTES = 20;
+    /** The number of preferences each person has. (See {@link
+     * #PREF_WEIGHT}.) */
+    public static int NUM_PREFERENCES = 20;
 
-    /** The total number of "independent" attributes in the system. (See 
-     * {@link #INDEP_WEIGHT}.) Each person will either have the attribute or
+    /** The total number of "preferences" in the system. (See 
+     * {@link #PREF_WEIGHT}.) Each person will either have the attribute or
      * not; and if they do, they will have a double value assigned
-     * indicating its strength. */
-    public static int INDEPENDENT_ATTRIBUTE_POOL = NUM_INDEPENDENT_ATTRIBUTES;
+     * indicating its strength. (Morgan: is this still accurate?) */
+    public static int PREFERENCE_POOL_SIZE = NUM_PREFERENCES;
 
-    //independent attributes, which can change but do not affect each other
-    private ArrayList<Double> attributesK2      //Independent attributes
+    //A person's preferences, which can change but do not affect each other
+    private ArrayList<Double> preferences      //preferences
       = new ArrayList<Double>(Collections.nCopies(
-            INDEPENDENT_ATTRIBUTE_POOL, 0.0));
-
-    /** The interval inside which two indep attributes are considered "the
-     * same" so for attribute 14, if this has 0.5 and other has 0.2, they
-     * have this attribute in common, but if other had 0.1, they would
-     * not have this attribute in common */
-    public static double INDEPENDENT_INTERVAL = 0.2;
+            PREFERENCE_POOL_SIZE, 0.0));
   
     /** The number of "dependent" attributes each person has. (See {@link
      * #DEP_WEIGHT}.) */
@@ -203,25 +197,19 @@ public class Person implements Steppable {
       = new ArrayList<Double>(Collections.nCopies(
             DEPENDENT_ATTRIBUTE_POOL, 0.0));
 
-    /** The interval inside which two dep attributes are considered "the
-     * same" so for attribute 14, if this has 0.5 and other has 0.2, they
-     * have this attribute in common, but if other had 0.1, they would
-     * not have this attribute in common */
-    public static double DEPENDENT_INTERVAL = 0.3;
-
     /**
     * The following ArrayLists are used to store each student's influencible
     * preferences at the beginning and end of each year. The end of the 
-    * student's last year will be the attributesK2 and attributesK3 
+    * student's last year will be the preferences and attributesK3 
     * variables
     */
-    private ArrayList<Double> attributesK2Year0;
+    private ArrayList<Double> preferencesYear0;
     private ArrayList<Double> attributesK3Year0;
-    private ArrayList<Double> attributesK2Year1;
+    private ArrayList<Double> preferencesYear1;
     private ArrayList<Double> attributesK3Year1; 
-    private ArrayList<Double> attributesK2Year2;
+    private ArrayList<Double> preferencesYear2;
     private ArrayList<Double> attributesK3Year2; 
-    private ArrayList<Double> attributesK2Year3;
+    private ArrayList<Double> preferencesYear3;
     private ArrayList<Double> attributesK3Year3;
 
     //A list that will house the absolute sim time that this person first met,
@@ -241,26 +229,30 @@ public class Person implements Steppable {
    	    int n = b.size( );
    	    //If we have at least a single friend
    	    if(n > 0){
-   	    	ArrayList<Double> independentAverage = new ArrayList<Double>();
+   	    	ArrayList<Double> preferenceAverage = new ArrayList<Double>();
    	    	ArrayList<Double> dependentAverage = new ArrayList<Double>();
    	    	double tempTotal;
    	    	//For each attribute
-   	    	for (int x = 0; x < INDEPENDENT_ATTRIBUTE_POOL; x++){
+   	    	for (int x = 0; x < PREFERENCE_POOL_SIZE; x++){
    	    		//Temporary total for attribute at index x
    	    		tempTotal = 0;
    	    		//For each friend
    	    		for (int y = 0; y < n; y++){
    	    			//add the value for this attribute to the temporary total
-   	    			tempTotal+=((Person)((Edge) b.get(y)).getOtherNode(this)).getIndependentAttributes( ).get(x);
+   	    			tempTotal+=((Person)
+                        ((Edge) b.get(y)).getOtherNode(this)
+                        ).getPreferences( ).get(x);
    	    		}
    	    		//Set the average value for this attribute
-   	    		independentAverage.add(tempTotal/n);
+   	    		preferenceAverage.add(tempTotal/n);
    	    	}
    	    	//Do the same for dependent attributes
    	    	for (int x = 0; x < DEPENDENT_ATTRIBUTE_POOL; x++){
    	    		tempTotal = 0;
    	    		for (int y = 0; y < n; y++){
-   	    			tempTotal+=((Person)((Edge) b.get(y)).getOtherNode(this)).getDependentAttributes( ).get(x);
+   	    			tempTotal+=((Person)
+                        ((Edge) b.get(y)).getOtherNode(this)
+                        ).getDependentAttributes( ).get(x);
    	    		}
    	    		dependentAverage.add(tempTotal/n);
    	    	}
@@ -269,16 +261,16 @@ public class Person implements Steppable {
    	    	double distanceD;
    	    	double increment;
    	    	
-   	    	//For each independent attribute 
-   	    	for(int y = 0; y < INDEPENDENT_ATTRIBUTE_POOL; y++){
+   	    	//For each preference 
+   	    	for(int y = 0; y < PREFERENCE_POOL_SIZE; y++){
    	   			//Calculate the distance between the average attribute and this person's attribute
-   	   			distanceI = independentAverage.get(y) - getIndependentAttributes( ).get(y);
+   	   			distanceI = preferenceAverage.get(y) - getPreferences( ).get(y);
    	   			//If we randomly decide to change the attribute
    	    		if(Sim.instance( ).random.nextDouble(true, true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
    	    			//Calculate an increment by which to change using the distance and a random factor
    	    			increment = (Sim.instance( ).random.nextDouble(true,true)/5) * distanceI;
-   	    			//Set the new independent attribute factor to whatever it was before plus the increment
-   	    			setIndAttrValue(y, getIndependentAttributes( ).get(y) + increment);
+   	    			//Set the new preference value to whatever it was before plus the increment
+   	    			setPreferenceValue(y, getPreferences( ).get(y) + increment);
    	    		}
    	    	}
    	    	
@@ -416,11 +408,11 @@ public class Person implements Steppable {
 
         //Assigning constant attributes
         for(int i=0; i<CONSTANT_ATTRIBUTE_POOL; i++){
-            boolean rand = Sim.instance( ).random.nextBoolean( );
-            attributesK1.set(i, rand);
+            double rand = Sim.instance( ).random.nextDouble( );
+            constantAttrs.set(i, rand);
         }
-        //Assigning independent attributes
-        assignAttribute(NUM_INDEPENDENT_ATTRIBUTES, attributesK2);
+        //Assigning preferences
+        assignAttribute(NUM_PREFERENCES, preferences);
         //Assigning dependent attributes
         assignAttribute(NUM_DEPENDENT_ATTRIBUTES, attributesK3);
         //
@@ -664,10 +656,10 @@ public class Person implements Steppable {
         double indAverage=0;
         double depAverage=0;
         String message = "";
-        for(int x = 0; x < NUM_INDEPENDENT_ATTRIBUTES; x++){
-          indAverage += Math.abs(attributesK2.get(x) - attributesK2Year0.get(x));
+        for(int x = 0; x < NUM_PREFERENCES; x++){
+          indAverage += Math.abs(preferences.get(x) - preferencesYear0.get(x));
         }
-        indAverage=indAverage/NUM_INDEPENDENT_ATTRIBUTES;
+        indAverage=indAverage/NUM_PREFERENCES;
         for(int x = 0; x < NUM_DEPENDENT_ATTRIBUTES; x++){
           depAverage += Math.abs(attributesK3.get(x) - attributesK3Year0.get(x));
         }
@@ -736,22 +728,9 @@ public class Person implements Steppable {
         // even it out by removing one.
     }
 
-    private int attrCounter(int num, ArrayList<Boolean> attr1, 
-        ArrayList<Boolean> attr2){
-      int count = 0;
-      for(int i=0; i<num; i++){
-        //if they have the same boolean value for an attribute
-        if(attr1.get(i) == attr2.get(i)){
-          //increment constant count
-          count++;
-        }
-      }
-      return count;
-    }
-    
-    //num is the size of the attribute pool
+    // for doubles
     private double attrCounter(int num, ArrayList<Double> attr1, 
-        ArrayList<Double> attr2, double interval){
+        ArrayList<Double> attr2){
     	
     	double sum1 = 0.0;
     	double sum2 = 0.0;
@@ -783,18 +762,18 @@ public class Person implements Steppable {
       double similarity = 0.0;
       
       //Kind 1: Constant
-      int constantCount = attrCounter(CONSTANT_ATTRIBUTE_POOL, attributesK1, 
-        other.attributesK1);
+      double constantCount = attrCounter(CONSTANT_ATTRIBUTE_POOL,
+        constantAttrs, other.constantAttrs);
       
-      //Kind 2: Independent
-      double indepCount = attrCounter(INDEPENDENT_ATTRIBUTE_POOL, attributesK2, 
-        other.attributesK2, INDEPENDENT_INTERVAL);
+      //Kind 2: Preferences
+      double prefCount = attrCounter(PREFERENCE_POOL_SIZE, preferences, 
+        other.preferences);
       
       //Kind 3: Dependent
       ArrayList<Double> normalK3This = normalize(attributesK3);
       ArrayList<Double> normalK3Other = normalize(other.attributesK3);
       double depCount = attrCounter(DEPENDENT_ATTRIBUTE_POOL, normalK3This, 
-        normalK3Other, DEPENDENT_INTERVAL);
+        normalK3Other);
       
         //Do they have the same race?
         int raceCount = 0;
@@ -808,11 +787,11 @@ public class Person implements Steppable {
         }
         //Calculate their similarity rating, taking importance of each 
         //category (the weight) into account
-      similarity = (constantCount * CONST_WEIGHT) + (indepCount * INDEP_WEIGHT)
+      similarity = (constantCount * CONST_WEIGHT) + (prefCount * PREF_WEIGHT)
           + (depCount * DEP_WEIGHT) + (raceCount * RACE_WEIGHT) 
           + (genCount * GEN_WEIGHT);
       double maxRating = (CONSTANT_ATTRIBUTE_POOL * CONST_WEIGHT) 
-          + (INDEPENDENT_ATTRIBUTE_POOL * INDEP_WEIGHT)
+          + (PREFERENCE_POOL_SIZE * PREF_WEIGHT)
           + (DEPENDENT_ATTRIBUTE_POOL * DEP_WEIGHT) + RACE_WEIGHT + GEN_WEIGHT;
       return similarity / maxRating;
     
@@ -872,17 +851,15 @@ public class Person implements Steppable {
   }
   
   /** Returns a list of doubles, one for each of the {@link
-   * #INDEPENDENT_ATTRIBUTE_POOL} possible indep attributes. This will *
-   * indicate the degree to which the person possesses each of those
-   * attributes (0 = does not have that attribute at all.) */
-  public ArrayList<Double> getIndependentAttributes(){
-    return attributesK2;
+   * #PREFERENCE_POOL_SIZE} possible preferences. */
+  public ArrayList<Double> getPreferences(){
+    return preferences;
   }
 
-  /** Sets the value of the independent attribute whose index is passed to
-   * the value passed. */
-  public void setIndAttrValue(int index, double val){
-    attributesK2.set(index, val);
+  /** Sets the value of the preference whose index is passed to the value
+   * passed. */
+  public void setPreferenceValue(int index, double val){
+      preferences.set(index, val); 
   }
 
   /** Sets the value of the dependent attribute whose index is passed to
@@ -948,16 +925,16 @@ public class Person implements Steppable {
     year = x;
     //store initial attributes
     if(year==1){
-      attributesK2Year0=new ArrayList<Double>(attributesK2);
+      preferencesYear0=new ArrayList<Double>(preferences);
       attributesK3Year0=new ArrayList<Double>(attributesK3);
     }else if(year==2){
-      attributesK2Year1=new ArrayList<Double>(attributesK2);
+      preferencesYear1=new ArrayList<Double>(preferences);
       attributesK3Year1=new ArrayList<Double>(attributesK3);
     }else if(year==3){
-      attributesK2Year2=new ArrayList<Double>(attributesK2);
+      preferencesYear2=new ArrayList<Double>(preferences);
       attributesK3Year2=new ArrayList<Double>(attributesK3);
     }else if(year==4){
-      attributesK2Year3=new ArrayList<Double>(attributesK2);
+      preferencesYear3=new ArrayList<Double>(preferences);
       attributesK3Year3=new ArrayList<Double>(attributesK3);
     }
   }
@@ -973,20 +950,20 @@ public class Person implements Steppable {
      * performed). */
   public void incrementYear(){
     if(year==1){
-      attributesK2Year1=new ArrayList<Double>(attributesK2);
+      preferencesYear1=new ArrayList<Double>(preferences);
       attributesK3Year1=new ArrayList<Double>(attributesK3);
     }else if(year==2){
-      attributesK2Year2=new ArrayList<Double>(attributesK2);
+      preferencesYear2=new ArrayList<Double>(preferences);
       attributesK3Year2=new ArrayList<Double>(attributesK3);
     }else if(year==3){
-      attributesK2Year3=new ArrayList<Double>(attributesK2);
+      preferencesYear3=new ArrayList<Double>(preferences);
       attributesK3Year3=new ArrayList<Double>(attributesK3);
     }
     year++;
   }
 
   public boolean hasFullData(){
-    if(attributesK2Year0!=null&&attributesK2Year1!=null&&attributesK2Year3!=null&&attributesK2!=null&&attributesK3Year0!=null&&attributesK3Year1!=null&&attributesK3Year3!=null&&attributesK3!=null){
+    if(preferencesYear0!=null&&preferencesYear1!=null&&preferencesYear3!=null&&preferences!=null&&attributesK3Year0!=null&&attributesK3Year1!=null&&attributesK3Year3!=null&&attributesK3!=null){
       return true;
     }else{
       return false;

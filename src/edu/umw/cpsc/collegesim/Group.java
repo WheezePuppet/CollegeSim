@@ -249,15 +249,15 @@ public class Group implements Steppable{
    	    //the loop even though that's kind of a waste
    	    int n = students.size( );
    	    if(n > 0){
-   	    	ArrayList<Double> independentAverage = new ArrayList<Double>();
+   	    	ArrayList<Double> preferenceAverage = new ArrayList<Double>();
    	    	ArrayList<Double> dependentAverage = new ArrayList<Double>();
    	    	double tempTotal;
-   	    	for (int x = 0; x < students.get(0).getIndependentAttributes( ).size( ); x++){    
+   	    	for (int x = 0; x < students.get(0).getPreferences( ).size( ); x++){    
    	    		tempTotal=0;
    	    		for (int y = 0; y < n; y++){
-   	    			tempTotal+=students.get(y).getIndependentAttributes( ).get(x);
+   	    			tempTotal+=students.get(y).getPreferences( ).get(x);
    	    		}
-   	    		independentAverage.add(tempTotal/n);
+   	    		preferenceAverage.add(tempTotal/n);
    	    	}
    	    	for (int x = 0; x < students.get(0).getDependentAttributes( ).size( ); x++){
    	    		tempTotal=0;
@@ -267,7 +267,7 @@ public class Group implements Steppable{
    	    		dependentAverage.add(tempTotal/n);
    	    	}
 
-        //At this point, both independentAverage and dependentAverage are
+        //At this point, both preferenceAverage and dependentAverage are
         //filled the following should use two rands-- one to see if the
         //attribute should in fact change, and another to be used to
         //multiply by the distance to calculate how much it would increment
@@ -276,20 +276,20 @@ public class Group implements Steppable{
         //indirect normalization We have to keep our numbers pretty low
         //here-- this will be called at every step
         
-   	    	double distanceI;  //distance between current person's current 
-        // independent attribute and the group's average attribute
+   	    	double distanceP;  //distance between current person's current 
+        // preference and the group's average value for that preference
    	    	double distanceD;  //distance between current person's current 
         // dependent attribute and group's average attribute
    	    	double increment; //how much each attribute will increment by
    	    	for(int x = 0; x < n; x++){
-   	    		for (int y = 0; y < independentAverage.size( ); y++){
-   	    			distanceI = independentAverage.get(y) - students.get(x).getIndependentAttributes().get(y);
+   	    		for (int y = 0; y < preferenceAverage.size( ); y++){
+   	    			distanceP = preferenceAverage.get(y) - students.get(x).getPreferences().get(y);
    	    			if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
-   	    				increment = (Sim.instance( ).random.nextDouble(true,true)/52) * distanceI; 
+   	    				increment = (Sim.instance( ).random.nextDouble(true,true)/52) * distanceP; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
                     //the group's average
-   	    				students.get(x).setIndAttrValue(y, (students.get(x).getIndependentAttributes().get(y)) +
+   	    				students.get(x).setPreferenceValue(y, (students.get(x).getPreferences().get(y)) +
    	    						increment);
    	    			}
    	    		}
