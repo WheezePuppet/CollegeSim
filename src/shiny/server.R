@@ -439,7 +439,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 group_by(period,race) %>% summarize(numStudents=n())
 
             x <- inner_join(encounters.stats.df,people.stats.df,
-                    by=c("id1"="id")) %>%
+                    by=c("id1"="id","year"="period")) %>%
                 select(year,type,race)
             encounter.types <- group_by(x,year,race,type) %>%
                 dplyr::summarize(numEvents=n())
