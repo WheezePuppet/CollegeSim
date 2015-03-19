@@ -233,7 +233,7 @@ public class Person implements Steppable {
      * Personality drift for being affected by a Person's friends.
      */
     private void personalityDrift( ){
-    	//Get a bag of the person's friends
+    	//Get a bag of the edges to the person's friends
     	Bag b = Sim.peopleGraph.getEdgesIn(this);
    	    
     	//should we add something short for if n=1 or just let it go through
@@ -251,7 +251,7 @@ public class Person implements Steppable {
    	    		//For each friend
    	    		for (int y = 0; y < n; y++){
    	    			//add the value for this attribute to the temporary total
-   	    			tempTotal+=((Person) b.get(y)).getIndependentAttributes( ).get(x);
+   	    			tempTotal+=((Person)((Edge) b.get(y)).getOtherNode(this)).getIndependentAttributes( ).get(x);
    	    		}
    	    		//Set the average value for this attribute
    	    		independentAverage.add(tempTotal/n);
@@ -260,7 +260,7 @@ public class Person implements Steppable {
    	    	for (int x = 0; x < DEPENDENT_ATTRIBUTE_POOL; x++){
    	    		tempTotal = 0;
    	    		for (int y = 0; y < n; y++){
-   	    			tempTotal+=((Person) b.get(y)).getDependentAttributes().get(x);
+   	    			tempTotal+=((Person)((Edge) b.get(y)).getOtherNode(this)).getDependentAttributes( ).get(x);
    	    		}
    	    		dependentAverage.add(tempTotal/n);
    	    	}
