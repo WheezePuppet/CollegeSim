@@ -539,22 +539,35 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 group_by(year) %>%
                 summarize(meanMin=mean(numMin),
                           meanWhi=mean(numWhi),
-                          meanTot=mean(numTot))
+                          meanTot=mean(numTot)) %>%
+                mutate(expMin=meanTot * (1-input$probWhite))
 
             summary.group.stats.df <- summary.group.stats.df %>%
-                gather(measure, value, meanMin:meanTot)
+                gather(measure, value, meanMin:expMin)
             the.plot <- ggplot(summary.group.stats.df) +
-                geom_line(aes(x=year,group=measure,col=measure,y=value),size=1.2) +
+                geom_line(aes(x=year,group=measure,col=measure,linetype=measure,
+                    y=value), size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
                 expand_limits(y=0) +
-                scale_color_manual(name="",
-                     breaks=c("meanMin","meanWhi","meanTot"),
+                scale_linetype_manual(name="",
+                     breaks=c("meanMin","meanWhi","meanTot","expMin"),
                      labels=c("avg # min",
                         "avg # whi",
-                        "avg total size"),
+                        "avg total size",
+                        "expected avg # min"),
+                    values=c("meanMin"="solid","meanWhi"="solid",
+                        "meanTot"="solid",
+                        "expMin"="dotted")) + 
+                scale_color_manual(name="",
+                     breaks=c("meanMin","meanWhi","meanTot","expMin"),
+                     labels=c("avg # min",
+                        "avg # whi",
+                        "avg total size",
+                        "expected avg # min"),
                     values=c("meanMin"="brown","meanWhi"="blue",
-                        "meanTot"="darkgrey")) + 
+                        "meanTot"="darkgrey",
+                        "expMin"="darkgrey")) + 
                 labs(title="Group composition",
                     x="Simulation year", y="")
 
