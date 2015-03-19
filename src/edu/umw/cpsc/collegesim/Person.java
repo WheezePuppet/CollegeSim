@@ -749,9 +749,21 @@ public class Person implements Steppable {
       return count;
     }
     
-    private int attrCounter(int num, ArrayList<Double> attr1, 
+    //num is the size of the attribute pool
+    private double attrCounter(int num, ArrayList<Double> attr1, 
         ArrayList<Double> attr2, double interval){
-      int count = 0;
+    	
+    	double sum1 = 0.0;
+    	double sum2 = 0.0;
+    	for(int i = 0; i < num; i ++){
+    		sum1 += attr1.get(i);
+    		sum2 += attr2.get(i);
+    	}
+    	
+    	double difference = Math.abs(sum1 - sum2);
+    	//return the similarity rating
+    	return (num - difference);
+/*      int count = 0;
       for(int i=0; i<num; i++){
         double difference = attr1.get(i) - attr2.get(i);
         difference = Math.abs(difference);
@@ -761,7 +773,7 @@ public class Person implements Steppable {
           count++;
         }
       }
-      return count;
+      return count;*/
     }
     
     /**
@@ -775,13 +787,13 @@ public class Person implements Steppable {
         other.attributesK1);
       
       //Kind 2: Independent
-      int indepCount = attrCounter(INDEPENDENT_ATTRIBUTE_POOL, attributesK2, 
+      double indepCount = attrCounter(INDEPENDENT_ATTRIBUTE_POOL, attributesK2, 
         other.attributesK2, INDEPENDENT_INTERVAL);
       
       //Kind 3: Dependent
       ArrayList<Double> normalK3This = normalize(attributesK3);
       ArrayList<Double> normalK3Other = normalize(other.attributesK3);
-      int depCount = attrCounter(DEPENDENT_ATTRIBUTE_POOL, normalK3This, 
+      double depCount = attrCounter(DEPENDENT_ATTRIBUTE_POOL, normalK3This, 
         normalK3Other, DEPENDENT_INTERVAL);
       
         //Do they have the same race?
