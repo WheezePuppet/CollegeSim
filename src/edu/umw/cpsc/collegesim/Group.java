@@ -250,7 +250,7 @@ public class Group implements Steppable{
    	    int n = students.size( );
    	    if(n > 0){
    	    	ArrayList<Double> preferenceAverage = new ArrayList<Double>();
-   	    	ArrayList<Double> dependentAverage = new ArrayList<Double>();
+   	    	ArrayList<Double> hobbyAverage = new ArrayList<Double>();
    	    	double tempTotal;
    	    	for (int x = 0; x < students.get(0).getPreferences( ).size( ); x++){    
    	    		tempTotal=0;
@@ -259,27 +259,27 @@ public class Group implements Steppable{
    	    		}
    	    		preferenceAverage.add(tempTotal/n);
    	    	}
-   	    	for (int x = 0; x < students.get(0).getDependentAttributes( ).size( ); x++){
+   	    	for (int x = 0; x < students.get(0).getHobbies( ).size( ); x++){
    	    		tempTotal=0;
    	    		for (int y = 0; y < n; y++){
-   	    			tempTotal+=students.get(y).getDependentAttributes().get(x);
+   	    			tempTotal+=students.get(y).getHobbies().get(x);
    	    		}
-   	    		dependentAverage.add(tempTotal/n);
+   	    		hobbyAverage.add(tempTotal/n);
    	    	}
 
-        //At this point, both preferenceAverage and dependentAverage are
-        //filled the following should use two rands-- one to see if the
-        //attribute should in fact change, and another to be used to
-        //multiply by the distance to calculate how much it would increment
-        //by note that a group's influence will never directly decrement
-        //any attributes-- dependent attributes may only decrement by
-        //indirect normalization We have to keep our numbers pretty low
-        //here-- this will be called at every step
+        //At this point, both preferenceAverage and hobbyAverage are filled.
+        //the following should use two rands-- one to see if the attribute
+        //should in fact change, and another to be used to multiply by the
+        //distance to calculate how much it would increment by. note that a
+        //group's influence will never directly decrement any attributes--
+        //hobbies may only decrement by indirect normalization. We have to 
+        //keep our numbers pretty low here-- this will be called at every 
+        //step
         
    	    	double distanceP;  //distance between current person's current 
         // preference and the group's average value for that preference
-   	    	double distanceD;  //distance between current person's current 
-        // dependent attribute and group's average attribute
+   	    	double distanceH;  //distance between current person's current 
+        // hobby and group's average value for that hobby
    	    	double increment; //how much each attribute will increment by
    	    	for(int x = 0; x < n; x++){
    	    		for (int y = 0; y < preferenceAverage.size( ); y++){
@@ -294,11 +294,11 @@ public class Group implements Steppable{
    	    			}
    	    		}
    	    		
-   	    		for(int y = 0; y < dependentAverage.size( ); y++){
-   	    			distanceD = dependentAverage.get(y) - students.get(x).getDependentAttributes().get(y);
+   	    		for(int y = 0; y < hobbyAverage.size( ); y++){
+   	    			distanceH = hobbyAverage.get(y) - students.get(x).getHobbies().get(y);
    	    			if(Sim.instance().random.nextDouble(true,true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){  
-   	    				increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceD;
-   	    				students.get(x).setDepAttrValue(y,(students.get(x).getDependentAttributes().get(y)) +
+   	    				increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceH;
+   	    				students.get(x).setHobbyValue(y,(students.get(x).getHobbies().get(y)) +
    	    						increment);  //Morgan's method
    	    			}
    	    		}

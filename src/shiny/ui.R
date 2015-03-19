@@ -32,9 +32,9 @@ shinyUI(fluidPage(
                     sliderInput("numPreferences",
                         label="Size of preference pool (and # prefs/student)",
                         value=20,min=0,max=100),
-                    sliderInput("numDepAttrs",
-                        label="# Dependent attributes per student",value=20,
-                        min=0,max=100)
+                    sliderInput("numHobbies",
+                        label="Size of hobby pool (and # hobbies/student)",
+                        value=20,min=0,max=100)
             ),
             div(class="inputCategory",
                 HTML("Similarity &rarr; friendship equation <i>(y=mx+b)</i>:<br/>"),

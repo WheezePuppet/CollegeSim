@@ -239,7 +239,7 @@ public class Sim extends SimState implements Steppable{
         Person.FRIENDSHIP_COEFFICIENT = .22;
         Person.FRIENDSHIP_INTERCEPT = .05;
         Person.NUM_PREFERENCES = 20;
-        Person.NUM_DEPENDENT_ATTRIBUTES = 20;
+        Person.NUM_HOBBIES = 20;
         Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
         Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
         Group.MIXED_RACE_GROUP_FRACTION = .5;
@@ -285,8 +285,8 @@ public class Sim extends SimState implements Steppable{
                 Person.FRIENDSHIP_INTERCEPT = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-numPreferences")) {
                 Person.NUM_PREFERENCES = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("-numDepAttrs")) {
-                Person.NUM_DEPENDENT_ATTRIBUTES = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numHobbies")) {
+                Person.NUM_HOBBIES = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-initNumForcedOppRaceFriends")) {
                 Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 
                     Integer.parseInt(args[++i]);
@@ -644,7 +644,7 @@ public class Sim extends SimState implements Steppable{
         "  [-decayThreshold numMonthsStayAlive] # Integer; default 2\n" +
         "  [-friendshipCoefficient coeff]       # Double; default .22\n" +
         "  [-friendshipIntercept intercept]     # Double; default .05\n" +
-        "  [-numDepAttrs num]                   # Integer; default 20\n" +
+        "  [-numHobbies num]                    # Integer; default 20\n" +
         "  [-numPreferences num]                # Integer; default 20\n" +
         "  [-initNumForcedOppRaceFriends num]   # Integer; default 0\n" +
         "  [-initNumMixedRaceGroups num]        # Integer; default 0\n" +
