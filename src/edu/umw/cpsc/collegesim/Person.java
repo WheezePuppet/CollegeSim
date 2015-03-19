@@ -168,13 +168,13 @@ public class Person implements Steppable {
   
     /** The number of preferences each person has. (See {@link
      * #PREF_WEIGHT}.) */
-    public static int NUM_PREFERENCES = 20;
+    public static int NUM_PREFERENCES;
 
     /** The total number of "preferences" in the system. (See 
      * {@link #PREF_WEIGHT}.) Each person will either have the attribute or
      * not; and if they do, they will have a double value assigned
      * indicating its strength. (Morgan: is this still accurate?) */
-    public static int PREFERENCE_POOL_SIZE = NUM_PREFERENCES;
+    public static int PREFERENCE_POOL_SIZE;
 
     //A person's preferences, which can change but do not affect each other
     private ArrayList<Double> preferences
@@ -183,13 +183,13 @@ public class Person implements Steppable {
   
     /** The number of "hobbies" attributes each person has. (See {@link
      * #HOBBY_WEIGHT}.) */
-    public static int NUM_HOBBIES = 20;
+    public static int NUM_HOBBIES;
 
     /** The total number of "hobbies" in the system. (See 
      * {@link #HOBBY_WEIGHT}.) Each person will either have the attribute or
      * not; and if they do, they will have a double value assigned
      * indicating its strength. */
-    public static int HOBBY_POOL_SIZE = NUM_HOBBIES;
+    public static int HOBBY_POOL_SIZE;
 
     //hobbies, which can change but you only have 1 unit to 
     //split among them

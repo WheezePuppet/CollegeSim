@@ -238,8 +238,8 @@ public class Sim extends SimState implements Steppable{
         Person.DECAY_THRESHOLD = 2;
         Person.FRIENDSHIP_COEFFICIENT = .22;
         Person.FRIENDSHIP_INTERCEPT = .05;
-        Person.NUM_PREFERENCES = 20;
-        Person.NUM_HOBBIES = 20;
+        Person.NUM_PREFERENCES = Person.PREFERENCE_POOL_SIZE = 20;
+        Person.NUM_HOBBIES = Person.NUM_HOBBIES = 20;
         Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
         Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
         Group.MIXED_RACE_GROUP_FRACTION = .5;
@@ -284,9 +284,11 @@ public class Sim extends SimState implements Steppable{
             } else if (args[i].equals("-friendshipIntercept")) {
                 Person.FRIENDSHIP_INTERCEPT = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-numPreferences")) {
-                Person.NUM_PREFERENCES = Integer.parseInt(args[++i]);
+                Person.NUM_PREFERENCES = Person.PREFERENCE_POOL_SIZE =
+                    Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numHobbies")) {
-                Person.NUM_HOBBIES = Integer.parseInt(args[++i]);
+                Person.NUM_HOBBIES = Person.HOBBY_POOL_SIZE =
+                    Integer.parseInt(args[++i]);
             } else if (args[i].equals("-initNumForcedOppRaceFriends")) {
                 Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 
                     Integer.parseInt(args[++i]);
