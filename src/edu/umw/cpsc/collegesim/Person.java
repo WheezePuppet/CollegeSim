@@ -241,8 +241,7 @@ public class Person implements Steppable {
    	    		for (int y = 0; y < n; y++){
    	    			//add the value for this attribute to the temporary total
    	    			tempTotal+=((Person)
-                        ((Edge) b.get(y)).getOtherNode(this)
-                        ).getPreferences( ).get(x);
+                        ((Edge) b.get(y)).getOtherNode(this)).getPreferences( ).get(x);
    	    		}
    	    		//Set the average value for this attribute
    	    		preferenceAverage.add(tempTotal/n);
@@ -252,8 +251,7 @@ public class Person implements Steppable {
    	    		tempTotal = 0;
    	    		for (int y = 0; y < n; y++){
    	    			tempTotal+=((Person)
-                        ((Edge) b.get(y)).getOtherNode(this)
-                        ).getHobbies( ).get(x);
+                        ((Edge) b.get(y)).getOtherNode(this)).getHobbies( ).get(x);
    	    		}
    	    		hobbyAverage.add(tempTotal/n);
    	    	}

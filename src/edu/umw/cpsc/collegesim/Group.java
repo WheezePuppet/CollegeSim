@@ -285,7 +285,7 @@ public class Group implements Steppable{
    	    		for (int y = 0; y < preferenceAverage.size( ); y++){
    	    			distanceP = preferenceAverage.get(y) - students.get(x).getPreferences().get(y);
    	    			if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
-   	    				increment = (Sim.instance( ).random.nextDouble(true,true)/52) * distanceP; 
+   	    				increment = (Sim.instance( ).random.nextDouble(true,true)/5) * distanceP; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
                     //the group's average
