@@ -195,8 +195,7 @@ public class Person implements Steppable {
     //split among them
     //in other words, if one increases, then another decreases
     private ArrayList<Double> hobbies
-      = new ArrayList<Double>(Collections.nCopies(
-            HOBBY_POOL_SIZE, 0.0));
+      = new ArrayList<Double>(Collections.nCopies(HOBBY_POOL_SIZE, 0.0));
 
     /**
     * The following ArrayLists are used to store each student's influencible
@@ -368,7 +367,8 @@ public class Person implements Steppable {
     }
     
     private void assignAttribute(int numAttr, ArrayList<Double> attr){
-      boolean okay;
+      //boolean okay;
+    	System.out.println(numAttr);
       for(int i=0; i<numAttr; i++){
      /*   //pick an attribute to change
         int index = Sim.instance( ).random.nextInt(poolSize);
@@ -387,8 +387,12 @@ public class Person implements Steppable {
         //pick a degree to which the person will have this attribute
         //we generate a number between 0 and 1, including 1 but not including 0
         double degree = Sim.instance( ).random.nextDouble(false, true);
+        System.out.println("About to have a problem?");
+        System.out.println(i);
+        System.out.println(degree);
         //then we set the attribute at index i to be degree
         attr.set(i, degree);
+        System.out.println("done");
       }
     }
     
@@ -731,27 +735,14 @@ public class Person implements Steppable {
     private double attrCounter(int num, ArrayList<Double> attr1, 
         ArrayList<Double> attr2){
     	
-    	double sum1 = 0.0;
-    	double sum2 = 0.0;
-    	for(int i = 0; i < num; i ++){
-    		sum1 += attr1.get(i);
-    		sum2 += attr2.get(i);
-    	}
+    	double dissimilarity = 0.0;
     	
-    	double difference = Math.abs(sum1 - sum2);
+    	for(int i = 0; i < num; i++){
+    		dissimilarity += Math.abs(attr1.get(i)-attr2.get(i));
+    	}
+
     	//return the similarity rating
-    	return (num - difference);
-/*      int count = 0;
-      for(int i=0; i<num; i++){
-        double difference = attr1.get(i) - attr2.get(i);
-        difference = Math.abs(difference);
-        //if the difference is within the accept interval
-        if(difference <= interval){
-          //increment constant count
-          count++;
-        }
-      }
-      return count;*/
+    	return (num - dissimilarity);
     }
     
     /**
