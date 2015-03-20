@@ -387,12 +387,8 @@ public class Person implements Steppable {
         //pick a degree to which the person will have this attribute
         //we generate a number between 0 and 1, including 1 but not including 0
         double degree = Sim.instance( ).random.nextDouble(false, true);
-        System.out.println("About to have a problem?");
-        System.out.println(i);
-        System.out.println(degree);
         //then we set the attribute at index i to be degree
         attr.set(i, degree);
-        System.out.println("done");
       }
     }
     

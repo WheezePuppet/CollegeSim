@@ -223,8 +223,8 @@ public class Sim extends SimState implements Steppable{
     public static void main(String[] args) throws IOException {
 
         // Mandatory command-line values.
-        NUM_SIMULATION_YEARS = -1;
-        SIMTAG = -1;
+        NUM_SIMULATION_YEARS = 5;
+        SIMTAG = 5;
 
         // Optional values with defaults.
         Person.RACE_WEIGHT = 5;
@@ -239,7 +239,7 @@ public class Sim extends SimState implements Steppable{
         Person.FRIENDSHIP_COEFFICIENT = .22;
         Person.FRIENDSHIP_INTERCEPT = .05;
         Person.NUM_PREFERENCES = Person.PREFERENCE_POOL_SIZE = 20;
-        Person.NUM_HOBBIES = Person.NUM_HOBBIES = 20;
+        Person.NUM_HOBBIES = Person.HOBBY_POOL_SIZE = 20;
         Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
         Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
         Group.MIXED_RACE_GROUP_FRACTION = .5;
