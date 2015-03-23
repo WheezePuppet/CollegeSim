@@ -19,7 +19,7 @@ shinyUI(fluidPage(
         div(id="runsimstuff",
             flowLayout(
                 numericInput("maxTime","Number of sim years",
-                    value=8,min=1,step=1),
+                    value=20,min=1,step=1),
                 actionButton("runsim",label="Run sim")
             )
         ),
@@ -112,7 +112,7 @@ shinyUI(fluidPage(
                     label="Group drift distance (fraction towards mean)",
                     value=.2, min=0,max=1,step=0.05),
                 sliderInput("peerDriftRate",
-                    label="Peer drift rate (prob of changing attr per peer)",
+                    label="Peer drift rate (prob of changing attr)",
                     value=.1, min=0,max=1,step=0.05),
                 sliderInput("peerDriftDistance",
                     label="Peer drift distance (fraction towards mean)",
