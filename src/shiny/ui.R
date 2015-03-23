@@ -19,7 +19,7 @@ shinyUI(fluidPage(
         div(id="runsimstuff",
             flowLayout(
                 numericInput("maxTime","Number of sim years",
-                    value=8,min=1,step=1),
+                    value=20,min=1,step=1),
                 actionButton("runsim",label="Run sim")
             )
         ),
