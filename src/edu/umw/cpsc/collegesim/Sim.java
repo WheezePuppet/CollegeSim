@@ -246,7 +246,9 @@ public class Sim extends SimState implements Steppable{
         Group.RECRUITMENT_REQUIRED = .6;
         Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
         Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+        Group.DRIFT_DISTANCE = .2;
         Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+        Person.DRIFT_DISTANCE = .2;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -271,9 +273,13 @@ public class Sim extends SimState implements Steppable{
             } else if (args[i].equals("-groupDriftRate")) {
                 Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
                     Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-groupDriftDistance")) {
+                Group.DRIFT_DISTANCE = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-peerDriftRate")) {
                 Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
                     Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-peerDriftDistance")) {
+                Person.DRIFT_DISTANCE = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-dropoutRate")) {
                 DROPOUT_RATE = Double.parseDouble(args[++i]);
             } else if (args[i].equals("-dropoutIntercept")) {
@@ -644,7 +650,9 @@ public class Sim extends SimState implements Steppable{
         "  [-initNumGroups initNumGroups]       # Integer; default 200\n" +
         "  [-numNewGroupsPerYear num]           # Integer; default 10\n" +
         "  [-groupDriftRate probChangeAttr]     # Double; default .1\n" +
+        "  [-groupDriftDistance fraction]       # Double; default .2\n" +
         "  [-peerDriftRate probChangeAttr]      # Double; default .1\n" +
+        "  [-peerDriftDistance fraction]        # Double; default .2\n" +
         "  [-dropoutRate rate]                  # Double; default .01\n" +
         "  [-dropoutIntercept intercept]        # Double; default .05\n" +
         "  [-numToMeetPop num]                  # Integer; default 5\n" +

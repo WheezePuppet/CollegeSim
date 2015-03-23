@@ -108,9 +108,15 @@ shinyUI(fluidPage(
                 sliderInput("groupDriftRate",
                     label="Group drift rate (prob of changing attr per group)",
                     value=.1, min=0,max=1,step=0.05),
+                sliderInput("groupDriftDistance",
+                    label="Group drift distance (fraction towards mean)",
+                    value=.2, min=0,max=1,step=0.05),
                 sliderInput("peerDriftRate",
                     label="Peer drift rate (prob of changing attr per peer)",
-                    value=.1, min=0,max=1,step=0.05)
+                    value=.1, min=0,max=1,step=0.05),
+                sliderInput("peerDriftDistance",
+                    label="Peer drift distance (fraction towards mean)",
+                    value=.2, min=0,max=1,step=0.05)
             ),
 
             hr(),

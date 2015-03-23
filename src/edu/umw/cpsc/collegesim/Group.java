@@ -62,6 +62,12 @@ public class Group implements Steppable{
      * enough" from their influencing peers to warrant change. */
     public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE;
   
+    /** Each time a student changes one of her attribute values in response to
+     * a group (see {@link #LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE}), the
+     * fraction towards the group's mean value for that attribute that student
+     * will drift. */
+    public static double DRIFT_DISTANCE;
+
     /**
      * Each time step, the number of students who will be "invited" to a
      * group. (<i>i.e.</i>, have {@link #recruitStudent(Person)} called on
@@ -285,7 +291,7 @@ public class Group implements Steppable{
    	    		for (int y = 0; y < preferenceAverage.size( ); y++){
    	    			distanceP = preferenceAverage.get(y) - students.get(x).getPreferences().get(y);
    	    			if(Sim.instance( ).random.nextDouble(true,true)< LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
-   	    				increment = (Sim.instance( ).random.nextDouble(true,true)/5) * distanceP; 
+   	    				increment = (Sim.instance( ).random.nextDouble(true,true)*DRIFT_DISTANCE) * distanceP; 
                     //random number inclusively from 0-1, then divide by 5,
                     //then multiply by the distance that attribute is from
                     //the group's average
@@ -297,7 +303,7 @@ public class Group implements Steppable{
    	    		for(int y = 0; y < hobbyAverage.size( ); y++){
    	    			distanceH = hobbyAverage.get(y) - students.get(x).getHobbies().get(y);
    	    			if(Sim.instance().random.nextDouble(true,true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){  
-   	    				increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceH;
+   	    				increment = (Sim.instance( ).random.nextDouble(true, true)*DRIFT_DISTANCE)*distanceH;
    	    				students.get(x).setHobbyValue(y,(students.get(x).getHobbies().get(y)) +
    	    						increment);  //Morgan's method
    	    			}

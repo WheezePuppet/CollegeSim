@@ -139,9 +139,14 @@ public class Person implements Steppable {
      * their attribute values in response to each of their peers. */
     public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE;
 
+    /** Each time a student changes one of her attribute values in response to
+     * their peers (see {@link #LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE}),
+     * the fraction towards their peer's mean value for that attribute that
+     * student will drift. */
+    public static double DRIFT_DISTANCE;
+
     // Hand out consecutive unique numbers to new people.
-    private static int nextPersonId = 0;
-    private int id;
+    private static int nextPersonId = 0; private int id;
 
     private int year;
 /*
@@ -264,7 +269,7 @@ public class Person implements Steppable {
    	   			//If we randomly decide to change the attribute
    	    		if(Sim.instance( ).random.nextDouble(true, true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){
    	    			//Calculate an increment by which to change using the distance and a random factor
-   	    			increment = (Sim.instance( ).random.nextDouble(true,true)/5) * distanceI;
+   	    			increment = (Sim.instance( ).random.nextDouble(true,true)*DRIFT_DISTANCE) * distanceI;
    	    			//Set the new preference value to whatever it was before plus the increment
    	    			setPreferenceValue(y, getPreferences( ).get(y) + increment);
    	    		}
@@ -274,7 +279,7 @@ public class Person implements Steppable {
    	    	for(int y = 0; y < HOBBY_POOL_SIZE; y++){
    	    		distanceD = hobbyAverage.get(y) - getHobbies( ).get(y);
    	    		if(Sim.instance().random.nextDouble(true, true) < LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE){  
-   	    			increment = (Sim.instance( ).random.nextDouble(true, true)/5)*distanceD;
+   	    			increment = (Sim.instance( ).random.nextDouble(true, true)*DRIFT_DISTANCE)*distanceD;
    	    			setHobbyValue(y, getHobbies( ).get(y) + increment);
    	    		}
    	    	}
