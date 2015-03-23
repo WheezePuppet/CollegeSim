@@ -103,9 +103,15 @@ shinyUI(fluidPage(
                     label="Number of new groups created per year",value=2,
                     min=0,max=10)
             ),
-            sliderInput("driftRate",
-                label="Drift rate (prob of changing attribute)",
-                value=.0, min=0,max=1,step=0.05),
+            div(class="inputCategory",
+                HTML("Personality drift:<br/>"),
+                sliderInput("groupDriftRate",
+                    label="Group drift rate (prob of changing attr per group)",
+                    value=.1, min=0,max=1,step=0.05),
+                sliderInput("peerDriftRate",
+                    label="Peer drift rate (prob of changing attr per peer)",
+                    value=.1, min=0,max=1,step=0.05)
+            ),
 
             hr(),
 

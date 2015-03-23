@@ -60,7 +60,7 @@ public class Group implements Steppable{
     /** Each time step, the probability that a student will change one of
      * their attribute values <i>provided</i> that said attribute is "different
      * enough" from their influencing peers to warrant change. */
-    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE;
   
     /**
      * Each time step, the number of students who will be "invited" to a

@@ -136,10 +136,8 @@ public class Person implements Steppable {
     public static int INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS;
     
     /** Each time step, the probability that a student will change one of
-     * their attribute values. */
-    //I removed "<i>provided</i> that said attribute is different enough from their influencing peers to warrant change"
-    //because it was inaccurate - likelihood has nothing to do with attribute difference but is pure chance
-    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+     * their attribute values in response to each of their peers. */
+    public static double LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE;
 
     // Hand out consecutive unique numbers to new people.
     private static int nextPersonId = 0;

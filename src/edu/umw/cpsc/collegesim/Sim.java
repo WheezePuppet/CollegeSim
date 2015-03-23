@@ -245,6 +245,8 @@ public class Sim extends SimState implements Steppable{
         Group.MIXED_RACE_GROUP_FRACTION = .5;
         Group.RECRUITMENT_REQUIRED = .6;
         Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
+        Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+        Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -266,8 +268,11 @@ public class Sim extends SimState implements Steppable{
                 INIT_NUM_GROUPS = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numNewGroupsPerYear")) {
                 NUM_NEW_GROUPS_PER_YEAR = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("-driftRate")) {
+            } else if (args[i].equals("-groupDriftRate")) {
                 Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
+                    Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-peerDriftRate")) {
+                Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
                     Double.parseDouble(args[++i]);
             } else if (args[i].equals("-dropoutRate")) {
                 DROPOUT_RATE = Double.parseDouble(args[++i]);
@@ -638,7 +643,8 @@ public class Sim extends SimState implements Steppable{
         "  [-numFreshmenPerYear num]            # Integer; default 1000\n" +
         "  [-initNumGroups initNumGroups]       # Integer; default 200\n" +
         "  [-numNewGroupsPerYear num]           # Integer; default 10\n" +
-        "  [-driftRate probChangeAttribute]     # Double; default .1\n" +
+        "  [-groupDriftRate probChangeAttr]     # Double; default .1\n" +
+        "  [-peerDriftRate probChangeAttr]      # Double; default .1\n" +
         "  [-dropoutRate rate]                  # Double; default .01\n" +
         "  [-dropoutIntercept intercept]        # Double; default .05\n" +
         "  [-numToMeetPop num]                  # Integer; default 5\n" +
