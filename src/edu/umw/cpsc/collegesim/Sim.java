@@ -223,8 +223,8 @@ public class Sim extends SimState implements Steppable{
     public static void main(String[] args) throws IOException {
 
         // Mandatory command-line values.
-        NUM_SIMULATION_YEARS = 5;
-        SIMTAG = 5;
+        NUM_SIMULATION_YEARS = -1;
+        SIMTAG = -1;
 
         // Optional values with defaults.
         Person.RACE_WEIGHT = 5;
