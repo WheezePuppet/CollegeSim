@@ -582,26 +582,31 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
         }
     })
 
-    output$numGroupsPlot <- renderPlot({
+    output$groupsPerStudentPlot <- renderPlot({
 
         if (input$runsim < 1) return(NULL)
 
-        groups.stats.df <- groups.stats()
+        people.stats.df <- people.stats()
 
-        if (nrow(groups.stats.df) > 0) {
+        if (nrow(people.stats.df) > 0) {
 
-            groups.stats.df$numTot <- 
-                groups.stats.df$numMin + groups.stats.df$numWhi
-            summary.group.stats.df <- groups.stats.df %>%
-                group_by(year) %>%
-                summarize(numGrp=n())
-
-            the.plot <- ggplot(summary.group.stats.df) +
-                geom_line(aes(x=year,y=numGrp),col="darkgrey",size=1.2) +
+            avg.groups.by.race <- people.stats.df %>% group_by(period,race) %>% 
+                summarize(avgng=mean(numGroups))
+            the.plot <- ggplot(avg.groups.by.race) +
+                geom_line(aes(x=period,y=avgng,group=race,col=race,
+                    linetype=race),size=1.2) +
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
+                scale_linetype_manual(name="",
+                    breaks=c("MINORITY","WHITE"),
+                    labels=c("minorities","whites"),
+                    values=c("MINORITY"="solid","WHITE"="solid")) +
+                scale_color_manual(name="",
+                    breaks=c("MINORITY","WHITE"),
+                    labels=c("minorities","whites"),
+                    values=c("MINORITY"="brown","WHITE"="blue")) +
                 expand_limits(y=0) +
-                labs(title="Number of groups",
+                labs(title="Average number of groups per student",
                     x="Simulation year", y="")
 
             print(the.plot)

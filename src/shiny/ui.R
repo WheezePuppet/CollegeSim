@@ -181,7 +181,7 @@ shinyUI(fluidPage(
             tabPanel("Groups",
                 plotOutput("currentGroupsPlot"),
                 plotOutput("groupsHistoryPlot"),
-                plotOutput("numGroupsPlot")
+                plotOutput("groupsPerStudentPlot")
             ),
             tabPanel("Similarity",
                 plotOutput("similarityPlot"),
