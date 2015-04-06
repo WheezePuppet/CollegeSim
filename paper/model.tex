@@ -229,9 +229,17 @@ probability would make friendship likelihood unreasonably high for similar
 Students and unreasonably low for dissimilar.) With this probability, make the
 two Students friends.
 
-\item[\textsl{AdjustAttributes}] HELP ME EXPLAIN THIS MORGAN
+\item[\textsl{AdjustAttributes}] For each of a Student's preferences and
+hobbies, compute the average value of that preference/hobby for all friends of
+that Student. Then, with probability $p_a$ (.1), adjust the Student's
+attribute towards the mean by $d_a$ (.2) of the difference between its current
+value and the mean. (With probability $1-p_a$, make no such adjustment to that
+attribute.)
 
-\item[\textsl{InfluenceMembers}] HELP ME EXPLAIN THIS MORGAN
+\item[\textsl{InfluenceMembers}] Adjust the attribute values for each Student
+in the Group, using the exact same algorithm as the \textsl{AdjustAttributes}
+submodel except that instead of using the Students' friends' mean, use the
+Group members' mean.
 
 \item[\textsl{DecayFriendships}] Remove the friendship with each of the
 Student's friends who has not been ``refreshed" (encountered while already
@@ -239,11 +247,12 @@ friends) in the most recent $t_d$ (2) academic months. This ``decay threshold"
 models the maximum time two friends can be apart from one another and still
 remain friends.
 
-\item[\textsl{RecruitStudents}] Choose $n_r$ Students from the general population, and
-compute their \textit{affinity} via \textsl{ComputeAffinity}. For each of the
-Students who are not already a member of the Group, compute 
-$\mathbb{P}(\text{join group})=XXXXXX  \textit{affinity} XXXXX$
-and with this probability have the Student join the Group.
+\item[\textsl{RecruitStudents}] Choose $n_r$ Students from the general
+population, and compute their \textit{affinity} to this Group via
+\textsl{ComputeAffinity}. For each of the Students who are not already a
+member of the Group, compute $\mathbb{P}(\text{join group})= \textit{affinity}
++ \textbf{RecruitmentFactor} - t_r$, where the ``recruitment threshold" $t_r$
+has default value .6. With this probability have the Student join the Group.
 
 \item[\textsl{GraduateStudents}] Remove every Student with \textbf{Year}=4 from the
 simulation.
