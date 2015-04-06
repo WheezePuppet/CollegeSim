@@ -2,8 +2,9 @@
 \section{THE MODEL}
 \label{sec:model}
 
+% Hand-tweaking the cite so as to avoid spitting out 14 author names. -SD
 We present the model for the CollegeSim simulation using an abbreviated
-version of the ODD protocol \cite{polhill_using_2008}.
+version of the ODD protocol \cite[Grimm \textit{et al.} 2008]{polhill_using_2008}.
 
 \subsection{Purpose}
 
@@ -24,7 +25,8 @@ The model has two kinds of entities: Students, and Groups.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Students %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Each Student agent has the following attributes:
+\vspace{.1in}
+Each \textbf{Student} agent has the following attributes:
 
 \begin{description}
 \itemsep.1em
@@ -35,14 +37,15 @@ Each Student agent has the following attributes:
 \item[Year] An integer from 1 to 4 indicating the Student's current year
 in school (freshman, sophomore, junior, and senior). For simplicity the model
 does not allow larger numbers (``fifth-year seniors"); any Student reaching
-the end of their 4th year without having dropped out automatically graduates.
+the end of their 4th year % without having dropped out 
+automatically graduates.
 
-\item[Preferences] An array (of configurable size) of real numbers
-(between 0 and 1) representing the student's abstract preferences. None have
-fixed interpretations, but as a conceptual example one might consider
-preference \#9 to be ``political persuasion, on a scale from extremely liberal
-(0) to extremely conservative (1)." Preferences are strictly independent of
-each other in the sense that a high value for one does not imply a high or low
+\item[Preferences] An array (of configurable size) of real numbers (between 0
+and 1) representing the student's abstract preferences. None have fixed
+interpretations, but as a conceptual example one might consider preference \#9
+to represent ``political persuasion, on a scale from extremely liberal (0) to
+extremely conservative (1)." Preferences are strictly independent of each
+other in the sense that a high value for one does not imply a high or low
 value for any other.
 
 A Student's preferences (and hobbies; see below) will change throughout the
@@ -72,13 +75,14 @@ membership in Groups.
 \vspace{.2in}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Groups %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Group entities represent the abstract social groups (corresponding to anything
-from common residential hallways to student clubs to simple informal cliques)
-that Students form with each other. Groups impact the simulation in two ways:
-(1) a Group's members will jointly influence each other's preference and hobby
-attributes, and (2) Students interact with those in their groups more often
-than with the population at large.
+\textbf{Group} entities represent the abstract social groups (corresponding to
+anything from common residential hallways to student clubs to simple informal
+cliques) that Students form with each other. Groups impact the simulation in
+two ways: (1) a Group's members will jointly influence each other's preference
+and hobby attributes, and (2) Students interact with those in their groups
+more often than with the population at large.
 
+\vspace{.1in}
 Each Group agent has the following attributes:
 
 \begin{description}
@@ -119,77 +123,81 @@ below, for details about each step.
 
 \begin{enumerate}
 \itemsep.1em
-\item At the start of each academic year:
+\item At the start of each academic year (pre-August):
 
     \begin{enumerate}
     \itemsep.1em
-    \item \textbf{Sim} -- IncrementYears, AddNewStudents, AddNewGroups.
+    \item \textbf{Sim} -- \textsl{IncrementYears}, \textsl{AddNewStudents},
+\textsl{AddNewGroups}.
     \end{enumerate}
 
-\item In each academic month:
+\item In each academic month (August through April, inclusive):
 
     \begin{enumerate}
     \itemsep.1em
-    \item Each \textbf{Student} -- EncounterOthers, AdjustAttributes, DecayFriendships. 
-    \item Each \textbf{Group} -- InfluenceMembers, RecruitStudents, LoseStudents.
+    \item Each \textbf{Student} -- \textsl{EncounterOthers},
+\textsl{AdjustAttributes}, \textsl{DecayFriendships}. 
+    \item Each \textbf{Group} -- \textsl{InfluenceMembers},
+\textsl{RecruitStudents}, \textsl{LoseStudents}.
     \end{enumerate}
 
-\item At the end of each academic year:
+\item At the end of each academic year (post-April):
 
     \begin{enumerate}
     \itemsep.1em
-    \item \textbf{Sim} -- GraduateStudents. % , DropoutStudents.
+    \item \textbf{Sim} -- \textsl{GraduateStudents}. % , \textsl{DropoutStudents}.
     \end{enumerate}
 \end{enumerate}
 
 \subsection{Initialization}
 
-When the simulation begins, $n_{s_0}$ (default value 4000) Student agents are
-created with unique \textbf{ID}s, with \textbf{Year} $\thicksim U(1,4)$
-and $\mathbb{P}(\textbf{Race}=white) = p_w$ (default .85). Each of $n_p$ (40)
+When the simulation begins, $n_{s_0}$ (default 4000; all default values
+written in parentheses) Student agents are created with unique \textbf{ID}s,
+with \textbf{Year} $\thicksim \left \lfloor U(1,4) \right \rfloor$ and
+$\mathbb{P}(\textbf{Race}=white) = p_w$ (.85). Each of $n_p$ (40)
 \textbf{Preferences} and $n_h$ (40) \textbf{Hobbies} are generated i.i.d.
 $\thicksim U(0,1)$, and then the hobbies are normalized so that they sum to 1.
 
-If policy \textbf{InitialMixedRaceDyads} is enabled, each Student is initially
-provided with $n_{d_0}$ friendships of randomly selected other students of the
-opposite race.
+If policy \textbf{InitialMixedRaceDyads} is enabled, each Student is also
+initially provided with $n_{d_0}$ friendships of randomly selected other
+students of the opposite race.
 
 Also at simulation start (regardless of policy), $n_{g_0}$ (40) Groups are
-created exactly as described in the \textbf{AddNewGroups} submodel, below.
+created exactly as described in the \textsl{AddNewGroups} submodel, below.
 
 If policy \textbf{OrientationGroups} is enabled, $n_{f_0}$ (20) Groups are
 created with unique \textbf{ID}s and with \textbf{isFixed} equal to TRUE. Each
-of these groups $k$, like those above, is assigned an initial number of
-students $n_{sg_k} \thicksim
-U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg})$. These students are
-deliberately chosen so that the proportion of minorities is 
-$\left\lfloor n_{sg_k} \cdot f_{\textit{minority}} \right \rfloor$. The default
-value of $f_{\text{\textit{minority}}}=.5$,
-considerably higher than $(1-p_w)=.15$, since the purpose of the policy is to
-expose white students to greater numbers of minorities than they otherwise
-would.
+of these groups $\mathcal{G}_k$, like those above, is assigned an initial
+number of students $n_{sg_k} \thicksim \left\lfloor
+U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg}) \right\rfloor$. These
+students are deliberately chosen so that the proportion of minorities is
+$\left\lfloor n_{sg_k} \cdot f_{\textit{minority}} \right \rfloor$. The
+default value of $f_{\text{\textit{minority}}}=.5$, considerably higher than
+$(1-p_w)=.15$, since the purpose of the policy is to expose white students to
+greater numbers of minorities than they otherwise would.
 
 
 \subsection{Submodels}
 
 \begin{description}
 \itemsep.8em
-\item[IncrementYears] Add 1 to the \textbf{Year} attribute of every Student
+\item[\textsl{IncrementYears}] Add 1 to the \textbf{Year} attribute of every Student
 still in the simulation.
 
-\item[AddNewStudents] Add $n_s$ (default 1000) new Student agents to the
+\item[\textsl{AddNewStudents}] Add $n_s$ (default 1000) new Student agents to the
 simulation with unique \textbf{ID}s, with \textbf{Year} = 1, and
-$\mathbb{P}(\textbf{Race}=white) = p_w$ (default .85). Each of $n_p$ (40)
+$\mathbb{P}(\textbf{Race}=white) = p_w$ (.85). Each of $n_p$ (40)
 \textbf{Preferences} and $n_h$ (40) \textbf{Hobbies} are generated i.i.d.
 $\thicksim U(0,1)$, and then the hobbies are normalized so that they sum to 1.
 
-\item[AddNewGroups] $n_{g_0}$ (10) Groups are created with unique \textbf{ID}s
-and with \textbf{isFixed} equal to FALSE. Each Group $k$ is randomly assigned
-$n_{sg_k}$ initial students, where $\forall k, 1\leq k\leq n_{g_0}, n_{sg_k}
-\thicksim U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg})$. Each Group's
-\textbf{RecruitmentFactor} is generated $\thicksim U(0,1)$.
+\item[\textsl{AddNewGroups}] $n_{g_0}$ (10) Groups are created with unique
+\textbf{ID}s and with \textbf{isFixed} equal to FALSE. Each Group
+$\mathcal{G}_k$ is randomly assigned $n_{sg_k}$ initial students, where
+$\forall k, 1\leq k\leq n_{g_0}, n_{sg_k} \thicksim \left\lfloor
+U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg}) \right\rfloor$. Each
+Group's \textbf{RecruitmentFactor} is generated $\thicksim U(0,1)$.
 
-\item[ComputeSimilarity] Given two Student agents, compute their perceived
+\item[\textsl{ComputeSimilarity}] Given two Student agents, compute their perceived
 similarity as:
 
 \[
@@ -198,51 +206,53 @@ w_p \sum_i |p_{1i}-p_{2i}| +
 w_h \sum_i |h_{1i}-h_{2i}|
 \]
 
-where $w_r$, $w_p$, $w_h$ are weights given to race (default 5), preferences
+where $w_r$, $w_p$, $w_h$ are weights given to race (5), preferences
 (1.5), and hobbies (2.5), $[\![r_1=r_2]\!]$ is 1 if the students have the same
 race and 0 otherwise, and $p_{ki}$ and $h_{ki}$ are the values of the $i$th
 preference and $i$th hobby, respectively, of student $k$.
 
-\item[ComputeAffinity] Given a Student and a Group, compute the mean
+\item[\textsl{ComputeAffinity}] Given a Student and a Group, compute the mean
 similarity between the Student and all individual members of the Group (using
-submodel \textbf{ComputeSimilarity}.)
+submodel \textsl{ComputeSimilarity}.)
 
-\item[EncounterOthers] Choose $n_{eg}$ (10) other students at random from the
-Student's current Groups, and $n_{ep}$ (5) from the population at large. For
-each one, if the two Students are already friends, ``refresh" their
-friendship. (See \textbf{DecayFriendships}, below.) If not, determine the
-Students' similarity via the \textbf{ComputeSimilarity} submodel, and compute
+\item[\textsl{EncounterOthers}] Choose $n_{eg}$ (10) other students at random
+from the Student's current Groups, and $n_{ep}$ (5) from the population at
+large. For each one, if the two Students are already friends, ``refresh" their
+friendship. (See \textsl{DecayFriendships}, below.) If not, determine the
+Students' similarity via the \textsl{ComputeSimilarity} submodel, and compute
 $\mathbb{P}(\text{become friends})=f_c \cdot \textit{similarity} + f_i$, where
 the default ``friendship coefficient" $f_c=.22$ and ``friendship intercept"
 $f_i=.05$. (The rationale for this transformation is establish a separate
 baseline probability range for friendship rather than simply equating the raw
-0-1 similarity measure with a probability. Without it, friendship would be
-unreasonably high for similar Students and unreasonably low for dissimilar.)
-With this probability, make the two Students friends.
+0-1 similarity measure with a probability. Using the similarity directly as a
+probability would make friendship likelihood unreasonably high for similar
+Students and unreasonably low for dissimilar.) With this probability, make the
+two Students friends.
 
-\item[AdjustAttributes] HELP ME EXPLAIN THIS MORGAN
+\item[\textsl{AdjustAttributes}] HELP ME EXPLAIN THIS MORGAN
 
-\item[InfluenceMembers] HELP ME EXPLAIN THIS MORGAN
+\item[\textsl{InfluenceMembers}] HELP ME EXPLAIN THIS MORGAN
 
-\item[DecayFriendships] Remove each of the Student's friends who has not been
-``refreshed" (encountered while already friends) in the most recent $t_d$ (2)
-academic months. This ``decay threshold" models the maximum time two friends
-can be apart from one another and still remain friends.
+\item[\textsl{DecayFriendships}] Remove the friendship with each of the
+Student's friends who has not been ``refreshed" (encountered while already
+friends) in the most recent $t_d$ (2) academic months. This ``decay threshold"
+models the maximum time two friends can be apart from one another and still
+remain friends.
 
-\item[RecruitStudents] Choose $n_r$ Students from the general population, and
-compute their \textit{affinity} via \textbf{ComputeAffinity}. For each of the
+\item[\textsl{RecruitStudents}] Choose $n_r$ Students from the general population, and
+compute their \textit{affinity} via \textsl{ComputeAffinity}. For each of the
 Students who are not already a member of the Group, compute 
 $\mathbb{P}(\text{join group})=XXXXXX  \textit{affinity} XXXXX$
 and with this probability have the Student join the Group.
 
-\item[GraduateStudents] Remove every Student with \textbf{Year}=4 from the
+\item[\textsl{GraduateStudents}] Remove every Student with \textbf{Year}=4 from the
 simulation.
 
 \end{description}
 
-The simulation proceeds for a fixed number of years (configurable; default 20)
-after which it terminates. Throughout the simulation, text files are produced
-to capture relevant data each academic month and year.
+The simulation proceeds for a fixed number of years after which it terminates.
+Throughout the simulation, text files are produced to capture relevant data
+each academic month and year.
 
 % I think we have no room; save for JASSS.
 % 
