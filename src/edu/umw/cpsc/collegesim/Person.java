@@ -520,6 +520,7 @@ public class Person implements Steppable {
      * <li>Encounter {@link #NUM_TO_MEET_POP} other people from the student
      * body at large (who may or may not be members of their current
      * groups.)</li>
+     * <li>Personality drift.</li>
      * <li>Decay this user's existing friendships to reflect the passage of
      * time.</li>
      * </ol>
