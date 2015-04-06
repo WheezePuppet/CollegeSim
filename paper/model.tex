@@ -2,39 +2,266 @@
 \section{THE MODEL}
 \label{sec:model}
 
-\subsection{Students}
+We present the model for the CollegeSim simulation using an abbreviated
+version of the ODD protocol \cite{polhill_using_2008}.
 
-% Axelrod 1997 -- culture is defined as ``a set of individual attributes that
-% are subject to social influence."
+\subsection{Purpose}
 
-\subsubsection{Attributes: preferences and hobbies}
+CollegeSim is an agent-based model designed to simulate an evolving social
+network among college students. In addition to their other attributes, Student
+agents are assigned one of two ``races" (white or minority) which factors into
+their perceived similarity to other agents they encounter, and accordingly to
+their likelihood of forming friendships with them. The purpose of the model is
+to investigate how racial segregation -- defined as the average proportion of
+friendships students have with others of the same race -- is affected by the
+strength (importance) of the race trait, the speed with which students adapt
+their preferences, and the presence or absence of certain institutional
+policies designed to influence segregation.
 
-\subsubsection{Attribute ``drift"}
+\subsection{Entities, state variables and scales}
 
-\subsection{Groups}
+The model has two kinds of entities: Students, and Groups.
 
-\subsection{Policies}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Students %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{Forced integrated dyads}
+Each Student agent has the following attributes:
 
-\subsubsection{Forced integrated groups (``orientation groups")}
+\begin{description}
+\itemsep.1em
+\item[ID] A unique ID number.
+
+\item[Race] Either ``white" or ``minority."
+
+\item[Year] An integer from 1 to 4 indicating the Student's current year
+in school (freshman, sophomore, junior, and senior). For simplicity the model
+does not allow larger numbers (``fifth-year seniors"); any Student reaching
+the end of their 4th year without having dropped out automatically graduates.
+
+\item[Preferences] An array (of configurable size) of real numbers
+(between 0 and 1) representing the student's abstract preferences. None have
+fixed interpretations, but as a conceptual example one might consider
+preference \#9 to be ``political persuasion, on a scale from extremely liberal
+(0) to extremely conservative (1)." Preferences are strictly independent of
+each other in the sense that a high value for one does not imply a high or low
+value for any other.
+
+A Student's preferences (and hobbies; see below) will change throughout the
+simulation in response to their friends. This is in line with Axelrod's
+definition of an agent's ``culture" as ``a set of individual attributes that
+are subject to social influence" \citeyear{axelrod_dissemination_1997}.
+
+\item[Hobbies] An array (of configurable size) of real numbers (between 0 and
+1) representing how much of the student's time is dedicated to a particular
+activity. Again, none have fixed interpretations (hobby \#17 might be thought
+of as ``the proportion of time the Student spends playing Pok\'emon"), but
+they are \textit{not} independent of each other since a greater value for one
+implies a lesser value for the others. Every time a Student's hobby value
+changes, all of that Student's hobby values are recalibrated proportionately
+so that they sum to 1.
+
+\item[Friends] An array of references to other Student objects with whom
+it has active relationships. This array will grow and shrink over time as new
+friendships are formed and ``non-refreshed" friendships expire.
+
+\end{description}
+
+Note that Students do not have spatial coordinates; their ``position" in the
+simulation is defined solely by their friendships with each other and their
+membership in Groups.
+
+\vspace{.2in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Groups %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Group entities represent the abstract social groups (corresponding to anything
+from common residential hallways to student clubs to simple informal cliques)
+that Students form with each other. Groups impact the simulation in two ways:
+(1) a Group's members will jointly influence each other's preference and hobby
+attributes, and (2) Students interact with those in their groups more often
+than with the population at large.
+
+Each Group agent has the following attributes:
+
+\begin{description}
+\itemsep.1em
+
+\item[ID] A unique ID number.
+
+\item[IsFixed] A logical (boolean) value indicating whether or not the
+group's membership is permanently fixed over time, or whether it can
+fluctuate. This is used to implement certain policies (see below).
+
+\item[RecruitmentFactor] A real number (from 0 to 1) indicating how
+aggressive the group is in attracting new members. (See below for
+interpretation.)
+
+\item[Members] An array of references to the Students who comprise its
+membership.
+
+\end{description}
+
+There are also two Policies in the model, \textbf{OrientationGroups} and
+\textbf{InitialMixedRaceDyads}, which can be separately enabled.
 
 
-\subsection{Limitations and simplifications}
 
-Known ways in which we depart from reality:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Schedule %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-People are known to have varying strengths (or ``tiers") to their
-relationships \cite{hirshman_leaving_2011}. In fact, people have many weak
-ties and few strong ties. ((Granovetter 1973; Hill and Dunbar 2003; Zhou et
-al. 2005). For simplicity, we model all friendships as equal.
+\subsection{Process overview and scheduling}
 
-Interview and survey data indicates that minorities and whites differ on their
-segregation preferences. Whites, more than minorities, are more demanding of
-like-color neighbors, while a majority of African-Americans in major urban
-areas appear to prefer integrated neighborhoods
-\cite{farley_residential_1997}. Even this kind of ``unidirectional" prejudice
-has been demonstrated to produce wide-scale segregation
-\cite{chen_emergence_2005}. We do not model this asymmetry.
+The simulation progresses according to an idealized academic calendar. Each
+academic year is comprised of nine academic months (August through April) and
+three summer months. Student agents and Group agents carry out their actions
+in each academic month: all students, followed by all groups. Additionally, a
+high-level controller called ``Sim" carries out activities at the start of
+every academic year (immediately before all Students run in August) and at its
+end (immediately after all Groups run in April). See the ``Submodels" section,
+below, for details about each step.
 
-assume independence of attributes, though Block and Grund disproved it.
+\begin{enumerate}
+\itemsep.1em
+\item At the start of each academic year:
+
+    \begin{enumerate}
+    \itemsep.1em
+    \item \textbf{Sim} -- IncrementYears, AddNewStudents, AddNewGroups.
+    \end{enumerate}
+
+\item In each academic month:
+
+    \begin{enumerate}
+    \itemsep.1em
+    \item Each \textbf{Student} -- EncounterOthers, AdjustAttributes, DecayFriendships. 
+    \item Each \textbf{Group} -- InfluenceMembers, RecruitStudents, LoseStudents.
+    \end{enumerate}
+
+\item At the end of each academic year:
+
+    \begin{enumerate}
+    \itemsep.1em
+    \item \textbf{Sim} -- GraduateStudents. % , DropoutStudents.
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Initialization}
+
+When the simulation begins, $n_{s_0}$ (default value 4000) Student agents are
+created with unique \textbf{ID}s, with \textbf{Year} $\thicksim U(1,4)$
+and $\mathbb{P}(\textbf{Race}=white) = p_w$ (default .85). Each of $n_p$ (40)
+\textbf{Preferences} and $n_h$ (40) \textbf{Hobbies} are generated i.i.d.
+$\thicksim U(0,1)$, and then the hobbies are normalized so that they sum to 1.
+
+If policy \textbf{InitialMixedRaceDyads} is enabled, each Student is initially
+provided with $n_{d_0}$ friendships of randomly selected other students of the
+opposite race.
+
+Also at simulation start (regardless of policy), $n_{g_0}$ (40) Groups are
+created exactly as described in the \textbf{AddNewGroups} submodel, below.
+
+If policy \textbf{OrientationGroups} is enabled, $n_{f_0}$ (20) Groups are
+created with unique \textbf{ID}s and with \textbf{isFixed} equal to TRUE. Each
+of these groups $k$, like those above, is assigned an initial number of
+students $n_{sg_k} \thicksim
+U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg})$. These students are
+deliberately chosen so that the proportion of minorities is 
+$\left\lfloor n_{sg_k} \cdot f_{\textit{minority}} \right \rfloor$. The default
+value of $f_{\text{\textit{minority}}}=.5$,
+considerably higher than $(1-p_w)=.15$, since the purpose of the policy is to
+expose white students to greater numbers of minorities than they otherwise
+would.
+
+
+\subsection{Submodels}
+
+\begin{description}
+\itemsep.8em
+\item[IncrementYears] Add 1 to the \textbf{Year} attribute of every Student
+still in the simulation.
+
+\item[AddNewStudents] Add $n_s$ (default 1000) new Student agents to the
+simulation with unique \textbf{ID}s, with \textbf{Year} = 1, and
+$\mathbb{P}(\textbf{Race}=white) = p_w$ (default .85). Each of $n_p$ (40)
+\textbf{Preferences} and $n_h$ (40) \textbf{Hobbies} are generated i.i.d.
+$\thicksim U(0,1)$, and then the hobbies are normalized so that they sum to 1.
+
+\item[AddNewGroups] $n_{g_0}$ (10) Groups are created with unique \textbf{ID}s
+and with \textbf{isFixed} equal to FALSE. Each Group $k$ is randomly assigned
+$n_{sg_k}$ initial students, where $\forall k, 1\leq k\leq n_{g_0}, n_{sg_k}
+\thicksim U(\text{\textit{min}}_{sg},\text{\textit{max}}_{sg})$. Each Group's
+\textbf{RecruitmentFactor} is generated $\thicksim U(0,1)$.
+
+\item[ComputeSimilarity] Given two Student agents, compute their perceived
+similarity as:
+
+\[
+w_r [\![r_1=r_2]\!] +
+w_p \sum_i |p_{1i}-p_{2i}| + 
+w_h \sum_i |h_{1i}-h_{2i}|
+\]
+
+where $w_r$, $w_p$, $w_h$ are weights given to race (default 5), preferences
+(1.5), and hobbies (2.5), $[\![r_1=r_2]\!]$ is 1 if the students have the same
+race and 0 otherwise, and $p_{ki}$ and $h_{ki}$ are the values of the $i$th
+preference and $i$th hobby, respectively, of student $k$.
+
+\item[ComputeAffinity] Given a Student and a Group, compute the mean
+similarity between the Student and all individual members of the Group (using
+submodel \textbf{ComputeSimilarity}.)
+
+\item[EncounterOthers] Choose $n_{eg}$ (10) other students at random from the
+Student's current Groups, and $n_{ep}$ (5) from the population at large. For
+each one, if the two Students are already friends, ``refresh" their
+friendship. (See \textbf{DecayFriendships}, below.) If not, determine the
+Students' similarity via the \textbf{ComputeSimilarity} submodel, and compute
+$\mathbb{P}(\text{become friends})=f_c \cdot \textit{similarity} + f_i$, where
+the default ``friendship coefficient" $f_c=.22$ and ``friendship intercept"
+$f_i=.05$. (The rationale for this transformation is establish a separate
+baseline probability range for friendship rather than simply equating the raw
+0-1 similarity measure with a probability. Without it, friendship would be
+unreasonably high for similar Students and unreasonably low for dissimilar.)
+With this probability, make the two Students friends.
+
+\item[AdjustAttributes] HELP ME EXPLAIN THIS MORGAN
+
+\item[InfluenceMembers] HELP ME EXPLAIN THIS MORGAN
+
+\item[DecayFriendships] Remove each of the Student's friends who has not been
+``refreshed" (encountered while already friends) in the most recent $t_d$ (2)
+academic months. This ``decay threshold" models the maximum time two friends
+can be apart from one another and still remain friends.
+
+\item[RecruitStudents] Choose $n_r$ Students from the general population, and
+compute their \textit{affinity} via \textbf{ComputeAffinity}. For each of the
+Students who are not already a member of the Group, compute 
+$\mathbb{P}(\text{join group})=XXXXXX  \textit{affinity} XXXXX$
+and with this probability have the Student join the Group.
+
+\item[GraduateStudents] Remove every Student with \textbf{Year}=4 from the
+simulation.
+
+\end{description}
+
+The simulation proceeds for a fixed number of years (configurable; default 20)
+after which it terminates. Throughout the simulation, text files are produced
+to capture relevant data each academic month and year.
+
+% I think we have no room; save for JASSS.
+% 
+% \subsection{Limitations and simplifications}
+% 
+% Finally, we report some known ways in which our model is known to depart from
+% reality:
+% 
+% People are known to have varying strengths (or ``tiers") to their
+% relationships \cite{hirshman_leaving_2011}. In fact, people have many weak
+% ties and few strong ties. ((Granovetter 1973; Hill and Dunbar 2003; Zhou et
+% al. 2005). For simplicity, we model all friendships as equal.
+% 
+% Interview and survey data indicates that minorities and whites differ on their
+% segregation preferences. Whites, more than minorities, are more demanding of
+% like-color neighbors, while a majority of African-Americans in major urban
+% areas appear to prefer integrated neighborhoods
+% \cite{farley_residential_1997}. Even this kind of ``unidirectional" prejudice
+% has been demonstrated to produce wide-scale segregation
+% \cite{chen_emergence_2005}. We do not model this asymmetry.
+% 
+% assume independence of attributes, though Block and Grund disproved it.
