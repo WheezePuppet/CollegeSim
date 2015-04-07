@@ -7,6 +7,7 @@
 #
 library(shiny)
 library(shinyIncubator)
+library(tidyr)
 library(dplyr)
 library(ggplot2)
 
@@ -14,31 +15,32 @@ library(ggplot2)
 # -------------------------------- Constants ---------------------------------
 SIM.FILES.BASE.DIR <- "/tmp"
 
-# xCHANGE: The full path of your project directory. Any .java file that appears
-# in this directory hierarchy will be compiled as part of the simulation.
-SOURCE.DIR <- "/home/stephen/SocialSim"
+SOURCE.DIR <- "/home/stephen/research/diversity/CollegeSim"
 
 CLASSES.DIR <- "/tmp/classes"
 
-OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.csv")
+OUTPUT.FILE <- paste0(SIM.FILES.BASE.DIR,"/","stdoutSIMTAG.txt")
 
 PEOPLE.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","peopleSIMTAG.csv")
+
+FRIENDSHIPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","friendshipsSIMTAG.csv")
+
+ENCOUNTERS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","encountersSIMTAG.csv")
+
+GROUPS.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","groupsSIMTAG.csv")
+
+SIMILARITY.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","similaritySIMTAG.csv")
 
 DROPOUT.STATS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","dropoutSIMTAG.csv")
 
 SIM.PARAMS.FILE <- paste0(SIM.FILES.BASE.DIR,"/","sim_paramsSIMTAG.txt")
 
-# xCHANGE: The package/classname of the main() Java class in your sim.
 SIM.CLASS.NAME <- "edu.umw.cpsc.collegesim.Sim"
 
 JAVA.RUN.TIME.OPTIONS <- ""
 
-# OPTIONAL: The rate (number of milliseconds between refreshes) at which the
-# web app will read the simulator's output file for progress to update plots
-# and such.
 REFRESH.PERIOD.MILLIS <- 500
 
-# OPTIONAL: Any Java libraries needed by the simulation.
 LIBS <- c("mason.17.jar")
 
 CLASSPATH <- paste(
@@ -57,22 +59,64 @@ shinyServer(function(input,output,session) {
     classes.for.person.output.lines <- 
         c(rep("integer",4),rep("factor",2),"numeric","integer")
 
+    classes.for.friendship.lines <- rep("integer",3)
+
+    classes.for.encounters.lines <- c(rep("integer",3),"factor")
+
+    classes.for.groups.lines <- c(rep("integer",4))
+
+    classes.for.similarity.lines <- c("integer","factor","double","logical")
+
     # Return a data frame containing the most recent contents of the 
     # PEOPLE.STATS.FILE.
     people.stats <- function() {
-ps <<- parse.stats.df(PEOPLE.STATS.FILE)
-        return(parse.stats.df(PEOPLE.STATS.FILE))
+ps <<- parse.stats.df(PEOPLE.STATS.FILE, classes.for.person.output.lines)
+        return(parse.stats.df(PEOPLE.STATS.FILE,
+            classes.for.person.output.lines))
     }
 
 
     # Return a data frame containing the most recent contents of the 
     # DROPOUT.STATS.FILE.
     dropout.stats <- function() {
-dr <<- parse.stats.df(DROPOUT.STATS.FILE)
-        return(parse.stats.df(DROPOUT.STATS.FILE))
+dr <<- parse.stats.df(DROPOUT.STATS.FILE, classes.for.person.output.lines)
+        return(parse.stats.df(DROPOUT.STATS.FILE,
+            classes.for.person.output.lines))
     }
 
-    parse.stats.df <- function(filename.template) {
+    # Return a data frame containing the most recent contents of the 
+    # FRIENDSHIPS.STATS.FILE.
+    friendship.stats <- function() {
+fr <<- parse.stats.df(FRIENDSHIPS.STATS.FILE, classes.for.friendship.lines)
+        return(parse.stats.df(FRIENDSHIPS.STATS.FILE,
+            classes.for.friendship.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # ENCOUNTERS.STATS.FILE.
+    encounters.stats <- function() {
+en <<- parse.stats.df(ENCOUNTERS.STATS.FILE, classes.for.encounters.lines)
+        return(parse.stats.df(ENCOUNTERS.STATS.FILE,
+            classes.for.encounters.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # GROUPS.STATS.FILE.
+    groups.stats <- function() {
+gr <<- parse.stats.df(GROUPS.STATS.FILE, classes.for.groups.lines)
+        return(parse.stats.df(GROUPS.STATS.FILE,
+            classes.for.groups.lines))
+    }
+
+    # Return a data frame containing the most recent contents of the 
+    # SIMILARITY.STATS.FILE.
+    similarity.stats <- function() {
+si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
+        return(parse.stats.df(SIMILARITY.STATS.FILE,
+            classes.for.similarity.lines))
+    }
+
+    parse.stats.df <- function(filename.template, classes.list) {
         if (!file.exists(sub("SIMTAG",simtag,filename.template))) {
             return(data.frame())
         }
@@ -80,7 +124,7 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
             # Change the colClasses argument here, if desired, to control the
             # classes used for each of the data columns.
             read.csv(sub("SIMTAG",simtag,filename.template),header=TRUE,
-                colClasses=classes.for.person.output.lines)
+                colClasses=classes.list)
         },error = function(e) return(data.frame())
         )
     }
@@ -88,7 +132,6 @@ dr <<- parse.stats.df(DROPOUT.STATS.FILE)
 
     # Return the seed, as recorded in the SIM.PARAMS.FILE.
     seed <- function() {
-cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n")
         get.param("seed")
     }
     
@@ -189,16 +232,38 @@ cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n"
                 "-initNumGroups",input$initNumGroups,
                 "-numNewGroupsPerYear",input$numNewGroupsPerYear,
                 "-numFreshmenPerYear",input$numFreshmenPerYear,
+                "-groupDriftRate",input$groupDriftRate,
+                "-groupDriftDistance",input$groupDriftDistance,
+                "-peerDriftRate",input$peerDriftRate,
+                "-peerDriftDistance",input$peerDriftDistance,
+                "-dropoutRate",input$dropoutRate,
+                "-dropoutIntercept",input$dropoutIntercept,
+                "-numToMeetPop",input$numToMeetPop,
+                "-numToMeetGroup",input$numToMeetGroup,
+                "-decayThreshold",input$decayThreshold,
+                "-friendshipCoefficient",input$friendshipCoefficient,
+                "-friendshipIntercept",input$friendshipIntercept,
+                "-numPreferences",input$numPreferences,
+                "-numHobbies",input$numHobbies,
+                ifelse(input$forceBiracialFriendships=="on",
+                    paste("-initNumForcedOppRaceFriends",
+                        input$numForcedFriendships),""),
+                ifelse(input$oGroups=="on",
+                    paste("-initNumMixedRaceGroups",
+                        input$initNumMixedRaceGroups),""),
+                ifelse(input$oGroups=="on",
+                    paste("-mixedRaceGroupFraction",
+                        input$mixedRaceGroupFraction),""),
                 ifelse(input$seedType=="specific",
                                             paste("-seed",input$seed),
                                             ""),
+                "-recruitmentRequired",input$recruitmentRequired,
+                "-likelihoodOfLeavingGroup",input$likelihoodOfLeavingGroup,
                 ">",sub("SIMTAG",simtag,OUTPUT.FILE),"&"))
         })
     }
 
 
-    # CHANGE: put any graphics commands to produce a visual analysis of the
-    # simulation's output here.
     output$friendshipsPlot <- renderPlot({
         if (input$runsim < 1) return(NULL)
         people.stats.df <- people.stats()
@@ -208,9 +273,10 @@ cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n"
                 filter(!is.na(avgFriends))
             the.plot <- ggplot(by.race.by.year,
                 aes(x=period,y=avgFriends,col=race)) + 
-                geom_line() + 
+                geom_line(size=1.2) + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
-                                    breaks=0:isolate(input$maxTime)-1) +
+                                    breaks=0:isolate(input$maxTime)-1) + 
+                scale_color_manual(values=c("MINORITY"="brown","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Average number of friends by race",
                     x="Simulation year",
@@ -227,13 +293,25 @@ cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n"
         if (input$runsim < 1) return(NULL)
         dropout.stats.df <- dropout.stats()
         people.stats.df <- people.stats()
-        if (nrow(dropout.stats.df) > 0) {
+        if (nrow(dropout.stats.df) > 0 &&
+            nrow(people.stats.df) > 0) {
             people.by.race.by.year <- 
                 group_by(people.stats.df,period,race) %>%
                 summarize(p.count=n())
             dropout.by.race.by.year <- 
                 group_by(dropout.stats.df,period,race) %>%
                 summarize(d.count=n())
+            for (year in 0:(max(dropout.stats.df$period))) {
+                for (race in levels(dropout.by.race.by.year$race)) {
+                    if (nrow(dropout.by.race.by.year[
+                        dropout.by.race.by.year$period == year &
+                        dropout.by.race.by.year$race == race,]) == 0) {
+                        dropout.by.race.by.year <- rbind(
+                            dropout.by.race.by.year, 
+                            data.frame(period=year, race=race, d.count=0))
+                    }
+                }
+            }
             dropout.data <- inner_join(people.by.race.by.year,
                     dropout.by.race.by.year,
                 by=c("period","race")) %>%
@@ -243,10 +321,359 @@ cat("calling seed. simtag is ",simtag,", and the seed is",get.param("seed"),"\n"
                 geom_line() + 
                 scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
                                     breaks=0:isolate(input$maxTime)-1) +
+                scale_color_manual(values=c("MINORITY"="brown","WHITE"="blue")) +
                 expand_limits(y=0) +
                 labs(title="Dropout rate",
                     x="Simulation year",
                     y="Percentage dropouts")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$interracialRelationshipsPlot <- renderPlot({
+        if (input$runsim < 1) return(NULL)
+        friendships.stats.df <- friendship.stats()
+        people.stats.df <- people.stats()
+        if (nrow(people.stats.df) > 0) {
+            friendships <- inner_join(friendships.stats.df,
+                select(people.stats.df,period,id,race),by=c("period","id"))
+            friendships <- inner_join(friendships,people.stats.df,
+                by=c("period"="period","friendId"="id")) %>%
+                select(period,id,friendId,race.x,race.y)
+
+            # friendships is now this data frame:
+            #  period id friendId race.x race.y
+            #1      0  0       66  WHITE  WHITE
+            #2      0  0       10  WHITE  WHITE
+            #3      0  0        7  WHITE  WHITE
+
+            friendships.by.race <- 
+                group_by(friendships,period,race.x,race.y) %>%
+                dplyr::summarize(numRels=n())
+            class(friendships.by.race) <- "data.frame"
+            minority.with.minority.rels <- 
+                filter(friendships.by.race,race.x=="MINORITY",
+                    race.y=="MINORITY") %>%
+                select(period,mm.rels=numRels)
+            minority.with.white.rels <- 
+                filter(friendships.by.race,race.x=="WHITE",
+                    race.y=="MINORITY") %>%
+                select(period,mw.rels=numRels)
+            white.with.white.rels <- 
+                filter(friendships.by.race,race.x=="WHITE",
+                    race.y=="WHITE") %>%
+                select(period,ww.rels=numRels) %>%
+                mutate(ww.rels=ww.rels/10)   # realistic scale
+            rels.df <- 
+                inner_join(inner_join(minority.with.white.rels, 
+                    minority.with.minority.rels,
+                    by=c("period")),white.with.white.rels,by=c("period")) %>%
+                mutate(min.perc.mw.rels=100*mw.rels/(mm.rels+mw.rels),
+                       whi.perc.mw.rels=100*mw.rels/(ww.rels+mw.rels))
+            # "perc.mw.rels" now represents, for each year, the percentage of
+            # total relationships that minorities have (with anybody) that are
+            # with whites.
+
+            the.plot <- ggplot(rels.df %>% 
+                    gather(measure, value, mw.rels:whi.perc.mw.rels),
+                aes(x=period, y=value, color=measure, linetype=measure)) + 
+                geom_line(size=1.2) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                scale_linetype_manual(name="",
+                     breaks=c("mm.rels", "mw.rels", "ww.rels",
+                        "min.perc.mw.rels", "whi.perc.mw.rels"),
+                     labels=c("# min-min fships",
+                        "# min-whi fships", 
+                        "# whi-whi fships / 10", 
+                        "% of mins' that are min-whi",
+                        "% of whis' that are min-whi"),
+                    values=c("mm.rels"="dotted","mw.rels"="solid",
+                        "ww.rels"="dashed",
+                        "min.perc.mw.rels"="solid",
+                        "whi.perc.mw.rels"="solid")) +
+                scale_color_manual(name="",
+                     breaks=c("mm.rels", "mw.rels", "ww.rels",
+                        "min.perc.mw.rels", "whi.perc.mw.rels"),
+                     labels=c("# min-min fships",
+                        "# min-whi fships", 
+                        "# whi-whi fships / 10", 
+                        "% of mins' that are min-whi",
+                        "% of whis' that are min-whi"),
+                    values=c("mm.rels"="darkgrey","mw.rels"="darkgrey",
+                        "ww.rels"="darkgrey",
+                        "min.perc.mw.rels"="brown",
+                        "whi.perc.mw.rels"="blue")) +
+                expand_limits(y=0) +
+                geom_hline(yintercept=100,linetype="dotted",color="black") +
+                annotate("text", x=0, y=100+5, hjust=0, size=4,
+                    label="max") +
+                geom_hline(yintercept=input$probWhite*100,linetype="dashed",
+                    color="blue") +
+                annotate("text", x=0, y=input$probWhite*100-5, hjust=0, size=4,
+                    label="expected proportion") +
+                labs(title=paste("Racial composition of minorities' and",
+                    "whites' friendships"),
+                    x="Simulation year", y="")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+
+    })
+
+    output$encountersPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        encounters.stats.df <- encounters.stats()
+        people.stats.df <- people.stats()
+
+        if (nrow(encounters.stats.df) > 0 &&
+            nrow(people.stats.df) > 0) {
+
+            num.students.df <- people.stats.df %>% 
+                group_by(period,race) %>% summarize(numStudents=n())
+
+            x <- inner_join(encounters.stats.df,people.stats.df,
+                    by=c("id1"="id","year"="period")) %>%
+                select(year,type,race)
+            encounter.types <- group_by(x,year,race,type) %>%
+                dplyr::summarize(numEvents=n())
+            encounter.types <- inner_join(num.students.df,encounter.types,
+                by=c("period"="year","race"="race"))
+
+            # encounter.types now looks like this:
+            #  period     race numStudents          type numEvents
+            #1      0 MINORITY          21         decay       359
+            #2      0 MINORITY          21   meetFriends       714
+            # ...
+
+            the.plot <- ggplot(encounter.types, 
+                aes(x=period,y=numEvents/numStudents)) +
+                facet_grid(race ~ .) +
+                geom_line(aes(color=type,linetype=type,group=type),size=1.2) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                scale_color_manual(name="",
+                     breaks=c("tickle","meetFriends","meetNoFriends","decay"),
+                     labels=c("tickles",
+                        "new friendships",
+                        "rejected friendships",
+                        "decayed friendships"),
+                    values=c("tickle"="orange","meetFriends"="darkgreen",
+                        "meetNoFriends"="red","decay"="black")) + 
+                scale_linetype_manual(name="",
+                     breaks=c("tickle","meetFriends","meetNoFriends","decay"),
+                     labels=c("tickles",
+                        "new friendships",
+                        "rejected friendships",
+                        "decayed friendships"),
+                    values=c("tickle"="dotted","meetFriends"="solid",
+                        "meetNoFriends"="dashed","decay"="dashed")) + 
+                expand_limits(y=0) +
+                labs(title="Encounter/decay events per student",
+                    x="Simulation year", y="Events per student")
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+
+    })
+
+    output$currentGroupsPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        groups.stats.df <- groups.stats()
+
+        if (nrow(groups.stats.df) > 0) {
+
+            last.full.year <- max(groups.stats.df$year) - 1
+
+            if (last.full.year >= 1) {
+
+                groups.stats.df <- 
+                    filter(groups.stats.df, year==last.full.year)
+
+                groups.stats.df <- groups.stats.df %>%
+                    gather(measure, value, numMin, numWhi)
+
+                the.plot <- ggplot(groups.stats.df) +
+                    geom_bar(aes(x=id,fill=measure,y=value),stat="identity") +
+                    expand_limits(y=0) +
+                    scale_fill_manual(name="",
+                          breaks=c("numMin","numWhi"),
+                          labels=c("num minorities",
+                             "num whites"),
+                         values=c("numMin"="brown","numWhi"="blue")) +
+                     labs(title=paste(
+                        "Group composition: year",last.full.year),
+                         x="Group ID", y="")
+
+                print(the.plot)
+            }
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$groupsHistoryPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        groups.stats.df <- groups.stats()
+
+        if (nrow(groups.stats.df) > 0) {
+
+            groups.stats.df$numTot <- 
+                groups.stats.df$numMin + groups.stats.df$numWhi
+            summary.group.stats.df <- groups.stats.df %>%
+                group_by(year) %>%
+                summarize(meanMin=mean(numMin),
+                          meanWhi=mean(numWhi),
+                          meanTot=mean(numTot)) %>%
+                mutate(expMin=meanTot * (1-input$probWhite))
+
+            summary.group.stats.df <- summary.group.stats.df %>%
+                gather(measure, value, meanMin:expMin)
+            the.plot <- ggplot(summary.group.stats.df) +
+                geom_line(aes(x=year,group=measure,col=measure,linetype=measure,
+                    y=value), size=1.2) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                expand_limits(y=0) +
+                scale_linetype_manual(name="",
+                     breaks=c("meanMin","meanWhi","meanTot","expMin"),
+                     labels=c("avg # min",
+                        "avg # whi",
+                        "avg total size",
+                        "expected avg # min"),
+                    values=c("meanMin"="solid","meanWhi"="solid",
+                        "meanTot"="solid",
+                        "expMin"="dotted")) + 
+                scale_color_manual(name="",
+                     breaks=c("meanMin","meanWhi","meanTot","expMin"),
+                     labels=c("avg # min",
+                        "avg # whi",
+                        "avg total size",
+                        "expected avg # min"),
+                    values=c("meanMin"="brown","meanWhi"="blue",
+                        "meanTot"="darkgrey",
+                        "expMin"="darkgrey")) + 
+                labs(title="Group composition",
+                    x="Simulation year", y="")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$groupsPerStudentPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        people.stats.df <- people.stats()
+
+        if (nrow(people.stats.df) > 0) {
+
+            avg.groups.by.race <- people.stats.df %>% group_by(period,race) %>% 
+                summarize(avgng=mean(numGroups))
+            the.plot <- ggplot(avg.groups.by.race) +
+                geom_line(aes(x=period,y=avgng,group=race,col=race,
+                    linetype=race),size=1.2) +
+                scale_x_continuous(limits=c(0,isolate(input$maxTime)-1),
+                                    breaks=0:isolate(input$maxTime)-1) +
+                scale_linetype_manual(name="",
+                    breaks=c("MINORITY","WHITE"),
+                    labels=c("minorities","whites"),
+                    values=c("MINORITY"="solid","WHITE"="solid")) +
+                scale_color_manual(name="",
+                    breaks=c("MINORITY","WHITE"),
+                    labels=c("minorities","whites"),
+                    values=c("MINORITY"="brown","WHITE"="blue")) +
+                expand_limits(y=0) +
+                labs(title="Average number of groups per student",
+                    x="Simulation year", y="")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$similarityPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        similarity.stats.df <- similarity.stats()
+
+        if (nrow(similarity.stats.df) > 0) {
+
+            the.plot <- ggplot(similarity.stats.df) +
+                geom_boxplot(aes(y=similarity,x=races,fill=races))+
+                scale_fill_manual(values=c("MINORITY"="brown",
+                    "MIXED"="grey","WHITE"="blue"),
+                          breaks=c("MINORITY","MIXED","WHITE"),
+                          labels=c("min-min",
+                             "min-whi","whi-whi")) +
+                scale_x_discrete(labels=c("minority-minority encounters",
+                    "minority-white encounters","white-white encounters")) +
+                expand_limits(y=c(0,1)) +
+                labs(title="Perceived similarity upon encountering")
+
+            print(the.plot)
+        }
+        # Recreate this plot in a little bit.
+        if (sim.started) {
+            invalidateLater(REFRESH.PERIOD.MILLIS,session)
+        }
+    })
+
+    output$similarityImpactPlot <- renderPlot({
+
+        if (input$runsim < 1) return(NULL)
+
+        similarity.stats.df <- similarity.stats()
+
+        if (nrow(similarity.stats.df) > 0) {
+
+            x <- similarity.stats.df %>%
+                group_by(races,becameFriends) %>% 
+                summarize(num=n())
+            fractions <- sapply(levels(x$races), function(race) { 
+                x$num[x$races==race & x$becameFriends] / 
+                    sum(x[x$races==race,"num"]) 
+            })
+
+            the.plot <- ggplot(x,aes(y=num,x=races)) +
+                geom_bar(aes(fill=becameFriends),
+                    stat="identity") +
+                scale_fill_manual(values=c("TRUE"="darkgreen","FALSE"="red"),
+                          breaks=c("MINORITY","MIXED","WHITE"),
+                          labels=c("min-min",
+                             "min-whi","whi-whi")) +
+                scale_x_discrete(labels=c("minority-minority encounters",
+                    "minority-white encounters","white-white encounters")) +
+                annotate("text",x=1:3,label=paste0(round(fractions*100,2),"%"),
+                    y=Inf, vjust=1.5, size=6) +
+                labs(title="Fraction of encounters leading to friendship")
+
             print(the.plot)
         }
         # Recreate this plot in a little bit.

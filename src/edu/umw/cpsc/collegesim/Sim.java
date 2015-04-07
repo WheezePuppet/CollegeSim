@@ -11,7 +11,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-/** The top-level singleton simulation class, with main(). */
+/** The top-level singleton simulation class, with main(). 
+ * <p></p>
+ * Purpose in life:
+ * <ol>
+ * <li>At start of simulation, create {@link #INIT_NUM_PEOPLE} people and
+ * {@link #INIT_NUM_GROUPS} groups. Schedule them all to run, and
+ * ourselves.</li>
+ * <li>Each August, increment everyone's year, enroll the new freshman class,
+ * create new groups, and schedule all these.</li>
+ * <li>Each May, dump year-end statistics, graduate and/or dropout students
+ * (based on their alienation). (And remove random groups?).</li>
+ * </ol>
+ */
 public class Sim extends SimState implements Steppable{
 
     /** 
@@ -20,11 +32,9 @@ public class Sim extends SimState implements Steppable{
     public static long SEED;
 
     /**
-     * A graph where each node is a student and each edge is a friendship between
-     * those students. It is undirected. */
+     * A graph where each node is a student and each edge is a friendship 
+     * between those students. It is undirected. */
     public static Network peopleGraph = new Network(false);
-
-    public static int TRIAL_NUM;
 
     /**
      * A hashtag identifying the current run of the simulation.
@@ -58,27 +68,30 @@ public class Sim extends SimState implements Steppable{
      * dropping out. If x is based on the alienation level,
      * then y=mx+b, where m is the DROPOUT_RATE and b the
      * DROPOUT_INTERCEPT, gives the probability of dropping out. */
-    public static final double DROPOUT_RATE = 0.01;
+    public static double DROPOUT_RATE;
     
     /** See {@link #DROPOUT_RATE}. */
-    public static final double DROPOUT_INTERCEPT = 0.05;
-
-    private static ArrayList<Group> groups = new ArrayList<Group>();
-    
-    //Platypus Do we need this now? It looks like it because the network doesn't
-    //have a method to determine the size - you could get a bag of the people from the network
-    //and then get the size of the bag
-    private static ArrayList<Person> peopleList = new ArrayList<Person>();
-    
-    private static Sim theInstance;
+    public static double DROPOUT_INTERCEPT;
 
     public static final int NUM_MONTHS_IN_ACADEMIC_YEAR = 9;
     public static final int NUM_MONTHS_IN_SUMMER = 3;
     public static final int NUM_MONTHS_IN_YEAR = NUM_MONTHS_IN_ACADEMIC_YEAR +
         NUM_MONTHS_IN_SUMMER;
     
-    //Platypus do we use both of these?
-    public static int NUM_SIMULATION_YEARS=  8;
+    /** The length of the simulation in years, settable via command-line. */
+    public static int NUM_SIMULATION_YEARS;
+
+
+    // The list of every group in the entire simulation. 
+    private static ArrayList<Group> allGroups = new ArrayList<Group>();
+    
+    // The list of every student in the entire simulation. (Maintained in
+    // addition to the Network for convenience.)
+    private static ArrayList<Person> peopleList = new ArrayList<Person>();
+    
+    // Singleton pattern.
+    private static Sim theInstance;
+
 
     private static File outF;
     private static BufferedWriter outWriter;
@@ -86,15 +99,18 @@ public class Sim extends SimState implements Steppable{
     private static BufferedWriter FoutWriter;
     private static File PrefoutF;
     private static BufferedWriter PrefoutWriter;
-    
-    //Platypus do we need these?
-    private static int currentStudentID = 0;
-    private static int currentGroupID = 0; 
-
+    private static File groupF;
+    private static PrintWriter groupWriter;
+    static PrintWriter encounterWriter;
+    static PrintWriter similarityWriter;
     
     // Here is the schedule!
-    // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5.
-    // Groups run at clock time 1, 2, 3, ..., 9.
+    // Persons run at clock time 0.5, 1.5, 2.5, ..., 8.5, ..summer.., 12.5...
+    // Groups run at clock time 1, 2, 3, ..., 9 ..summer.. 13...
+    // The Sim object itself runs at 0.1, 9.1, 12.1, 21.1, 33.1, ... in other
+    // words, every August and May, just before all Persons and Groups run for
+    // the first time that academic year and after they all run for the last
+    // time that academic year.
     boolean nextMonthInAcademicYear() {
         double curTime = Sim.instance().schedule.getTime();
         int curTimeInt = (int) Math.ceil(curTime);
@@ -103,12 +119,18 @@ public class Sim extends SimState implements Steppable{
         return (monthsWithinYear < NUM_MONTHS_IN_ACADEMIC_YEAR);
     }
 
+    /**
+     * Return the total number of students currently in the simulation.
+     */
     public static int getNumPeople( ){
         return peopleList.size();
     }
 
-    public int getNumGroups(){
-        return groups.size();
+    /**
+     * Return the total number of groups currently in the simulation.
+     */
+    public static int getNumGroups(){
+        return allGroups.size();
     }
 
     /* creating the instance */
@@ -128,7 +150,7 @@ public class Sim extends SimState implements Steppable{
     }
 
 
-    //Platypus
+    /** Return the list of all students in the simulation. */
     public static ArrayList<Person> getPeople(){
         return peopleList;
     }
@@ -136,61 +158,60 @@ public class Sim extends SimState implements Steppable{
     public Sim(long seed){
         super(seed);
         this.SEED = seed;
+
+        try {
+            encounterWriter = new PrintWriter(
+                new FileWriter("encounters"+Sim.SIMTAG+".csv"));
+            encounterWriter.println("year,id1,id2,type");
+            encounterWriter.flush();
+
+            similarityWriter = new PrintWriter(
+                new FileWriter("similarity"+Sim.SIMTAG+".csv"));
+            similarityWriter.println("year,races,similarity,becameFriends");
+            similarityWriter.flush();
+        } catch (IOException e) { e.printStackTrace(); }
     }
     
     public void start( ){
         super.start( );
-        //create people, put them in the network, and add them to the
-        //schedule
-        /*PrefoutF= new File("preferencesDropout.csv");
-        FoutF.delete();
-        PrefoutF= new File("preferencesGraduate.csv");
-        FoutF.delete();
-        */
 
-        /*try{
-            File file = new File("preferencesGraduate.csv");
-            file.delete();
-            file = new File("preferencesDropout.csv");
-            file.delete();
-            file = new File("averageChange.csv");
-            file.delete();
-            }catch(Exception e){
-            e.printStackTrace();
- 
-        }*/
+        // NOTE: the simulation starts at time -1. (Yes, NEGATIVE one.) This
+        // is why we do things like schedule the first students at time 1.5
+        // from now, and groups at time 2.0 from now: so they run at times 0.5
+        // and 1.0, respectively.
 
         for(int i=0; i<INIT_NUM_PEOPLE; i++){
-            //Create a new student with the desired student ID. Here,
-            //currentStudentID and i will be identical. But we want to
-            //increment currentStudentID so we can use it later as the
-            //years go on, when the number of students and the assignment
-            //of IDs will no longer match the iterator (i)
-            Person person = new Person(currentStudentID);
-            currentStudentID++;
-            //Give them a random year
+            //Create a person of random year, add and schedule them.
+            Person person = new Person();
             person.setYear(random.nextInt(4)+1);
-            //Add them to the list of students
-            //Platypus
             peopleList.add(person);
-            //Add the student to the Network
             peopleGraph.addNode(person);
-//            lastMet.addNode(person);
-            //Schedule the student to step
             schedule.scheduleOnceIn(1.5, person);
         }
 
+        // Initialize with some "plain ol' groups."
         for(int x = 0; x<INIT_NUM_GROUPS; x++){
-            //Create a new group with a group ID and give it the list of people
-            Group group = new Group(currentGroupID, peopleList);
-            currentGroupID++;
-            //Add it to the list of groups
-            groups.add(group);
-            //Schedule the group to step
+            //Create a new group, add and schedule it.
+            Group group = new Group();
+            allGroups.add(group);
             schedule.scheduleOnceIn(2.0, group);
         }
 
-        //Schedule this (why?) Platypus
+        // Initialize with forced-mixed-race orientation groups (if any).
+        for(int x = 0; x<Group.INITIAL_NUM_MIXED_RACE_GROUPS; x++){
+            Group group = new Group(Group.MIXED_RACE_GROUP_FRACTION);
+            allGroups.add(group);
+            schedule.scheduleOnceIn(2.0, group);
+        }
+
+        for(int i = 0; i<peopleList.size(); i++){
+            for (int j=0; j<Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS;
+                                                                        j++){
+                peopleList.get(i).forceAddRandomOppRaceFriend();
+            }
+        }
+
+        //Schedule ourselves to run at start of first academic year.
         schedule.scheduleOnceIn(1.1, this);
 
     }
@@ -208,11 +229,26 @@ public class Sim extends SimState implements Steppable{
         // Optional values with defaults.
         Person.RACE_WEIGHT = 5;
         Person.PROBABILITY_WHITE = .8;
-        TRIAL_NUM = 1;
         INIT_NUM_PEOPLE = 4000;
         NUM_FRESHMEN_ENROLLING_PER_YEAR = 1000;
         INIT_NUM_GROUPS = 200;
         NUM_NEW_GROUPS_PER_YEAR = 10;
+        Person.NUM_TO_MEET_POP = 5;
+        Person.NUM_TO_MEET_GROUP = 10;
+        Person.DECAY_THRESHOLD = 2;
+        Person.FRIENDSHIP_COEFFICIENT = .22;
+        Person.FRIENDSHIP_INTERCEPT = .05;
+        Person.NUM_PREFERENCES = Person.PREFERENCE_POOL_SIZE = 20;
+        Person.NUM_HOBBIES = Person.HOBBY_POOL_SIZE = 20;
+        Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 0;
+        Group.INITIAL_NUM_MIXED_RACE_GROUPS = 0;
+        Group.MIXED_RACE_GROUP_FRACTION = .5;
+        Group.RECRUITMENT_REQUIRED = .6;
+        Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = .1;
+        Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+        Group.DRIFT_DISTANCE = .2;
+        Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE = .1;
+        Person.DRIFT_DISTANCE = .2;
         SEED = System.currentTimeMillis();
 
         for (int i=0; i<args.length; i++) {
@@ -224,8 +260,6 @@ public class Sim extends SimState implements Steppable{
                 Person.RACE_WEIGHT = Integer.valueOf(args[++i]);
             } else if (args[i].equals("-probWhite")) {
                 Person.PROBABILITY_WHITE = Double.valueOf(args[++i]);
-            } else if (args[i].equals("-trialNum")) {
-                TRIAL_NUM = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-seed")) {
                 SEED = Long.parseLong(args[++i]);
             } else if (args[i].equals("-initNumPeople")) {
@@ -236,6 +270,49 @@ public class Sim extends SimState implements Steppable{
                 INIT_NUM_GROUPS = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-numNewGroupsPerYear")) {
                 NUM_NEW_GROUPS_PER_YEAR = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-groupDriftRate")) {
+                Group.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
+                    Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-groupDriftDistance")) {
+                Group.DRIFT_DISTANCE = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-peerDriftRate")) {
+                Person.LIKELIHOOD_OF_RANDOMLY_CHANGING_ATTRIBUTE =
+                    Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-peerDriftDistance")) {
+                Person.DRIFT_DISTANCE = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-dropoutRate")) {
+                DROPOUT_RATE = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-dropoutIntercept")) {
+                DROPOUT_INTERCEPT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-numToMeetPop")) {
+                Person.NUM_TO_MEET_POP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numToMeetGroup")) {
+                Person.NUM_TO_MEET_GROUP = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-decayThreshold")) {
+                Person.DECAY_THRESHOLD = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-friendshipCoefficient")) {
+                Person.FRIENDSHIP_COEFFICIENT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-friendshipIntercept")) {
+                Person.FRIENDSHIP_INTERCEPT = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-numPreferences")) {
+                Person.NUM_PREFERENCES = Person.PREFERENCE_POOL_SIZE =
+                    Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-numHobbies")) {
+                Person.NUM_HOBBIES = Person.HOBBY_POOL_SIZE =
+                    Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-initNumForcedOppRaceFriends")) {
+                Person.INITIAL_NUM_FORCED_OPPOSITE_RACE_FRIENDS = 
+                    Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-initNumMixedRaceGroups")) {
+                Group.INITIAL_NUM_MIXED_RACE_GROUPS = 
+                    Integer.parseInt(args[++i]);
+            } else if (args[i].equals("-mixedRaceGroupFraction")) {
+                Group.MIXED_RACE_GROUP_FRACTION = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-recruitmentRequired")) {
+                Group.RECRUITMENT_REQUIRED = Double.parseDouble(args[++i]);
+            } else if (args[i].equals("-likelihoodOfLeavingGroup")) {
+                Group.LIKELIHOOD_OF_RANDOMLY_LEAVING_GROUP = 
+                    Double.parseDouble(args[++i]);
             }
         }
 
@@ -252,7 +329,6 @@ public class Sim extends SimState implements Steppable{
             paramsFile.println("seed="+SEED);
             paramsFile.println("maxTime="+NUM_SIMULATION_YEARS);
             paramsFile.println("simtag="+SIMTAG);
-            paramsFile.println("trialNumber="+TRIAL_NUM);
             paramsFile.println("raceWeight="+Person.RACE_WEIGHT);
             paramsFile.println("initNumPeople="+INIT_NUM_PEOPLE);
             paramsFile.println("numFreshmenPerYear="+
@@ -266,6 +342,16 @@ public class Sim extends SimState implements Steppable{
             System.exit(2);
         }
 
+        // Add the "-seed SEED" arguments to args so that when doLoop() runs,
+        // it has the same seed we just randomly set from above.
+        String newargs[] = new String[args.length + 2];
+        for (int i=0; i<args.length; i++) {
+            newargs[i] = args[i];
+        }
+        newargs[newargs.length-2] = "-seed";
+        newargs[newargs.length-1] = "" + SEED;
+        args = newargs;
+
         doLoop(new MakesSimState() { 
             public SimState newInstance(long seed, String[] args) {
                 return instance(seed);
@@ -278,6 +364,11 @@ public class Sim extends SimState implements Steppable{
 
     private boolean isEndOfSim() {
         return (schedule.getTime()/NUM_MONTHS_IN_YEAR) > NUM_SIMULATION_YEARS;
+    }
+
+    boolean isLastYearOfSim() {
+        return (schedule.getTime()/NUM_MONTHS_IN_YEAR) >= 
+            NUM_SIMULATION_YEARS - 1;
     }
 
     int getCurrYearNum() {
@@ -300,7 +391,10 @@ public class Sim extends SimState implements Steppable{
                 System.out.println("Could not close file");
             }
         }
-        //if((int)(schedule.getTime()/NUM_MONTHS_IN_YEAR)!=NUM_SIMULATION_YEARS){
+        if(groupWriter!=null){
+            groupWriter.close();
+        }
+
         if(!isEndOfSim()){
             String f="people"+SIMTAG+".csv";
             try{
@@ -321,22 +415,52 @@ public class Sim extends SimState implements Steppable{
             }
             
             //FILE OF FRIENDSHIPS
-            String ff="P"+Person.RACE_WEIGHT+"T"+TRIAL_NUM+"edges"+(int) (schedule.getTime()/NUM_MONTHS_IN_YEAR)+".csv";
+            String ff="friendships"+SIMTAG+".csv";
             try{
+                // append to current file, if exists
                 FoutF = new File(ff);
-                FoutF.createNewFile();
-                FoutWriter = new BufferedWriter(new FileWriter(FoutF));
+                FoutWriter = new BufferedWriter(new FileWriter(FoutF, true));
+                if (Sim.instance().getCurrYearNum() == 0) {
+                    printHeaderToFriendshipsFile(FoutWriter);
+                }
+                for(int x = 0; x<peopleList.size(); x++){
+                    peopleList.get(x).printFriendsToFile(FoutWriter);
+                }
+                FoutWriter.flush();
             }catch(IOException e){
                 System.out.println("Couldn't create file");
                 e.printStackTrace();
                 System.exit(1);
             }
-            for(int x = 0; x<peopleList.size(); x++){
-                peopleList.get(x).printFriendsToFile(FoutWriter);
+            
+            //FILE OF GROUPS
+            String gf="groups"+SIMTAG+".csv";
+            try{
+                // append to current file, if exists
+                groupF = new File(gf);
+                groupWriter = new PrintWriter(new FileWriter(groupF, true));
+                if (Sim.instance().getCurrYearNum() == 0) {
+                    Group.printHeaderToGroupsFile(groupWriter);
+                }
+                for(int x = 0; x<allGroups.size(); x++){
+                    allGroups.get(x).printToFile(groupWriter);
+                }
+                groupWriter.flush();
+            }catch(IOException e){
+                System.out.println("Couldn't create file");
+                e.printStackTrace();
+                System.exit(1);
             }
         }
     }
 
+    static void printHeaderToFriendshipsFile(BufferedWriter writer) {
+        try {
+            writer.write("period,id,friendId\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void dumpToDropoutFile(Person p) {
         String f="dropout"+SIMTAG+".csv";
         BufferedWriter outWriter = null;
@@ -365,46 +489,14 @@ public class Sim extends SimState implements Steppable{
                 System.out.println("Could not close file");
             }
         }
-        /*try{
-                PrefoutF = new File("preferencesGraduate.csv");
-                if(!PrefoutF.exists()){
-                    PrefoutF.createNewFile();
-                }
-                PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-            }catch(IOException e){
-                System.out.println("Couldn't create file");
-                e.printStackTrace();
-                System.exit(1);
-            }
-            x.printPreferencesToFile(PrefoutWriter);*/
 
-
-            if(PrefoutWriter!=null){
+        if(PrefoutWriter!=null){
             try{
                 PrefoutWriter.close();
             }catch(IOException e){
                 System.out.println("Could not close file");
             }
         }
-        /*try{
-                PrefoutF = new File("averageChange.csv");
-                if(!PrefoutF.exists()){
-                    PrefoutF.createNewFile();
-                    try {
-                        PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                PrefoutWriter = new BufferedWriter(new FileWriter(PrefoutF, true));
-            }catch(IOException e){
-                System.out.println("Couldn't create file");
-                e.printStackTrace();
-                System.exit(1);
-            }
-            if(x.hasFullData()){
-                x.printChangeToFile(PrefoutWriter);
-            }*/
     }
 
     public void dumpPreferencesOfDropoutStudent(Person x){
@@ -433,9 +525,10 @@ public class Sim extends SimState implements Steppable{
             x.printPreferencesToFile(PrefoutWriter);
     }
 
+
     public void step(SimState state){
 
-//System.out.println("Sim::step(). The clock is now " + schedule.getTime());
+        System.out.println("#### SIM (" + schedule.getTime() + ")");
         if(!isEndOfSim()) {
 
             if(nextMonthInAcademicYear()){
@@ -446,46 +539,29 @@ public class Sim extends SimState implements Steppable{
                  */
                 System.out.println("---------------");
                 System.out.println("Starting year: "+getCurrYearNum());
-//Bag b = peopleGraph.getAllNodes();
-//boolean itIsInThere = false;
-//for (int i=0; i<b.size(); i++) {
-//    if (((Person)b.get(i)).getID() == personInQuestion) {
-//        itIsInThere = true;
-//    }
-//}
-//if (itIsInThere) {
-//System.out.println("At start of year, " + personInQuestion + " is IN the graph.");
-//} else {
-//System.out.println("At start of year, " + personInQuestion + " is NOT in the graph.");
-//}
                 for(int x = 0; x<peopleList.size(); x++){
-                    //Platypus
-                    //Is this something we need to track in the graph?
                     peopleList.get(x).incrementYear();
                 }
                 for(int x = 0; x<NUM_FRESHMEN_ENROLLING_PER_YEAR; x++){
-                    //Create a new student
-                    Person person = new Person(currentStudentID);
-                    currentStudentID++;
-                    //Make them a freshman
+                    //Create and add a new freshman
+                    Person person = new Person();
                     person.setYear(1);
-                    //Add the student to the list and the graph
                     peopleList.add(person);
                     peopleGraph.addNode(person);
-                    //Schedule the person
-                    //Why 1.4? Because (1) we the Sim are running at int.1,
-                    //and (2) (Morgan and Stephen are too tired to figure
-                    //out the second part.)
+                    //Schedule the person.
+                    //Why 1.4 from now? Because (1) we the Sim are running at 
+                    //int.1, and (2) students each run at int.5.
                     schedule.scheduleOnceIn(1.4, person);
                 }
                 for(int x = 0; x<NUM_NEW_GROUPS_PER_YEAR; x++){
                     //Create a new group with the list of people
-                    Group group = new Group(currentGroupID, peopleList);
-                    currentGroupID++;
+                    Group group = new Group();
                     //Add the group
-                    groups.add(group);
-                    //Schedule the group
-                    schedule.scheduleOnceIn(2.0,group);
+                    allGroups.add(group);
+                    //Schedule the group.
+                    //Why 1.9 from now? Because (1) we the Sim are running at 
+                    //int.1, and (2) groups each run at integer times.
+                    schedule.scheduleOnceIn(1.9,group);
                 }
                 /*
                  * The new academic year is now ready to begin! Schedule
@@ -502,7 +578,7 @@ public class Sim extends SimState implements Steppable{
                  */
                 System.out.println("End of year: "+getCurrYearNum());
                 ArrayList<Person> toRemove = new ArrayList<Person>();
-                ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
+                // ArrayList<Group> toRemoveGroups = new ArrayList<Group>();
 
                 dumpToFiles();
                 if(!isEndOfSim()) {
@@ -511,85 +587,86 @@ public class Sim extends SimState implements Steppable{
                         Person student = peopleList.get(x);
                         //If they have more than four years, they graduate
                         if(student.getYear( ) >= 4){
-//                            System.out.println("Person " + 
-  //                              student.getID() +
-    //                            " has graduated! Congrats!");
                             dumpPreferencesOfGraduatedStudent(student);
                             toRemove.add(student);
                         //Otherwise
                         }else{
                             double alienationLevel = student.getAlienation( );
-                            double alienation = DROPOUT_RATE * alienationLevel + DROPOUT_INTERCEPT; 
-                            //If they feel alienated, they have a chance to drop out
+                            double alienation = DROPOUT_RATE * alienationLevel 
+                                + DROPOUT_INTERCEPT; 
                             double dropChance = random.nextDouble( );
                             if(dropChance <= alienation){
-//                                System.out.println("Person " + student.getID( ) +
-//                                        " has dropped out of school.");
-                //                dumpPreferencesOfDropoutStudent(student);
                                 dumpToDropoutFile(student);
                                 toRemove.add(student);
                             }
                         }
                     }
-                    for(int x = 0; x<groups.size(); x++){
+/*
+ * Nuke groups randomly...do we want to do this?
+                    for(int x = 0; x<allGroups.size(); x++){
                         if(random.nextDouble(true, true)>.75){
-//                            System.out.println("Removing group " +
-//                                groups.get(x).getID());
-                            toRemoveGroups.add(groups.get(x));
+                            toRemoveGroups.add(allGroups.get(x));
                         }
                     }
                     for(int x = 0; x<toRemoveGroups.size(); x++){
                         toRemoveGroups.get(x).removeEveryoneFromGroup();
-                        groups.remove(toRemoveGroups.get(x));
+                        allGroups.remove(toRemoveGroups.get(x));
                     }
+*/
                     for(int x = 0; x<toRemove.size(); x++){
                         //Let the person leave their groups
                         toRemove.get(x).leaveUniversity();
-                        //remove the person from the list of people
                         peopleList.remove(toRemove.get(x));
-
-
-                        //remove the person from the graph of people and friendships
                         peopleGraph.removeNode(toRemove.get(x));
                     }
-                    toRemoveGroups.clear();
+                    // toRemoveGroups.clear();
                     toRemove.clear();
                 }
                 /*
                  * The academic year is now complete -- have a great summer!
-                 * Schedule myself to wake up in August.
+                 * Schedule myself to wake up in August, unless this is truly
+                 * the end.
                  */
-                schedule.scheduleOnceIn(NUM_MONTHS_IN_SUMMER, this);
-//Bag b = peopleGraph.getAllNodes();
-//boolean itIsInThere = false;
-//for (int i=0; i<b.size(); i++) {
-//    if (((Person)b.get(i)).getID() == personInQuestion) {
-//        itIsInThere = true;
-//    }
-//}
-//if (itIsInThere) {
-//System.out.println(personInQuestion + " is IN the graph.");
-//} else {
-//System.out.println(personInQuestion + " is NOT in the graph.");
-//}
+                if (!isLastYearOfSim()) {
+                    schedule.scheduleOnceIn(NUM_MONTHS_IN_SUMMER, this);
+                } else {
+                    schedule.seal();
+                }
             }
-        }else{
-            schedule.seal();
         }
 
     }
 
-    private static void printUsageAndQuit() {
+    /** (public simply to get it in the JavaDoc.) */
+    public static void printUsageAndQuit() {
         System.err.println(
-        "Usage: Sim -maxTime numGenerations     # Integer" +
-        "  -simtag simulationTag                # Long" + 
-        "  [-raceWeight numAttrsRaceIsWorth]    # Integer; default 5" +
-        "  [-probWhite fracNewStudentsWhoAreW]  # Double; default .8" +
-        "  [-trialNum trialNumber]              # Integer; default 1" +
-        "  [-initNumPeople initNumPeople]       # Integer; default 4000" +
-        "  [-numFreshmenPerYear num]            # Integer; default 1000" +
-        "  [-initNumGroups initNumGroups]       # Integer; default 200" +
-        "  [-numNewGroupsPerYear num]           # Integer; default 10" +
+        "Usage: Sim -maxTime numGenerations     # Integer\n" +
+        "  -simtag simulationTag                # Long\n" + 
+        "  [-raceWeight numAttrsRaceIsWorth]    # Integer; default 5\n" +
+        "  [-probWhite fracNewStudentsWhoAreW]  # Double; default .8\n" +
+        "  [-trialNum trialNumber]              # Integer; default 1\n" +
+        "  [-initNumPeople initNumPeople]       # Integer; default 4000\n" +
+        "  [-numFreshmenPerYear num]            # Integer; default 1000\n" +
+        "  [-initNumGroups initNumGroups]       # Integer; default 200\n" +
+        "  [-numNewGroupsPerYear num]           # Integer; default 10\n" +
+        "  [-groupDriftRate probChangeAttr]     # Double; default .1\n" +
+        "  [-groupDriftDistance fraction]       # Double; default .2\n" +
+        "  [-peerDriftRate probChangeAttr]      # Double; default .1\n" +
+        "  [-peerDriftDistance fraction]        # Double; default .2\n" +
+        "  [-dropoutRate rate]                  # Double; default .01\n" +
+        "  [-dropoutIntercept intercept]        # Double; default .05\n" +
+        "  [-numToMeetPop num]                  # Integer; default 5\n" +
+        "  [-numToMeetGroup num]                # Integer; default 10\n" +
+        "  [-decayThreshold numMonthsStayAlive] # Integer; default 2\n" +
+        "  [-friendshipCoefficient coeff]       # Double; default .22\n" +
+        "  [-friendshipIntercept intercept]     # Double; default .05\n" +
+        "  [-numHobbies num]                    # Integer; default 20\n" +
+        "  [-numPreferences num]                # Integer; default 20\n" +
+        "  [-initNumForcedOppRaceFriends num]   # Integer; default 0\n" +
+        "  [-initNumMixedRaceGroups num]        # Integer; default 0\n" +
+        "  [-mixedRaceGroupFraction fracMin]    # Double; default .5\n" +
+        "  [-recruitmentRequired frac]          # Double; default .6\n" +
+        "  [-likelihoodOfLeavingGroup frac]     # Double; default .1\n" +
         "  [-seed seed].                        # Long; default rand");
         System.exit(1);
     }

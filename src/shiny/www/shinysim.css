@@ -1,2 +1,20 @@
 
 /* shinysim.css */
+
+.inputCategory {margin-top:25px;margin-bottom:20px;}
+.inputCategory > div { margin-left:20px; }
+.inputCategory > div > label.control-label { margin-top:5px; font-size:small;}
+
+/* div > label.control-label { margin-top:35px; } */
+
+.morgan { color:darkred; border:1px solid; margin-top:5px; font-style:italic;}
+
+#maxTime, #seed { width:100px; }
+.shiny-flow-layout { vertical-align:middle; }
+.shiny-flow-layout > div { vertical-align:middle; }
+div button { vertical-align:middle; }
+.row > div, #log { margin-left:40px; margin-right:40px; border:1px solid;
+    padding:10px;}
+
+#runsimstuff div div { text-align:center; }
+#runsimstuff div div div input { margin:auto; }

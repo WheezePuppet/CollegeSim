@@ -1,0 +1,99 @@
+
+\section{RELATED WORK}
+\label{sec:related}
+
+The first and most famous agent-based model of racial segregation is of course
+Thomas Schelling's pioneering work \cite{schelling_models_1969}, implemented
+even before computing power was commonly available. Agents living in a grid of
+housing plots (similar to a cellular automaton, and simulated with coins on
+paper by Schelling) periodically examine the racial makeup of their neighbors,
+and decide to move (randomly to a new location in the grid) if the fraction of
+same-race neighbors falls below a certain threshold. His landmark finding was
+that even when agents have only very mild preferences to live near ``like"
+neighbors, total segregation of a residential community is likely to result.
+Schelling's original work has inspired extensions of this general theme that
+continue to the present day \cite[to name just a
+few]{laurie_role_2003,chen_emergence_2005,collard_emergence_2013,pate_segregation_2010,yin_dynamics_2009,fossett_overlooked_2005,abbas_agent-based_2013}.
+
+Junfu Zhang \citeyear{zhang_evolutionary_2002} strengthened this claim and
+discovered that even in a model where all agents \textit{desire} to have
+mixed-race neighbors (rather than simply being willing to tolerate them),
+total segregation will still occur. This underscores just how inherent the
+segregation of agents is to complex systems, and suggests that any measures
+taken to correct it must be drastic. Indeed, as Clark and Fossett state
+\citeyear{clark_understanding_2008}, ``mere tolerance and the absence of
+virulent housing discrimination will not produce integration under the
+prevailing patterns of ethnic preference, at least not in the short run."
+
+Gretchen Koehler \citeyear{koehler_racial_2001} critiqued the Schelling
+model's applicability to the university housing problem, observing that
+empirically, dissatisfied college students do not usually request housing
+reassignment as the Schelling model would require
+\cite{koehler_residential_2010}. Our model accordingly does not involve
+students transferring from their initially assigned (mixed-race) residential
+assignment, as described in the next section. Interestingly, Koehler also
+found through surveys that both white and minority students express a
+preference for integrated residence halls, although this preference is much
+stronger for the minorities.
+
+Kathleen Carley's ``Construct" system
+\cite{carley_theory_1991,schreiber_construct-multi-agent_2004} was an early,
+powerful agent-based simulation framework for modeling complex social and
+behavioral dynamics. It has been used, among other things, for investigating
+the effects of homophily on relationship formation and whether or not
+homophily alone is sufficient to produce the kind of tiered social network
+seen in practice \cite{hirshman_leaving_2011}. (It isn't.)
+
+Regarding the social influence of friends upon one another, one important work
+is Robert Axelrod's agent-based model of cultural diffusion
+\cite{axelrod_dissemination_1997}, which incorporates interaction effects
+between agents' attributes. ``\dots the likelihood that a given cultural
+feature will spread from one individual (or group) to another depends on how
+many other features they may already have in common." (p.205) Axelrod's work
+does not address segregation with respect to a fixed attribute (race), but
+instead examines the number and nature of stable cultural regions, with some
+surprising results (for instance, that moderately-sized territories have more
+distinct stable regions than either larger or smaller ones do). One key
+difference between this model and ours is that in Axelrod's model, agents only
+interact with their immediate geographic neighbors, which limits the number of
+paths through which influence can propagate. In our model, students are not
+restricted to interacting only on a fixed grid, but instead can form any
+number of overlapping groups, and indeed meet each other completely randomly
+with a certain probability. Our aim is to explore how the ``messy" structure
+of social networks plays out in a setting of multiple races and mutual
+influence.
+
+A more recent model of mutual social influence \cite{schuhmacher_using_2014}
+focused on risky vs. conventional behaviors in adolescents, and the ways in
+which behavioral choices propagated in a social network with both dyadic and
+group interactions. The authors had great success reproducing stylized facts
+from the adolescent development literature, confirming that an agent-based
+approach can indeed capture the key dynamics here. They did not, however,
+study racial factors or effects.
+
+Ghasem-Aghaee and Oren \citeyear{ghasem-aghaee_cognitive_2007} give a detailed
+and principled model of personality attributes and the ways in which they
+develop over time. Unlike our scheme and those of Axelrod and others
+\cite{epstein_growing_1996}, which assign to agents generic ``attributes" as
+placeholders for unspecified real-world qualities, Ghasem-Aghaee's model is
+based on contemporary psychology research and simulates specific personality
+traits such as openness, conscientiousness, and extraversion. Adopting such an
+approach in future work may help us refine our model to more closely imitate
+specific personality effects. Ghasem-Aghaee's simulation, however, does not
+explicitly model the relationships in an evolving social network, as ours
+does.
+
+We are unaware of attempts to simulate institutional policies regarding race
+in higher education. Feitosa \textit{et al.}
+\citeyear{feitosa_multi-agent_2011} pursued a similar aim in the domain of
+urban segregation, and express cautious optimism about their simulator's
+utility in determining the range of impact of anti-segregation policies.
+
+Other simulations have focused on inter-school segregation, rather than
+intra-school. Researchers \cite[for instance]{stoica_schelling_2014,millington_aspiration_2014} have adapted
+Schelling's model to scenarios in which parents choose the school they will
+send their children to, in part based on its proximity to their residence, its
+reputation, and its racial composition. This is very different from our work,
+which analyzes the social relationships between students of different races
+within a single institution.
+
