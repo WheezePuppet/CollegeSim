@@ -1,3 +1,104 @@
 
 \section{RESULTS}
 \label{sec:results}
+
+Of course, this simulation has an extensive list of parameters and moving parts, which means that, by necessity, 
+there are nearly endless possibilities for analysis. More than twenty variables were left to be varied at the command line, 
+each of them able to take on an infinite number of values. To direct our study, we decided to focus on the effects of the 
+importance of race (the race weight) on the simulation as well as the potential effects of implementing various policies, 
+which included mandated interracial friendships and the construction of forcibly integrated groups.
+
+First, it is important to inspect the graphs of the average number of friends held by minorities and whites across the years 
+in the simulation. Note that for any nonzero race weight, minorities had fewer friends on average than whites, 
+regardless of other parameter settings. That is, if race matters even slightly to the students in the simulation, then 
+minorities will form fewer relationships. When race is not a factor in forming relationships, the races have an approximately 
+equal average number of friends, as expected.
+
+By creating stacked histograms of the racial composition of each group, we observed that the composition of groups at the null 
+race weight matched the expected composition, which was based on the population composition, more closely than any of the 
+nonzero race weights. As race weight increased, the observed group composition grew farther from that which was expected. In 
+fact, at the most extremely high values of race weight, an increasing proportion of the groups consisted only of white 
+students, as minorities lose affinity towards many groups, and thus can neither join nor remain in them.
+
+We used boxplots to track and display the frequency of perceived similarity levels whenever two students encountered each 
+other. For the null race weight, the interracial encounters experienced the same perceived similarity levels as the 
+encounters between two students of the same race. These similarity ratings spread between 0.8 and 1.0. For higher values of 
+race weight, the homogeneous race interactions remained at approximately this level. Meanwhile, the perceived similarity of 
+heterogeneous race interactions creeped lower. Because of this, homogeneous encounters resulted in friendship slightly more 
+often than heterogeneous encounters as race weight was given positive value. As the importance of race increased, the number 
+of heterogeneous encounters which resulted in friendship expectedly decreased. However, the number of homogeneous encounters 
+which resulted in friendship stayed approximately the same.
+
+After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner. For each 
+parameter set, the simulation was run for ten trials, and information about each student was recorded for every year of the 
+simulation. We transformed this output into two vectors, one documenting the white students and another documenting the 
+minority students. Each element of the vector corresponded to the proportion of that individual's friends which were 
+minorities. To prevent duplicates, since a student who attended the college for four years would be included in the file four 
+times, we considered only the data that was obtained during a student's senior year. Additionally, it is important to note 
+that having no minority friends when you have some number of friends is potentially much different from having no 
+minority friends when you have no friends in general. So, we also omitted the data where a student had zero total friends. 
+After creating a vector for each trial run, we concatenated the ten vectors. The resultant vectors were around 160,000 in 
+length for the white data and around 40,000 in length for the minority data.
+
+For a population which is integrated, these vectors would have true mean equal to the population proportion of minorities.
+For each trial, this proportion was 0.2. This information was obtained by performing a t-test on the vectors of data. As 
+expected, under the null race weight, the t-test returned insignificant for both the white and minority vectors, meaning 
+there was not evidence to reject the null hypothesis that the true mean was indeed 0.2. Of course, eliminating race as a 
+consideration should in fact contribute to a perfectly integrated community. For any positive race weight, we fail to have 
+an integrated campus. That is, the t-tests performed on data collected at all other race weights rejected the null hypothesis 
+that the true mean is 0.2. Even when race weight was as low as 1, the campus experienced significant segregation.
+
+A second set of vectors was generated using the same parameter sets as the first, but with the exception that we have ``turned 
+on" a policy. An inactive policy, one whose parameter was previously zero, was set to have some nonzero parameter. Primarily, 
+we investigated the potential effects of creating five intentionally integrated groups at the beginning of each year. We then 
+determine if there is integration after this policy is implemented by the same method as before. Additionally, we perform 
+t-tests on the sets of vectors - whites when policy is off with whites when policy is on, and minorities when policy is off 
+with minorities when policy is on - to determine whether or not the policy had a measurable effect on the population. 
+
+For the null race weight, we of course still have integration after the implementation of the policy, and the policy does not 
+demonstrate any significant effect on the population. The policy also did not have an effect when race weight was 1, leaving 
+the campus still as segregated as it was before the policy was implemented. These results were repeated when race weight was 
+set to 10. When the weight of race was increased to 20, both populations were segregated before as well as after the policy 
+was implemented. However, the white population did have a significant chance after the policy came ``on," and that was that 
+the mean proportion of friends went down, from 0.1646 to 0.1634. So, in this case, it appears that the policy may have even 
+increased segregation. Finally, for the extreme setting of race weight at 100, the populations were segregated at both 
+collection points. The policy had a significant effect on the white data, decreasing the mean from 0.0935 to 0.0926.
+%I left out that there was a non-significant (but almost, p=0.07748) effect on the minority data where the mean
+%actually went up, so it's almost like the policy made things worse
+
+We also briefly investigated the effects of using ten integrated groups instead of five. When race weight equalled 1, the 
+t-test on the mean of the minority data returned insignificant, which means that the true mean is likely to be 0.2. In other 
+words, after this more extreme policy implementation, the white population remained segregated, but the minority population 
+had induced integration. Despite the white population remaining segregated, the t-tests between the sets of data revealed 
+that in both the white and minority cases, the policy implementation made a difference. The actual difference may 
+be unexpected: The policy caused the mean proportion of minority friends held by whites to {\emph decrease}, from 0.1983 to 
+0.1974. This is evidence that the policy actually caused higher segregation for whites. However, the positive result is that 
+the mean proportion of minority friends held by minorities also decreased, from 0.2025 to 0.2009. This means that, on 
+average, minorities were making more friends with whites, improving the integration from their direction.
+%If a minority has fewer minority friends, they have more white friends, which means they experience more
+%integration. Does that really help them at all? If I'm a minority, am I better off under a policy that causes me
+%to have more white friends than I would have been otherwise? Or would it not be as much of an improvement as if I just had
+%more friends in general? Or, would I feel more accepted if I could make lots of friends with people of my own race? Is the
+%end game to make whites have more minority friends, or to make minorities have more white friends? Which is truly the most
+%beneficial in terms of making minorities feel more accepted? Stephen?
+
+%I could see the argument for "minorities having more friends that are white" being beneficial from the viewpoint that
+%then they may not feel as threatened by other whites they encounter (may feel more at home/relaxed) as well as that the 
+%spread of ideas due to interaction with people who are different is increased.
+
+Finally, we momentarily examined the effects of using a different policy - forced interracial friendships - on the 
+populations. We set the number of forced interracial friendships to be 10, a value which is relatively high, since the average 
+total number of friends is only between about 10 to 20. Again, at race weight set equal to 1, the white population 
+experienced segregation, while the minority population experienced integration. In both cases, the policy had an effect on the 
+population, again decreasing the mean proportion of minority friends held by both groups. When this was repeated for race 
+weight set to 20, the populations were segregated both before and after the policy was implemented, and the policy appears 
+to have had no effect.
+
+Clearly, there is a wealth of analysis to be done on this simulation, and we have barely even brushed the surface of the 
+possibilities. In future analyses, we hope to collect data on more combinations of the parameters. We seek to determine how 
+extreme a policy must be for it to effectively integrate the population for a variety of race weights. Obviously, the null 
+weight for race displayed integration regardless of policy status. Other than that, we failed to achieve pure integration 
+with any one other policy. It may be that the policies need be more severe, or that we must use the policies in 
+conjunction. It also may be that the policies struggle at this proportion of minorities in the population, but would 
+excel if the number of minorities was marginally increased. There are an innumerable number of questions to be posed 
+surrounding this simulation, and an even wider expanse of data to be collected.
