@@ -2,12 +2,6 @@
 \section{RESULTS}
 \label{sec:results}
 
-Of course, this simulation has an extensive list of parameters and moving parts, which means that, by necessity, 
-there are nearly endless possibilities for analysis. More than twenty variables were left to be varied at the command line, 
-each of them able to take on an infinite number of values. To direct our study, we decided to focus on the effects of the 
-importance of race (the race weight) on the simulation as well as the potential effects of implementing various policies, 
-which included mandated interracial friendships and the construction of forcibly integrated groups.
-
 For the subsequent analyses, we obtained data for each parameter set by running the simulation for ten trials. Information about each student was recorded for every year of the 
 simulation, and for each piece of anlaysis, we extracted the variable of interest by transforming this output into two vectors: one documenting the white students and another documenting the minority students. Each element of the vector corresponded to the parameter of interest. Often, this was the proportion of that individual's friends which were 
 minorities, but on occasion we were interested in other variables. To prevent duplicates in the data, since a student who attended the college for four years would be included in the file four 
@@ -24,7 +18,9 @@ fact by using the proportional data as an example. A histogram of all proportion
     \includegraphics[width=0.5\textwidth]{histogramProportionData.png}
       \caption{A histogram of the proportional data compared to the Beta distribution.}
 \end{figure}
-We will be using the standard $\alpha=0.05$ rejection value for $p$.
+This result is of course supported by the Q-Q plot. We will be using the standard $\alpha=0.05$ rejection value for $p$.
+
+\subsection{Simulation Verification}
 
 \begin{figure}[h]
   \centering
@@ -52,20 +48,23 @@ That is, if race matters even slightly to the students in the simulation, then m
 forming relationships, the races have an approximately equal average number of friends, as expected. Additionally, the number of friends held by whites 
 does not vary for varying race weight, indicating that the level of segregation does not directly impact their ability to form and maintain relationships.
 
-By creating stacked histograms of the racial composition of each group, we observed that the composition of groups at the null 
-race weight matched the expected composition, which was based on the population composition, more closely than any of the 
-nonzero race weights. As race weight increased, the observed group composition grew farther from that which was expected. In 
-fact, at the most extremely high values of race weight, an increasing proportion of the groups consisted only of white 
-students, as minorities lose affinity towards many groups, and thus can neither join nor remain in them.
+%%By creating stacked histograms of the racial composition of each group,
+%We observed that the composition of groups at the null 
+%race weight matched the expected composition, which was based on the population composition, more closely than any of the 
+%nonzero race weights. As race weight increased, the observed group composition grew farther from that which was expected. In 
+%fact, at the most extremely high values of race weight, an increasing proportion of the groups consisted only of white 
+%students, as minorities lose affinity towards many groups, and thus can neither join nor remain in them.
 
-We used boxplots to track and display the frequency of perceived similarity levels whenever two students encountered each 
-other. For the null race weight, the interracial encounters experienced the same perceived similarity levels as the 
+%We used boxplots to track and display the frequency of perceived similarity levels whenever two students encountered each other.
+For the null race weight, the interracial encounters experienced the same perceived similarity levels as the 
 encounters between two students of the same race. These similarity ratings spread between 0.8 and 1.0. For higher values of 
 race weight, the homogeneous race interactions remained at approximately this level. Meanwhile, the perceived similarity of 
 heterogeneous race interactions creeped lower. Because of this, homogeneous encounters resulted in friendship slightly more 
 often than heterogeneous encounters as race weight was given positive value. As the importance of race increased, the number 
 of heterogeneous encounters which resulted in friendship expectedly decreased. However, the number of homogeneous encounters 
 which resulted in friendship stayed approximately the same.
+
+\subsection{Discoveries}
 
 After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner. For the following observations, we 
 choose to use the proportional friendship data.
