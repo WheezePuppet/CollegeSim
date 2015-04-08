@@ -15,7 +15,22 @@ which included mandated interracial friendships and the construction of forcibly
 \end{figure}
 First, it is important to inspect the graphs of the average number of friends held by minorities and whites across the years 
 in the simulation. An example of such data is shown in Figure 1. Note that for any nonzero race weight, 
-minorities had fewer friends on average than whites, regardless of other parameter settings. That is, if race matters even 
+minorities had fewer friends on average than whites, regardless of other parameter settings. The following table shows the average 
+number of friends held by each of the two races, with the associated $p$-value obtained from a t-test to determine the difference.
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Race Weight & Average Number of Friends: White & Average Number of Friends: Minority & $p$-value\\
+\hline
+0 & 15.67 & 15.74 & 0.0779\\
+10 & 15.55 & 14.15 & $<2.2\times 10^{-16}$\\
+20 & 15.49 & 12.98 & $<2.2\times 10^{-16}$\\
+100 & 15.44 & 7.97 & $<2.2\times 10^{-16}$\\
+\hline
+\end{tabular}
+\end{center}~~\\
+
+That is, if race matters even 
 slightly to the students in the simulation, then minorities will form fewer relationships. When race is not a factor in 
 forming relationships, the races have an approximately equal average number of friends, as expected.
 
