@@ -34,7 +34,7 @@ We will be using the standard $\alpha=0.05$ rejection value for $p$.
 First, it is important to inspect the data of the average number of friends held by minorities and whites across the years 
 in the simulation. An example of such data is shown in Figure 2. Note that for any nonzero race weight, 
 minorities had fewer friends on average than whites, regardless of other parameter settings. The following table shows the average 
-number of friends held by each of the two races, with the associated $p$-value obtained from a t-test to determine the difference.
+number of friends held by each of the two races, with the associated $p$-value obtained to determine the difference.
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
@@ -49,7 +49,8 @@ Race Weight & Average Number of Friends: White & Average Number of Friends: Mino
 \end{center}~~\\
 
 That is, if race matters even slightly to the students in the simulation, then minorities will form fewer relationships. When race is not a factor in 
-forming relationships, the races have an approximately equal average number of friends, as expected.
+forming relationships, the races have an approximately equal average number of friends, as expected. Additionally, the number of friends held by whites 
+does not vary for varying race weight, indicating that the level of segregation does not directly impact their ability to form and maintain relationships.
 
 By creating stacked histograms of the racial composition of each group, we observed that the composition of groups at the null 
 race weight matched the expected composition, which was based on the population composition, more closely than any of the 
@@ -66,43 +67,32 @@ often than heterogeneous encounters as race weight was given positive value. As 
 of heterogeneous encounters which resulted in friendship expectedly decreased. However, the number of homogeneous encounters 
 which resulted in friendship stayed approximately the same.
 
-After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner.
+After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner. For the following observations, we 
+choose to use the proportional friendship data.
 
-For a population which is integrated, these vectors would have true mean equal to the population proportion of minorities.
-For each trial, this proportion was 0.2. This information was obtained by performing a t-test on the vectors of data. As 
-expected, under the null race weight, the t-test returned insignificant for both the white and minority vectors, meaning 
-there was not evidence to reject the null hypothesis that the true mean was indeed 0.2. Of course, eliminating race as a 
-consideration should in fact contribute to a perfectly integrated community. For any positive race weight, we fail to have 
-an integrated campus. That is, the t-tests performed on data collected at all other race weights rejected the null hypothesis 
-that the true mean is 0.2. Even when race weight was as low as 1, the campus experienced significant segregation.
+%The data generated from race weight being set to 0 was used as our baseline reference 
+%for purely integrated data. So, any comparion of data to this baseline reference that was insignificant could be called integrated. The data generated 
+%from race weight equalling 100 was considered to be the extremely segregated reference point. Of course, race weight is unbounded, and it would 
+%be impossible to find ``the absolute" maximum race weight to case 100\% segregation. We decided that at level 100, race weight is high enough 
+%to be deemed extreme segregation. So, any comparison of data to this reference point that was insignificant could be called extremely integrated.
 
-A second set of vectors was generated using the same parameter sets as the first, but with the exception that we have ``turned 
-on" a policy. An inactive policy, one whose parameter was previously zero, was set to have some nonzero parameter. Primarily, 
+%Some weird results from this so I won't consider it for now
+
+First, we generate a set of vectors for several given weights for race. A second set of vectors was generated using the same parameter sets as the first, but with the 
+exception that we have ``turned on" a policy. An inactive policy, one whose parameter was previously zero, was set to have some nonzero parameter. Primarily, 
 we investigated the potential effects of creating five intentionally integrated groups at the beginning of each year. We then 
-determine if there is integration after this policy is implemented by the same method as before. Additionally, we perform 
-t-tests on the sets of vectors - whites when policy is off with whites when policy is on, and minorities when policy is off 
-with minorities when policy is on - to determine whether or not the policy had a measurable effect on the population. 
+determine if the policy had an effect by performing a Wilcoxon rank test on the sets of vectors - whites when policy is off versus whites when policy is on, and minorities when policy is off 
+versus minorities when policy is on - to determine whether or not the policy had a measurable effect on the population.
 
-For the null race weight, we of course still have integration after the implementation of the policy, and the policy does not 
-demonstrate any significant effect on the population. The policy also did not have an effect when race weight was 1, leaving 
+For the null race weight, the policy does not demonstrate any significant effect on the population. The policy also did not have an effect when race weight was 1, leaving 
 the campus still as segregated as it was before the policy was implemented. These results were repeated when race weight was 
-set to 10. When the weight of race was increased to 20, both populations were segregated before as well as after the policy 
-was implemented. However, the white population did have a significant chance after the policy came ``on," and that was that 
-the mean proportion of friends went down, from 0.1646 to 0.1634. So, in this case, it appears that the policy may have even 
-increased segregation. Finally, for the extreme setting of race weight at 100, the populations were segregated at both 
-collection points. The policy had a significant effect on the white data, decreasing the mean from 0.0935 to 0.0926.
-%I left out that there was a non-significant (but almost, p=0.07748) effect on the minority data where the mean
+set to 10. When the weight of race was increased to 20, the white population did have a significant change after the policy came ``on." The actual difference may 
+be unexpected: The policy caused the mean proportion of minority friends held by whites to {\emph decrease}, from 0.1646 to 0.1634. This is evidence that the policy actually caused higher segregation for whites. However, the positive result is that the mean proportion of minority friends held by minorities also decreased, from 0.2215 to 0.2201. This means that, on 
+average, minorities were making more friends with whites, improving the integration from their direction. Finally, for the extreme setting of race weight at 100, the policy had a significant effect on the white data, decreasing the mean from 0.0935 to 0.0926. We also briefly investigated the effects of using ten integrated groups instead of five. When race weight equalled 1, we continued to demonstrate the effect that the policy decreases, on average, the proportion of minority friends held by white students. Again, the average proportion of minority friends 
+held by minorities also decreased.
+%I left out that there was a non-significant effect on the minority data where the mean
 %actually went up, so it's almost like the policy made things worse
 
-We also briefly investigated the effects of using ten integrated groups instead of five. When race weight equalled 1, the 
-t-test on the mean of the minority data returned insignificant, which means that the true mean is likely to be 0.2. In other 
-words, after this more extreme policy implementation, the white population remained segregated, but the minority population 
-had induced integration. Despite the white population remaining segregated, the t-tests between the sets of data revealed 
-that in both the white and minority cases, the policy implementation made a difference. The actual difference may 
-be unexpected: The policy caused the mean proportion of minority friends held by whites to {\emph decrease}, from 0.1983 to 
-0.1974. This is evidence that the policy actually caused higher segregation for whites. However, the positive result is that 
-the mean proportion of minority friends held by minorities also decreased, from 0.2025 to 0.2009. This means that, on 
-average, minorities were making more friends with whites, improving the integration from their direction.
 %If a minority has fewer minority friends, they have more white friends, which means they experience more
 %integration. Does that really help them at all? If I'm a minority, am I better off under a policy that causes me
 %to have more white friends than I would have been otherwise? Or would it not be as much of an improvement as if I just had
@@ -115,12 +105,10 @@ average, minorities were making more friends with whites, improving the integrat
 %spread of ideas due to interaction with people who are different is increased.
 
 Finally, we momentarily examined the effects of using a different policy - forced interracial friendships - on the 
-populations. We set the number of forced interracial friendships to be 10, a value which is relatively high, since the average 
-total number of friends is only between about 10 to 20. Again, at race weight set equal to 1, the white population 
-experienced segregation, while the minority population experienced integration. In both cases, the policy had an effect on the 
-population, again decreasing the mean proportion of minority friends held by both groups. When this was repeated for race 
-weight set to 20, the populations were segregated both before and after the policy was implemented, and the policy appears 
-to have had no effect.
+populations. We set the number of forced interracial friendships to be 10, a value which is relatively high given the average total number of friendships (see table). At race weight 
+set equal to 1, the policy had an effect on both races in the population, again decreasing the mean proportion of minority friends held by both groups. When this was repeated for race 
+weight set to 20, the policy appears to have had no effect. It may be that even at a relatively low value for the importance of race, the policy is already not strong enough to overcome 
+the perceived barrier.
 
 Clearly, there is a wealth of analysis to be done on this simulation, and we have barely even brushed the surface of the 
 possibilities. In future analyses, we hope to collect data on more combinations of the parameters. We seek to determine how 
