@@ -3,7 +3,7 @@
 \label{sec:results}
 
 For the subsequent analyses, we obtained data for each parameter set by running the simulation for ten trials. Information about each student was recorded for every year of the 
-simulation, and for each piece of anlaysis, we extracted the variable of interest by transforming this output into two vectors: one documenting the white students and another documenting the minority students. Each element of the vector corresponded to the parameter of interest. Often, this was the proportion of that individual's friends which were 
+simulation, and for each piece of anlaysis, we extracted the variable of interest by transforming this output into two vectors: one documenting the white students and another documenting the minority students. Each element of the vectors corresponds to the parameter of interest for one student. Often, this was the proportion of that individual's friends which were 
 minorities, but on occasion we were interested in other variables. To prevent duplicates in the data, since a student who attended the college for four years would be included in the file four 
 times, we considered only the data that was obtained during a student's senior year. With regards to friendship proportions, it is important to note 
 that having no minority friends when you have some number of friends is potentially much different from having no 
@@ -22,19 +22,20 @@ This result is of course supported by the Q-Q plot. We will be using the standar
 
 \subsection{Simulation Verification}
 
-\begin{figure}[h]
-  \centering
-    \includegraphics[width=0.5\textwidth]{avgNumberOfFriendsFromCaladan.png}
-      \caption{The average number of friends students possessed for one run of the simulation.}
-\end{figure}
+%\begin{figure}[h]
+%  \centering
+%    \includegraphics[width=0.5\textwidth]{avgNumberOfFriendsFromCaladan.png}
+%      \caption{The average number of friends students possessed for one run of the simulation.}
+%\end{figure}
 First, it is important to inspect the data of the average number of friends held by minorities and whites across the years 
-in the simulation. An example of such data is shown in Figure 2. Note that for any nonzero race weight, 
+in the simulation. The table Note that for any nonzero race weight, 
 minorities had fewer friends on average than whites, regardless of other parameter settings. The following table shows the average 
-number of friends held by each of the two races, with the associated $p$-value obtained to determine the difference.
+number of friends held by each of the two races, with the associated $p$-value obtained to determine the difference.\\
+
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Race Weight & Average Number of Friends: White & Average Number of Friends: Minority & $p$-value\\
+Race Weight & Number of Friends: White & Number of Friends: Minority & $p$-value\\
 \hline
 0 & 15.66 & 15.73 & 0.0784\\
 10 & 15.54 & 14.15 & $<2.2\times 10^{-16}$\\
@@ -79,16 +80,15 @@ choose to use the proportional friendship data.
 
 First, we generate a set of vectors for several given weights for race. A second set of vectors was generated using the same parameter sets as the first, but with the 
 exception that we have ``turned on" a policy. An inactive policy, one whose parameter was previously zero, was set to have some nonzero parameter. Primarily, 
-we investigated the potential effects of creating five intentionally integrated groups at the beginning of each year. We then 
+we investigated the potential effects of setting the {\bf OrientationGroups} policy to five. We then 
 determine if the policy had an effect by performing a Wilcoxon rank test on the sets of vectors - whites when policy is off versus whites when policy is on, and minorities when policy is off 
 versus minorities when policy is on - to determine whether or not the policy had a measurable effect on the population.
 
-For the null race weight, the policy does not demonstrate any significant effect on the population. The policy also did not have an effect when race weight was 1, leaving 
+For the null race weight, {\bf OrientationGroups} does not demonstrate any significant effect on the population. This policy also did not have an effect when race weight was 1, leaving 
 the campus still as segregated as it was before the policy was implemented. These results were repeated when race weight was 
-set to 10. When the weight of race was increased to 20, the white population did have a significant change after the policy came ``on." The actual difference may 
-be unexpected: The policy caused the mean proportion of minority friends held by whites to {\emph decrease}, from 0.1646 to 0.1634. This is evidence that the policy actually caused higher segregation for whites. However, the positive result is that the mean proportion of minority friends held by minorities also decreased, from 0.2215 to 0.2201. This means that, on 
-average, minorities were making more friends with whites, improving the integration from their direction. Finally, for the extreme setting of race weight at 100, the policy had a significant effect on the white data, decreasing the mean from 0.0935 to 0.0926. We also briefly investigated the effects of using ten integrated groups instead of five. When race weight equalled 1, we continued to demonstrate the effect that the policy decreases, on average, the proportion of minority friends held by white students. Again, the average proportion of minority friends 
-held by minorities also decreased.
+set to 10. When the weight of race was increased to 20, the white population did have a significant change after {\bf OrientationGroups} came ``on." The actual difference may 
+be unexpected: The policy caused the mean proportion of minority friends held by whites to \emph{decrease}, from 0.1646 to 0.1634. This is evidence that the policy actually caused higher segregation for whites. However, the positive result is that the mean proportion of minority friends held by minorities also decreased, from 0.2215 to 0.2201. This means that, on 
+average, minorities had a higher percentage of their friendships form with whites, improving the integration from their direction. Finally, for the extreme setting of race weight at 100, {\bf OrientationGroups} had a significant effect on the white data, decreasing the mean from 0.0935 to 0.0926. We also briefly investigated the effects of using ten integrated groups instead of five. When race weight equalled 1, we continued to demonstrate the effect that the policy decreases, on average, the proportion of minority friends held by white students. Again, the average proportion of minority friends held by minorities also decreased.
 %I left out that there was a non-significant effect on the minority data where the mean
 %actually went up, so it's almost like the policy made things worse
 
@@ -103,7 +103,7 @@ held by minorities also decreased.
 %then they may not feel as threatened by other whites they encounter (may feel more at home/relaxed) as well as that the 
 %spread of ideas due to interaction with people who are different is increased.
 
-Finally, we momentarily examined the effects of using a different policy - forced interracial friendships - on the 
+Finally, we momentarily examined the effects of using a different policy -{\bf InitialMixedRaceDyads} - on the 
 populations. We set the number of forced interracial friendships to be 10, a value which is relatively high given the average total number of friendships (see table). At race weight 
 set equal to 1, the policy had an effect on both races in the population, again decreasing the mean proportion of minority friends held by both groups. When this was repeated for race 
 weight set to 20, the policy appears to have had no effect. It may be that even at a relatively low value for the importance of race, the policy is already not strong enough to overcome 
