@@ -8,13 +8,31 @@ each of them able to take on an infinite number of values. To direct our study, 
 importance of race (the race weight) on the simulation as well as the potential effects of implementing various policies, 
 which included mandated interracial friendships and the construction of forcibly integrated groups.
 
-\begin{figure}[h]\label{AvgFriends}
+For the subsequent analyses, we obtained data for each parameter set by running the simulation for ten trials. Information about each student was recorded for every year of the 
+simulation, and for each piece of anlaysis, we extracted the variable of interest by transforming this output into two vectors: one documenting the white students and another documenting the minority students. Each element of the vector corresponded to the parameter of interest. Often, this was the proportion of that individual's friends which were 
+minorities, but on occasion we were interested in other variables. To prevent duplicates in the data, since a student who attended the college for four years would be included in the file four 
+times, we considered only the data that was obtained during a student's senior year. With regards to friendship proportions, it is important to note 
+that having no minority friends when you have some number of friends is potentially much different from having no 
+minority friends when you have no friends in general. So, we also omitted the data where a student had zero total friends in the case where vectors represent proportions.
+After creating a vector for each trial run, we concatenated the ten vectors. The resultant vectors were around 160,000 in 
+length for the white data and around 40,000 in length for the minority data.
+
+For the vector comparisons, we chose to use the Wilcoxon rank test (as opposed to the more common Student's t-test) because our data is decidedly non-normal. Figure 1 illustrates this 
+fact by using the proportional data as an example. A histogram of all proportional data for one set of ten trials (both white and minority data included) is most closely modeled by the Beta distribution instead of a normal distribution.
+\begin{figure}[h]
+  \centering
+    \includegraphics[width=0.5\textwidth]{histogramProportionData.png}
+      \caption{A histogram of the proportional data compared to the Beta distribution.}
+\end{figure}
+We will be using the standard $\alpha=0.05$ rejection value for $p$.
+
+\begin{figure}[h]
   \centering
     \includegraphics[width=0.5\textwidth]{avgNumberOfFriendsFromCaladan.png}
       \caption{The average number of friends students possessed for one run of the simulation.}
 \end{figure}
-First, it is important to inspect the graphs of the average number of friends held by minorities and whites across the years 
-in the simulation. An example of such data is shown in Figure 1. Note that for any nonzero race weight, 
+First, it is important to inspect the data of the average number of friends held by minorities and whites across the years 
+in the simulation. An example of such data is shown in Figure 2. Note that for any nonzero race weight, 
 minorities had fewer friends on average than whites, regardless of other parameter settings. The following table shows the average 
 number of friends held by each of the two races, with the associated $p$-value obtained from a t-test to determine the difference.
 \begin{center}
@@ -22,16 +40,15 @@ number of friends held by each of the two races, with the associated $p$-value o
 \hline
 Race Weight & Average Number of Friends: White & Average Number of Friends: Minority & $p$-value\\
 \hline
-0 & 15.67 & 15.74 & 0.0779\\
-10 & 15.55 & 14.15 & $<2.2\times 10^{-16}$\\
-20 & 15.49 & 12.98 & $<2.2\times 10^{-16}$\\
-100 & 15.44 & 7.97 & $<2.2\times 10^{-16}$\\
+0 & 15.66 & 15.73 & 0.0784\\
+10 & 15.54 & 14.15 & $<2.2\times 10^{-16}$\\
+20 & 15.49 & 12.97 & $<2.2\times 10^{-16}$\\
+100 & 15.43 & 7.90 & $<2.2\times 10^{-16}$\\
 \hline
 \end{tabular}
 \end{center}~~\\
 
-That is, if race matters even 
-slightly to the students in the simulation, then minorities will form fewer relationships. When race is not a factor in 
+That is, if race matters even slightly to the students in the simulation, then minorities will form fewer relationships. When race is not a factor in 
 forming relationships, the races have an approximately equal average number of friends, as expected.
 
 By creating stacked histograms of the racial composition of each group, we observed that the composition of groups at the null 
@@ -49,16 +66,7 @@ often than heterogeneous encounters as race weight was given positive value. As 
 of heterogeneous encounters which resulted in friendship expectedly decreased. However, the number of homogeneous encounters 
 which resulted in friendship stayed approximately the same.
 
-After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner. For each 
-parameter set, the simulation was run for ten trials, and information about each student was recorded for every year of the 
-simulation. We transformed this output into two vectors, one documenting the white students and another documenting the 
-minority students. Each element of the vector corresponded to the proportion of that individual's friends which were 
-minorities. To prevent duplicates, since a student who attended the college for four years would be included in the file four 
-times, we considered only the data that was obtained during a student's senior year. Additionally, it is important to note 
-that having no minority friends when you have some number of friends is potentially much different from having no 
-minority friends when you have no friends in general. So, we also omitted the data where a student had zero total friends. 
-After creating a vector for each trial run, we concatenated the ten vectors. The resultant vectors were around 160,000 in 
-length for the white data and around 40,000 in length for the minority data.
+After preliminary analyses utilizing various graphs, we proceeded to analyze the data in a more concrete manner.
 
 For a population which is integrated, these vectors would have true mean equal to the population proportion of minorities.
 For each trial, this proportion was 0.2. This information was obtained by performing a t-test on the vectors of data. As 
