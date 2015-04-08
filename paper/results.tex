@@ -2,27 +2,34 @@
 \section{RESULTS}
 \label{sec:results}
 
-For the subsequent analyses, we obtained data for each parameter set by running the simulation for ten trials. Information about each student was recorded for every year of the 
-simulation, and for each piece of anlaysis, we extracted the variable of interest by transforming this output into two vectors: one documenting the white students and another documenting the minority students. Each element of the vectors corresponds to the parameter of interest for one student. Often, this is the proportion of that individual's friends which are 
-minorities, but on occasion we were interested in other variables. To prevent duplicates in the data, since a student who attended the college for four years would be included in the file four 
-times, we considered only the data that was obtained during a student's senior year. With regards to friendship proportions, it is important to note 
-that having no minority friends when you have some number of friends is potentially much different from having no 
-minority friends when you have no friends in general. So, we also omitted the data where a student had zero total friends in the case where vectors represent proportions.
-After creating a vector for each trial run, we concatenated the ten vectors. The resultant vectors were around 160,000 in 
-length for the white data and around 40,000 in length for the minority data.
+We obtained data for each parameter of interest by running the simulation for
+ten trials, recording the value for each student for every year of the
+simulation. Often, this was the proportion of that individual's friends who
+are minorities, but on occasion we were interested in other variables. We
+considered only the value corresponding to each student's senior year. Also,
+when considering friendship proportions, we omitted the data for students who
+had zero total friends. 
 
-For the vector comparisons, we chose to use the Wilcoxon rank test (as opposed
-to the more common Student's t-test) because our data is decidedly non-normal.
-Figure 1 illustrates this fact by using the proportional data as an example. A
-histogram of all proportional data for one set of ten trials (both white and
-minority data included) is most closely modeled by the beta distribution
-instead of a normal distribution. dA Q-Q plot shows evidence of
-non-normality). We use the standard $\alpha=0.05$ rejection value for $p$.
+For analysis, we formed two vectors (arrays) of the values of interest, one
+for white students and one for minority students, concatenating all students
+of that race from across all trials. The resultant vectors were around 160,000
+in length for the white data and around 40,000 in length for the minority
+data.
+
+To compare the populations, we chose to use the Wilcoxon rank test (as opposed
+to the more common Student's t-test) because much of our data is decidedly
+non-normal. Figure 1 illustrates this fact by using the proportion of minority
+friendships data as an example. A histogram of all values for one set of ten
+trials (both white and minority data included) is most closely modeled by the
+beta distribution instead of a normal distribution. (A Q-Q plot, not shown,
+gave evidence of non-normality). We use the standard $\alpha=0.05$ rejection
+value for $p$.
 
 \begin{figure}[ht]
   \centering
     \includegraphics[width=0.5\textwidth]{histogramProportionData.png}
-      \caption{A histogram of the proportional data compared to the Beta distribution.}
+      \caption{A histogram of the minority friendship proportion data compared
+to an ideal Beta distribution.}
 \end{figure}
 
 \subsection{Simulation Verification}
@@ -32,15 +39,23 @@ non-normality). We use the standard $\alpha=0.05$ rejection value for $p$.
 %    \includegraphics[width=0.5\textwidth]{avgNumberOfFriendsFromCaladan.png}
 %      \caption{The average number of friends students possessed for one run of the simulation.}
 %\end{figure}
-First, it is important to inspect the data of the average number of friends held by minorities and whites across the years 
-in the simulation. Note that for any $w_r\neq 0$, minorities had fewer friends on average than whites, regardless of other parameter settings. 
-The following table shows the average number of friends held by each of the two races, with the associated $p$-value used to determine if 
-the difference is significant.\\
 
-\begin{center}
+We first consider the average number of friends held by minorities and whites
+across all years in the simulation to verify that segregation occurs. We see 
+that for any $w_r\neq 0$, minorities had fewer friends on average than whites,
+regardless of other parameter settings. The following table shows the average
+number of friends held by each of the two races, with the associated $p$-value
+used to determine if the difference is significant.\\
+
+\begin{table}[htb]
+\centering
+\caption{For varying race weights, the average number of friends that white
+students and minority students have during senior
+year.\label{friendshipsVsRaceWeight}}
 \begin{tabular}{|c|c|c|c|}
 \hline
-$w_r$ & Number of Friends: White & Number of Friends: Minority & $p$-value\\
+$w_r$ & White students: mean \# of friends & Minority students: mean \# of
+friends  & $p$-value\\
 \hline
 0 & 15.66 & 15.73 & 0.0784\\
 10 & 15.54 & 14.15 & $<2.2\times 10^{-16}$\\
@@ -48,11 +63,14 @@ $w_r$ & Number of Friends: White & Number of Friends: Minority & $p$-value\\
 100 & 15.43 & 7.90 & $<2.2\times 10^{-16}$\\
 \hline
 \end{tabular}
-\end{center}~~\\
+\end{table}
 
-That is, if race matters even slightly to the students in the simulation, then minorities will form fewer relationships. When race is not a factor in 
-friendship formation, the races have an approximately equal average number of friends, as expected. Additionally, the number of friends held by whites 
-does not vary for varying $w_r$, indicating that $w_r$ does not directly impact their ability to form and maintain relationships.
+That is, if race matters even slightly to the students in the simulation, then
+minorities will form fewer relationships. When race is not a factor in
+friendship formation, the races have an approximately equal average number of
+friends, as expected. Additionally, the number of friends held by whites does
+not vary for varying $w_r$, indicating that $w_r$ does not directly impact
+their ability to form and maintain relationships, at least for $p_w=.85$.
 
 %%By creating stacked histograms of the racial composition of each group,
 %We observed that the composition of groups at the null 
@@ -62,9 +80,13 @@ does not vary for varying $w_r$, indicating that $w_r$ does not directly impact 
 %students, as minorities lose affinity towards many groups, and thus can neither join nor remain in them.
 
 %We used boxplots to track and display the frequency of perceived similarity levels whenever two students encountered each other.
-For $w_r=0$, students participating in interracial encounters experienced the same perceived similarity levels as students involved in same-race encounters. For higher values of 
-$w_r$, the homogeneous race interactions had similarity values that remained at approximately the same level. Meanwhile, the perceived similarity of heterogeneous race interactions 
-creeped lower.
+
+For $w_r=0$, students participating in interracial encounters perceived the
+same average similarity levels as students involved in same-race encounters,
+as expected. For higher values of $w_r$, the homogeneous race interactions had
+similarity values that remained at approximately the same level. Meanwhile,
+the perceived similarity of heterogeneous race interactions creeped lower.
+
 \begin{figure}
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -77,10 +99,13 @@ creeped lower.
 \end{subfigure}
 \caption{Perceived similarity and encounters for $w_r=20$.}
 \end{figure}
-Because of this, homogeneous encounters resulted in friendship slightly more 
-often (with respect to a percentage) than heterogeneous encounters as $w_r$ was given positive value. As the importance of race increased, the proportion 
-of heterogeneous encounters which resulted in friendship expectedly decreased. However, the proportion of homogeneous encounters 
-which resulted in friendship stayed approximately the same.
+
+Because of this, homogeneous encounters resulted in friendship slightly more
+often (with respect to a percentage) than heterogeneous encounters with
+$w_r>0$. As the importance of race increased, the proportion of heterogeneous
+encounters which resulted in friendship decreased as expected, while the
+proportion of homogeneous encounters which resulted in friendship stayed
+approximately the same.
 
 \subsection{Discoveries}
 
@@ -95,18 +120,34 @@ choose to use the proportional friendship data.
 
 %Some weird results from this so I won't consider it for now
 
-First, we generate a set of vectors for several values of $w_r$. A second set of vectors was generated using the same parameter sets as the first, but with the 
-exception that we have ``turned on" a policy. An inactive policy, one whose parameter was previously zero, was set to have some nonzero parameter. Primarily, 
-we investigated the potential effects of setting the parameter for {\bf OrientationGroups}, $n_{f_0}$, to five. We then 
-determine if the policy had an effect by performing a Wilcoxon rank test on the sets of vectors - whites when policy is off versus whites when policy is on, and minorities when policy is off 
-versus minorities when policy is on - to determine whether or not the policy had a distinguishable effect on the population.
+First, we consider the impact of the {\bf OrientationGroups} policy. We
+collected data for several values of $w_r$, both with the policy enabled and
+disabled. 
 
-For $w_r=0$, {\bf OrientationGroups} does not demonstrate any significant effect on the population. This policy also did not have an effect $w_r=1$, leaving 
-the campus still as segregated as it was before the policy was implemented. These results were repeated again when $w_r$ was set to 10. However, when $w_r$ was increased to 20, the 
-white population did experience a significant change after {\bf OrientationGroups} came ``on." Finally, for the extreme setting of $w_r=100$, {\bf OrientationGroups} again had a significant effect on the white data. To summarize, we discovered that below $w_r=20$, the policy had no effect. However, at this level and above, the policy did begin to influence the friendships being made by the Students. We also briefly investigated the effects of using $n_{f_0}=10$. When $w_r=1$, we continued to demonstrate the policy had a significant effect on the proportion of minority friends held by white students.
+We began with $n_{f_0}$ (the number of fixed-membership, intentionally
+mixed-race orientation groups) set to 5, and $f_{\text{\textit{minority}}}$
+(the proportion of minorities in such groups) to 0.5. For $w_r=0$, {\bf
+OrientationGroups} did not demonstrate any significant effect on the
+population (as measured by Wilcoxon rank test), as expected. This policy also
+did not have an effect at $w_r=1$ through $w_r=10$, with the campus still as
+segregated as before. When $w_r$ was increased to 20, however, the white
+population did experience a significant change. Finally, for the extreme
+setting of $w_r=100$, {\bf OrientationGroups} again had a significant effect
+on the white data. Interestingly, with double this number of orientation
+groups ($n_{f_0}=10$) the policy had a significant effect even for $w_r=1$. 
 
-It may now be important to note that, while the next natural question may be about how the mean proportions changed, we are purposefully not reporting the mean values here. The mean is 
-not a sufficient statistic for the beta distribution. That is, the information held in a distribution of this type is not adequately captured by reporting the mean, as it could be for a noraml distribution. To add, the values for the means are misleading. Even between statistically significant vectors, the difference in the means may be arbitrarily small to the naked eye. In fact, the alternative hypothesis for the Wilcoxon test is not that the means are equal, as in the Student's t-test, but instead is that the true location shift is not zero. Therefore, two statistically significant vectors may have the same or similar means, but come from two very different beta distributions with differing shape parameters and location shift not equal to zero. While this may be difficult to interpret within this context, the important conclusion is that the policy has been verified to have a tangible effect on the relationships formed by Students.
+Note that since the mean is not a sufficient statistic for the beta
+distribution (the information held in a distribution of this type is not
+adequately captured by reporting the mean, as it would be for a normal
+distribution), we do not compare or even report the means here. The
+alternative hypothesis for the Wilcoxon test is not that the means are equal,
+as in the Student's t-test, but instead is that the true location shift is not
+zero. Therefore, two statistically significant vectors may have the same or
+similar means, but come from two very different beta distributions with
+differing shape parameters and location shift not equal to zero. While this
+may be difficult to interpret within this context, the important conclusion is
+that the policy has been verified to have a tangible effect on the
+relationships formed by Students.
 
 
 %The actual difference may 
@@ -128,5 +169,14 @@ not a sufficient statistic for the beta distribution. That is, the information h
 %then they may not feel as threatened by other whites they encounter (may feel more at home/relaxed) as well as that the 
 %spread of ideas due to interaction with people who are different is increased.
 
-Finally, we momentarily examined the effects of using a different policy - {\bf InitialMixedRaceDyads} - on the 
-populations. We set $n_{d_0}=10$, a value which is relatively high given the average total number of friendships (see table). At $w_r=1$, the policy had an effect on both races in the population. When this was repeated for $w_r=20$, the policy appears to have had no effect. It may be that even at a relatively low value for the importance of race, the policy is already not strong enough to overcome the perceived barrier.
+For the {\bf InitialMixedRaceDyads} policy we set $n_{d_0}$ (the number of
+mixed-race friendships each Student begins with) to 10, a value which is
+relatively high considering the average total number of friendships (see Table
+\ref{friendshipsVsRaceWeight}). At $w_r=1$, the policy had an effect on both
+races in the population. When this was repeated for $w_r=20$, the policy
+appears to have had no effect. It may be that even at a relatively low value
+for the importance of race, the policy is already not strong enough to
+overcome the perceived barrier. We suspect that this in turn may be due to
+friendship decay: even if students are initialized with mixed-race
+friendships, those friendships will soon evaporate if not refreshed often
+enough.
