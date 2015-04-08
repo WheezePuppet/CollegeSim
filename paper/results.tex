@@ -11,14 +11,19 @@ minority friends when you have no friends in general. So, we also omitted the da
 After creating a vector for each trial run, we concatenated the ten vectors. The resultant vectors were around 160,000 in 
 length for the white data and around 40,000 in length for the minority data.
 
-For the vector comparisons, we chose to use the Wilcoxon rank test (as opposed to the more common Student's t-test) because our data is decidedly non-normal. Figure 1 illustrates this 
-fact by using the proportional data as an example. A histogram of all proportional data for one set of ten trials (both white and minority data included) is most closely modeled by the beta distribution instead of a normal distribution.
-\begin{figure}[h]
+For the vector comparisons, we chose to use the Wilcoxon rank test (as opposed
+to the more common Student's t-test) because our data is decidedly non-normal.
+Figure 1 illustrates this fact by using the proportional data as an example. A
+histogram of all proportional data for one set of ten trials (both white and
+minority data included) is most closely modeled by the beta distribution
+instead of a normal distribution. dA Q-Q plot shows evidence of
+non-normality). We use the standard $\alpha=0.05$ rejection value for $p$.
+
+\begin{figure}[ht]
   \centering
     \includegraphics[width=0.5\textwidth]{histogramProportionData.png}
       \caption{A histogram of the proportional data compared to the Beta distribution.}
 \end{figure}
-This result is of course supported by the Q-Q plot. We will be using the standard $\alpha=0.05$ rejection value for $p$.
 
 \subsection{Simulation Verification}
 
@@ -63,11 +68,11 @@ creeped lower.
 \begin{figure}
 \begin{subfigure}{.5\textwidth}
   \centering
-    \includegraphics[width=\textwidth]{similarityBoxplots20.png}
+    \includegraphics[width=1.2\textwidth]{similarityBoxplots20.png}
       \caption{Perceived similarity.}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
-    \includegraphics[width=0.7\textwidth]{encountersGraph20.png}
+    \includegraphics[width=\textwidth]{encountersGraph20.png}
       \caption{Fraction of encounters leading to friendship.}
 \end{subfigure}
 \caption{Perceived similarity and encounters for $w_r=20$.}
