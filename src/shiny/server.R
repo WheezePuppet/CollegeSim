@@ -270,7 +270,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
         if (nrow(people.stats.df) > 0) {
             by.race.by.year <- group_by(people.stats.df,period,race) %>%
                 dplyr::summarize(avgFriends=mean(numFriends)) %>%
-                filter(!is.na(avgFriends))
+                dplyr::filter(!is.na(avgFriends))
             the.plot <- ggplot(by.race.by.year,
                 aes(x=period,y=avgFriends,col=race)) + 
                 geom_line(size=1.2) + 
@@ -356,15 +356,15 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
                 dplyr::summarize(numRels=n())
             class(friendships.by.race) <- "data.frame"
             minority.with.minority.rels <- 
-                filter(friendships.by.race,race.x=="MINORITY",
+                dplyr::filter(friendships.by.race,race.x=="MINORITY",
                     race.y=="MINORITY") %>%
                 select(period,mm.rels=numRels)
             minority.with.white.rels <- 
-                filter(friendships.by.race,race.x=="WHITE",
+                dplyr::filter(friendships.by.race,race.x=="WHITE",
                     race.y=="MINORITY") %>%
                 select(period,mw.rels=numRels)
             white.with.white.rels <- 
-                filter(friendships.by.race,race.x=="WHITE",
+                dplyr::filter(friendships.by.race,race.x=="WHITE",
                     race.y=="WHITE") %>%
                 select(period,ww.rels=numRels) %>%
                 mutate(ww.rels=ww.rels/10)   # realistic scale
@@ -502,7 +502,7 @@ si <<- parse.stats.df(SIMILARITY.STATS.FILE, classes.for.similarity.lines)
             if (last.full.year >= 1) {
 
                 groups.stats.df <- 
-                    filter(groups.stats.df, year==last.full.year)
+                    dplyr::filter(groups.stats.df, year==last.full.year)
 
                 groups.stats.df <- groups.stats.df %>%
                     gather(measure, value, numMin, numWhi)
