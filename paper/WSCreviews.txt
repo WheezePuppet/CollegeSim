@@ -1,0 +1,80 @@
+
+Reviewer 1
+
+
+Summary
+
+    The paper is about factors impacting diversity within a student body. It restricts itself to racial diversity, using this special kind of diversity as an example with the help of which impacts on diversity can be studied, modelled, understood and perhaps manipulated. The question whether the results can be applied to other kinds of diversity remains open. The paper starts with a section motivating the whole study, then refers to related work. The third section gives an overview of the model, the fourth section reports results, and the paper ends in a conclusion stating that the model shows expected results ("verification") but saying nothing about validation, i.e. a comparison with empirical data, and that the model can in principle be used for evaluating strategies. The paper contains an ODD description of the model which allows other researchers to replicate it even without accessing the (published) code.
+
+
+Originality
+
+    The paper applies agent-based modelling to an interesting target system, starting from the stylised facts used in Schelling's famous segregation model, and successfully tries to draft a much more realistic, and perhaps empirically testable, model.
+
+
+Impact
+
+    It seems that the model can make an impact on the appication field in so far as it may allow (perhaps only after some extension and, more importantly, after empirical validation) a selection of strategies to overcome segregation in all types of schools (not only on the college level, as perhaps these strategies could be more effective on an earlier stage).
+
+
+Please explain in detail your evaluation of the paper.
+
+    The paper is well motivated. It refers to earlier work. Although I am not sure if all relevant literature was considered, I would not urge the authors to find more. The model is very well described, even in a way that I would be able to replicate it with reasonable effort without even accessing the original code. The model is verified in the sense that the authors tested whether the outcomes of the model were in line with the authors' expectations, and the model delivered some unexpected (or rather: unforeseen) discoveries --- which lend themselves to empirical validation, which at the current stage was certainly impossible to the authors as they are not in a position to apply their strategies to a real college student body. Hence, this shortcoming of the model cannot be attributed to the paper or its authors, but one could hope that the authors find a way to have their strategies applied to a real world scenario.
+
+
+
+Reviewer 2
+
+Summary
+
+    The paper presents an ABM of student integration in colleges
+
+
+Originality
+
+    I think the contribution is original
+
+
+Impact
+
+    The paper may have some impact in the community
+
+
+Please explain in detail your evaluation of the paper.
+
+    The paper would benefit by adding some social psychology references as it concerns homophily and propinquity.
+
+    I think the link http://caladan.umw.edu:22223 is not working.
+
+
+   Hi Stephen,
+   I really liked your paper.
+   I have just few suggestions:
+   may you want to add some social psychology references for propinquity :
+   you can find some of Festinger's work even in wikipedia and homophily I
+   seem to recall that Cialdini  used it as weapon of persuasion. But also
+   this reference is
+   interesting [1]http://www.swosu.edu/academics/aij/2013/v3i2/voelker-mcd
+   owell-harris.pdf.
+   Maybe in the research inspired by Schelling you want to add the
+   following reference
+   Bischi G. I., & Merlone, U., (2011). [2]An Adaptive Dynamic Model of
+   Segregation. In Puu, T., & Panchuck A., (Eds.), Nonlinear Economic
+   Dynamics, pp.191-205,Nova Science Publishers, New York.
+   I am sure the Authors will be happy to have one citation! I attach it
+   for your convenience
+   Finally I cannot open the link [3]http://caladan.umw.edu:22223 as I
+   get: ERROR: cannot open the connection.
+
+
+
+TODO:
+Emphasize that we don't validate, but that we know we don't, and need to. and
+here are our plans to.
+
+Add refs:
+look in wikipedia for Festinger's work
+look for Cialdini using homophily as weapon of persuasion
+add Woelker ref
+Add Bischi/Merlone ref
+
