@@ -38,3 +38,15 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+# LaTeX crapola
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+
+# Archives
+*.zip
+*.tar.gz
