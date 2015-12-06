@@ -116,24 +116,56 @@
 
 \begin{frame}
 \frametitle{Motivation}
-Goal: To create a useful abstraction for the domain of peer influence on a college campus, to experiment and establish the quantitative effects and boundaries of key parameters, to validate the model against real-world empirical data, and to ascertain the possible effects of certain policies that institutions might choose to enact to encourage racial integration.
-\begin{enumerate}
-\item College enrollment rates for racial minorities are disproportionately low across the United States.
-\item Attrition is consistently higher for minorities than for white students.
-\item Alienation has been identified as a contributor to these conlusions.
-\end{enumerate}
+Goals:
+
+\begin{itemize}
+\itemsep.1em
+\item to create a useful abstraction for the domain of peer influence on a
+college campus
+\item to experiment and establish the quantitative effects and boundaries of
+key parameters
+\item to validate the model against real-world empirical data
+\item to ascertain the possible effects of certain policies that institutions might choose to enact to encourage racial integration.
+\end{itemize}
 
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Social Phenomenon}
-Propinquity: The more often two people encounter one another, the more likely it is they will form a friendship.\\
+\frametitle{The Problem}
+\begin{itemize}
+\item College enrollment rates for racial minorities are disproportionately
+low across the United States. (Ryu 2010)
+\item Attrition is consistently higher for minorities than for white students.
+(Zea \textit{et al.} 1997)
+\item Alienation has been identified as a key contributor to these effects,
+particularly \textbf{social estrangement}. (Kao \textit{et al.} 2003, Kalsner
+1991, Suen 1983)
+\item ``...even if minority students show high levels of academic
+satisfaction, they may feel socially and culturally alienated." (Loo 1986)
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Dominant factors in forming friendships}
+Propinquity: The more often two people encounter one another, the more likely
+it is they will form a friendship. (Mouw \textit{et al.} 2006)\\
 
 ~~\\
 
-Homophily: People with similar traits interact with one another more often than with dissimilar.
+Homophily: People with similar traits form friendships with one another more
+often. (McPherson \textit{et al.} 2001)
+\begin{itemize}
+\item hobbies
+\item values
+\item personal preferences
+\item race, age, gender
+\end{itemize}
+
 \end{frame}
 
 %------------------------------------------------
@@ -178,10 +210,15 @@ We describe an agent-based simulation to model these interrelationships and infl
 \section{The Model}
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Purpose}
-CollegeSim is an agent-based model designed to simulate an evolving social network among college students. Student agents are assigned one of two ``races" which factors into their perceived similarity to other agents, and accordingly to their likelihood of forming friendships with them. The ultimate goal of the model is to investigate how racial segregation is affected by the strength of the race trait and the presence or absence of certain institutional policies designed to influence segregation.
-\end{frame}
+% I don't think we need this slide; it seems mostly a repeat from above.
+%\begin{frame}
+%\frametitle{Purpose}
+%CollegeSim is an agent-based model designed to simulate an evolving social network among college students. 
+%
+%Student agents are assigned one of two ``races" which factors into their perceived similarity to other agents, and accordingly to their likelihood of forming friendships with them. 
+%
+%The ultimate goal of the model is to investigate how racial segregation is affected by the strength of the race trait and the presence or absence of certain institutional policies designed to influence segregation.
+%\end{frame}
 
 %------------------------------------------------
 
@@ -222,54 +259,102 @@ Each Group has the following attributes:
 Each academic year consists of nine academic months and three summer months. Student and Group agents carry out actions in each academic month. A high-level controller carries out actions at the beginning and end of each academic year.\\
 
 \begin{enumerate}
-\item At the start of each academic year, Sim runs IncrementYears, AddNewStudents, and AddNewGroups.
-\item In each academic month, each Student runs EncounterOthers, AdjustAttributes, and DecayFriendships.
-\item In each academic month, each Group runs InfluenceMembers, RecruitStudents, and LoseStudents.
-\item At the end of each academic year, Sim runs GraduateStudents.
+\item At the start of each academic year, new student agents (freshmen) and
+new social groups are created.
+\item In each academic month, each Student randomly encounters other students,
+adjusts their attributes due to their friends' influence, and discontinues old
+friendships.
+\item In each academic month, each Group influences its members, recruits new
+students, and loses some students. 
+\item At the end of each academic year, seniors graduate.
 \end{enumerate}
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Initialization}
+\frametitle{Some interesting model parameters}
 
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Submodels}
 \begin{enumerate}
-\item IncrementYears: Add 1 to the Year attribute of every Student still in the simulation.
-\item AddNewStudents: Add new Student agents to the simulation with unique IDs, Year = 1, and set probability of being white. Each of some number of Preferences and Hobbies are generated and then hobbies are normalized so that they sum to 1.
-\item AddNewGroups: Some number of Groups are created with unique IDs and with isFixed equal to FALSE. Each Group is randomly assigned initial students. Each Group's RecruitmentFactor is generated.
-\item ComputeSimilarity: Given two Student agents, compute their perceived similarity.
-\item ComputeAffinity: Given a Student and a Group, compute the mean similarity between the Student and all individual members of the Group.
+\item ``Race weight" ($w_r$) --- the importance of same-race to homophily
+calculations (measured in ``equivalent number of attributes")
+
+\item ``Decay threshold" ($t_d$) --- the number of time steps (simulated
+months) at which a friendship will be dissolved if the two friends did not
+encounter each other during that time (to ``refresh")
+
+\item Monthly group encounters ($n_{eg}$) --- the number of students from
+his/her groups that each student encounters monthly
+
+\item Monthly population encounters ($n_{ep}$) --- the number of students from
+the overall population that each student encounters monthly
+
 \end{enumerate}
+
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Experimental policies}
+
+\begin{enumerate}
+
+\item \textbf{Force initial biracial friendships.} When enabled, each Student
+is initially provided with $n_{d0}$ friendships of randomly selected other
+students of the opposite race.
+
+\item \textbf{Orientation groups.} When enabled, $n_{f0}$ \textit{fixed}
+groups are created in addition to the other groups. Students are deliberately
+assigned so that the proportion of minorities is higher in groups with
+minorities.
+
+\end{enumerate}
+
+In both cases, the goal is to combat segregation by mandating exposure to
+opposite-race peers early in a student's career.
+
+~~\\
+
+Question: to what degree can policies like these influence the degree of social
+integration of minorities?
 \end{frame}
 
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Submodels}
-\begin{enumerate}
-\item EncounterOthers: Choose some number of other students at random from the Student's current Groups and some other number from the population at large. For each one, if the two Students are already friends, ``refresh" their friendship. If not, determine the Students' similarity via the ComputeSimilarity submodel and compute their probability of becoming friends. With this probability, make the two Students friends.
-\item AdjustAttributes: For each of a Student's preferences and hobbies, compute the average value of that preference/hobby for all friends of that Student. Then, with some probability, adjust the Student's attribute towards the mean by some coefficient multipled by the difference between its current value and the mean.
-\item InfluenceMembers: Adjust the attribute values for each Student in the Group, using the exact same algorithm as the AdjustAttributes submodel except that instead of using the Students' friends' mean, use the Group members' mean.
-\end{enumerate}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Submodels}
-\begin{enumerate}
-\item DecayFriendships: Remove the friendship with each of the Student's friends who has not been ``refreshed" in the most recent academic months.
-\item RecruitStudents: Choose some number of Students from the general population and compute their affinity to this Group via ComputeAffinity. For each of the Students who are not already a member of the Group, compute the probability of joining the group.
-\item GraduateStudents: Remove every Student with Year = 4 from the simulation.
-\end{enumerate}
-\end{frame}
+% I think these is TMI, and should be described more generally (as it was
+% above.)
+%\begin{frame}
+%\frametitle{Submodels}
+%\begin{enumerate}
+%\item IncrementYears: Add 1 to the Year attribute of every Student still in the simulation.
+%\item AddNewStudents: Add new Student agents to the simulation with unique IDs, Year = 1, and set probability of being white. Each of some number of Preferences and Hobbies are generated and then hobbies are normalized so that they sum to 1.
+%\item AddNewGroups: Some number of Groups are created with unique IDs and with isFixed equal to FALSE. Each Group is randomly assigned initial students. Each Group's RecruitmentFactor is generated.
+%\item ComputeSimilarity: Given two Student agents, compute their perceived similarity.
+%\item ComputeAffinity: Given a Student and a Group, compute the mean similarity between the Student and all individual members of the Group.
+%\end{enumerate}
+%\end{frame}
+%
+%%------------------------------------------------
+%
+%\begin{frame}
+%\frametitle{Submodels}
+%\begin{enumerate}
+%\item EncounterOthers: Choose some number of other students at random from the Student's current Groups and some other number from the population at large. For each one, if the two Students are already friends, ``refresh" their friendship. If not, determine the Students' similarity via the ComputeSimilarity submodel and compute their probability of becoming friends. With this probability, make the two Students friends.
+%\item AdjustAttributes: For each of a Student's preferences and hobbies, compute the average value of that preference/hobby for all friends of that Student. Then, with some probability, adjust the Student's attribute towards the mean by some coefficient multipled by the difference between its current value and the mean.
+%\item InfluenceMembers: Adjust the attribute values for each Student in the Group, using the exact same algorithm as the AdjustAttributes submodel except that instead of using the Students' friends' mean, use the Group members' mean.
+%\end{enumerate}
+%\end{frame}
+%
+%%------------------------------------------------
+%
+%\begin{frame}
+%\frametitle{Submodels}
+%\begin{enumerate}
+%\item DecayFriendships: Remove the friendship with each of the Student's friends who has not been ``refreshed" in the most recent academic months.
+%\item RecruitStudents: Choose some number of Students from the general population and compute their affinity to this Group via ComputeAffinity. For each of the Students who are not already a member of the Group, compute the probability of joining the group.
+%\item GraduateStudents: Remove every Student with Year = 4 from the simulation.
+%\end{enumerate}
+%\end{frame}
 
 %------------------------------------------------
 \section{Results}
@@ -376,7 +461,30 @@ We would like to thank Madeline Lord and Jessica White, University of Mary Washi
 %------------------------------------------------
 
 \begin{frame}
-\Huge{\centerline{The End}}
+\frametitle{References}
+
+\scriptsize
+\begin{itemize}
+\itemsep.5em
+
+\item Kalsner, L. (1991). Issues in College Student Retention. Higher Education
+Extension Service Review, 3(1). 
+
+\item Loo, C. M., \& Rolison, G. (1986). Alienation of Ethnic Minority Students at a
+Predominantly White University. The Journal of Higher Education, 57(1), 58.
+
+\item McPherson, M., Smith-Lovin, L., \& Cook, J. M. (2001). Birds of a feather:
+Homophily in social networks. Annual Review of Sociology, 415-444.
+
+\item Ryu, M. (2010). Minorities in Higher Education: 24th Status Report. American Council on Education.
+
+\item Suen, H. K. (1983). Alienation and attrition of Black college students on a predominantly White campus. Journal of College Student Personnel, 24(2),
+117-121.
+
+\item Zea, M. C., Reisen, C. A., Beil, C., \& Caplan, R. D. (1997). Predicting
+Intention to Remain in College Among Ethnic Minority and Nonminority Students.
+The Journal of Social Psychology, 137(2), 149-160.
+\end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------------
