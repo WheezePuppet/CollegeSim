@@ -1,0 +1,21 @@
+
+    I'll start, and talk through slides 1-5.
+
+    You talk through slides 6-11, then switch to Firefox, which will have the
+web sim loaded up. Press "Run Sim" and watch it go. Click on the tabs just to
+show the wowza graphics and look impressive, without feeling the need to talk
+through each of them exhaustively. Maybe pick one or two graphs on one or two
+tabs that you like the best, and briefly articulate what they're showing. You
+could modify a couple parameters (actually clicking on the policies to expose
+the hidden slider bars would be nice) and run it a second time.
+
+    Then it transitions back to me, and I'll finish the talk, including
+results and next steps. Then Q&A.
+
+
+    Note: I like progressively revealing the contents of slides as I talk
+through the points. Some people don't like that -- they like the entire slide
+to appear as soon as it comes up. If you're like me, feel free to sprinkle
+"\pause" lines throughout your slides at the desired places, as you see I've
+done. If you're not like me, then just ignore this note and yours will all
+come up at once.
