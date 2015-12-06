@@ -16,6 +16,7 @@
 %----------------------------------------------------------------------------------------
 
 \documentclass{beamer}
+\usepackage{subcaption}
 
 \mode<presentation> {
 
@@ -183,7 +184,7 @@ foster integration?
 
 \begin{frame}
 \frametitle{Our Approach}
-The network of friendships that exists on a college campus is the result of, among other things, the innumerable chance encounters, introductions, impressions, and choices to form relationships that have occurred over many years.\\
+The network of friendships on a college campus is the result of (among other things) the innumerable chance encounters, impressions, and choices to form relationships that have occurred over years.\\
 
 ~~\\
 
@@ -195,6 +196,9 @@ We describe an agent-based simulation to model these interrelationships and infl
 \item influence the attributes of their friends;
 \item dissolve the friendships which are not ``refreshed" often enough by additional future encounters.
 \end{enumerate}
+
+~~\\
+We use ``number of friendships" as a proxy for social estrangement.
 \end{frame}
 
 %------------------------------------------------
@@ -291,6 +295,8 @@ students, and loses some students.
 \frametitle{Some interesting model parameters}
 
 \begin{enumerate}
+\item The proportion of white students ($p_w$) in the student body
+
 \item ``Race weight" ($w_r$) --- the importance of same-race to homophily
 calculations (measured in ``equivalent number of attributes")
 
@@ -372,33 +378,111 @@ integration of minorities?
 %\end{frame}
 
 %------------------------------------------------
-\section{Results}
+\section{Preliminary Validation}
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Simulation Verification}
-Consider the average number of friends held by minorities and whites across all years to verify that segregation occurs INCLUDE TABLE AND IMAGES
+Consider the average number of friends held by minorities and whites across
+all years to verify that social estrangement is impacted:
+
+\begin{table}[htb]
+\centering
+\caption{For varying race weights, the average number of friends that 
+students have during senior year.\label{friendshipsVsRaceWeight}}
+\begin{tabular}{|c|c|c|c|}
+\hline
+$w_r$ & Whites & Minorities  & $p$-value\\
+\hline
+0 & 15.66 & 15.73 & 0.0784\\
+10 & 15.54 & 14.15 & $<2.2\times 10^{-16}$\\
+20 & 15.49 & 12.97 & $<2.2\times 10^{-16}$\\
+100 & 15.43 & 7.90 & $<2.2\times 10^{-16}$\\
+\hline
+\end{tabular}
+\end{table}
 \end{frame}
 
+\begin{frame}
+\frametitle{Simulation Verification}
+Consider the perceived similarity between students who encounter each other,
+and how often that leads to friendship.
+
+\begin{figure}
+\begin{subfigure}{.45\textwidth}
+  \centering
+    \includegraphics[width=1.2\textwidth]{similarityBoxplots20.png}
+      \caption{Perceived similarity.}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+    \includegraphics[width=\textwidth]{encountersGraph20.png}
+      \caption{Fraction of encounters leading to friendship.}
+\end{subfigure}
+\caption{Perceived similarity and encounters for $w_r=20$.}
+\end{figure}
+\end{frame}
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Discoveries}
 
+The \textbf{Orientation Groups} policy has a significant influence on student
+friendships only when $r_w$ (the race weight) and/or $n_{fo}$ (the number of
+orientation groups) is quite high. Interestingly, it is not the \textit{mean}
+number of friendships that differs, but the distribution as a whole between
+whites and minorities. 
+
+~~\\
+
+\pause
+
+The \textbf{Force initial biracial friendships} policy did not have much
+effect. We believe this is due to friendship decay outweighing the forced
+propinquity: even if students are deliberately matched with opposite-race
+students early in their college careers, those friendships will soon decay if
+not refreshed often enough, which will happen if segregation is a strong
+factor.
+
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Conclusion}
+\frametitle{Moving forward}
 
+Our next steps with this verified and partially validated model:
+
+~~\\
+
+Experiment with policy parameters, especially in conjunction with one another,
+to see how extreme they would have to be to combat segregation.
+
+~~\\
+
+Experiment with $p_w$ --- is there a ``tipping point" for the proportion of
+whites beyond which the social estrangement experienced by minorities cannot
+be overcome?
+
+~~\\
+
+Investigate the extent of attribute influence that is occurring. Is this
+happening more often with whites than minorities? Is racial integration
+accompanied by increased homogeneity of attributes?
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Acknowledgements}
-We would like to thank Madeline Lord and Jessica White, University of Mary Washington computer science alumnae, for their valuable contributions to this project's ideas and implementation. We are also grateful to various UMW administrators, particularly Dr. Leah Cox and the Office of Diversity and Inclusion, for their valuable insights into the nature of student dynamics and race relations which significantly influenced our modeling choices.
+
+Thanks to:
+\begin{itemize}
+\itemsep.1em
+\item ACM SIGSIM and UMW Dean's Office for travel funding
+\item Madeline Lord and Jessica White, UMW computer science majors
+\item Dr.~Leah Cox, UMW VP of Diversity and Inclusion
+\end{itemize}
+
 \end{frame}
 
 %\begin{frame}
